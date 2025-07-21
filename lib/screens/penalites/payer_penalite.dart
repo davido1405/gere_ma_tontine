@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gerematontine/models/penalites.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 
 import '../../constants/colors.dart';
 
@@ -44,6 +45,53 @@ class _payer_penaliteState extends State<payer_penalite> {
     }
   }
 
+  Future<void>payerPenalite(String x, String y) async{
+    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=cotisations&action=payer_penalite");
+    final reponse=await http.post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
+        {
+          "code_tontine":widget.listsession.code_tontine,
+          "code_participant":widget.listsession.code_participant,
+          "montant":int.parse(x),
+          "libelle_mode_paiement":y
+        }));
+    if(reponse.statusCode==200){
+      Map<String,dynamic>data=jsonDecode(reponse.body);
+      bool success=data['success'];
+      if(success){
+        showDialog(context: context, builder: (BuildContext context){
+          return AlertDialog(
+            title: Center(child: Text("Statut paiement"),),
+            content: Text(data['message']),
+            actions: [
+              Center(
+                child: TextButton.icon(onPressed: (){
+                  Navigator.of(context).pop();
+                }, label: Text("OK"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
+              )
+            ],
+          );
+        });
+      }else{
+        showDialog(context: context, builder: (BuildContext context){
+          return AlertDialog(
+            title: Center(
+              child: Text("Statut paiement"),
+            ),
+            content: Text(data['message']),
+            actions: [
+              Center(
+                child: TextButton.icon(onPressed: (){
+                  Navigator.of(context).pop();
+                }, label: Text("OK"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
+              )
+            ],
+          );
+        });
+      }
+    }else{
+      print("Erreur serveur : ${reponse.statusCode}");
+    }
+  }
 
 
   @override
@@ -53,7 +101,7 @@ class _payer_penaliteState extends State<payer_penalite> {
         automaticallyImplyLeading: false,
         leading: IconButton(onPressed: (){
           Navigator.pop(context);
-        }, icon: Icon(Icons.arrow_back_ios)),
+        }, icon: Icon(Icons.arrow_back)),
         title: Text("Pénalités",
           style: TextStyle(
               fontSize: 25,
@@ -136,11 +184,7 @@ class _payer_penaliteState extends State<payer_penalite> {
                 Expanded(child: ElevatedButton.icon(onPressed: (){
                   String montantPay=montant.text;
                   String modePai=_selectedOption.toString();
-                  var data=jsonEncode({
-                    "mode_paiment":modePai,
-                    "montant_cotisation":montantPay
-                  });
-                  print(data);
+                  payerPenalite(montantPay,modePai);
                 }, label: Text("Payer",style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,

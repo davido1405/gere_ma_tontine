@@ -9,6 +9,7 @@ import 'package:gerematontine/screens/cotisations/payer_cotisation.dart';
 import 'package:gerematontine/screens/parametres.dart';
 import 'package:gerematontine/screens/penalites/payer_penalite.dart';
 import 'package:gerematontine/screens/tontine/details_tontine.dart';
+import 'package:gerematontine/screens/tontine/tour_tontine.dart';
 import 'package:http/http.dart';
 
 class acceuil extends StatefulWidget {
@@ -52,6 +53,9 @@ class _acceuilState extends State<acceuil> {
       if(success==true){
         setState(() {
           montantPenalite=total['data'].toString();
+          if(double.parse(montantPenalite)>5000.00){
+            _critique=true;
+          }
         });
       }
     }
@@ -77,6 +81,7 @@ class _acceuilState extends State<acceuil> {
     // TODO: implement initState
     super.initState();
     totalCotisation();
+    totalPenalite();
     tontineInfo();
     totalPenalite();
   }
@@ -84,11 +89,19 @@ class _acceuilState extends State<acceuil> {
 
   String montantPenalite="0 FCFA";
 
+  bool _critique=false;
+
   Tontine? _tontine;
+
 
 
   @override
   build(BuildContext context) {
+    if (_tontine == null) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
     return SafeArea(child: Column(
       children: [
         Padding(
@@ -142,7 +155,7 @@ class _acceuilState extends State<acceuil> {
                   children: [
                     Expanded(child: GestureDetector(
                       onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (_)=>details_tontine(listsession: widget.listsession,)));
+                        Navigator.push(context, MaterialPageRoute(builder: (_)=>tourTontine(listsession: widget.listsession,)));
                       },
                       child: Card(
                         color: couleur.primaryPurple,
@@ -187,7 +200,7 @@ class _acceuilState extends State<acceuil> {
                         color: couleur.primaryPurple,
                         margin: EdgeInsets.all(5),
                         child: Padding(
-                          padding: const EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(15),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -264,7 +277,7 @@ class _acceuilState extends State<acceuil> {
                               SizedBox(
                                 width: 30,
                               ),
-                              Icon(Icons.trending_down,color: Colors.white,size: 100,)
+                              Icon(_critique?Icons.warning:Icons.trending_down,color: _critique? Colors.red:Colors.white,size: 100,)
                             ],
                           ),
                         ),
@@ -296,140 +309,135 @@ class _acceuilState extends State<acceuil> {
         ),
         Row(
           children: [
-            Expanded(child: GestureDetector(
-              onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>details_tontine(listsession: widget.listsession)));
-              },
-              child: Card(
-                color: Colors.cyan[500],
-                margin: EdgeInsets.all(10),
-                child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Row(
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
+            Expanded(child: Card(
+              color: Colors.cyan[500],
+              margin: EdgeInsets.all(10),
+              child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Row(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text("Code tontine: ",style: TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.white
+                              ),),
+                              Text(_tontine!.code_tontine,style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white
+                              ),)
+                            ]
+                          ),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text("Code tontine: ",style: TextStyle(
+                                Text("Nom tontine: ",style: TextStyle(
                                     fontSize: 15,
                                     color: Colors.white
                                 ),),
-                                Text(_tontine!.code_tontine,style: TextStyle(
+                                Text(_tontine!.nom_tontine,style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
                                 ),)
                               ]
-                            ),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Nom tontine: ",style: TextStyle(
-                                      fontSize: 15,
-                                      color: Colors.white
-                                  ),),
-                                  Text(_tontine!.nom_tontine,style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white
-                                  ),)
-                                ]
-                            ),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Montant cotisation: ",style: TextStyle(
-                                      fontSize: 15,
-                                      color: Colors.white
-                                  ),),
-                                  Text(_tontine!.montant_cotisation+" FCFA",style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white
-                                  ),)
-                                ]
-                            ),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            Row(
-                                children: [
-                                  Text("Nombre participant: ",style: TextStyle(
-                                      fontSize: 15,
-                                      color: Colors.white
-                                  ),),
-                                  Text(_tontine!.nombre_participant.toString(),style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white
-                                  ),)
-                                ]
-                            ),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Fréquence cotisation: ",style: TextStyle(
-                                      fontSize: 15,
-                                      color: Colors.white
-                                  ),),
-                                  Text(_tontine!.frequence,style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white
-                                  ),)
-                                ]
-                            ),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Type de tirage: ",style: TextStyle(
-                                      fontSize: 15,
-                                      color: Colors.white
-                                  ),),
-                                  Text(_tontine!.type,style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white
-                                  ),)
-                                ]
-                            ),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Date de création: ",style: TextStyle(
-                                      fontSize: 15,
-                                      color: Colors.white
-                                  ),),
-                                  Text(_tontine!.date_creation,style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white
-                                  ),)
-                                ]
-                            ),
+                          ),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Montant cotisation: ",style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.white
+                                ),),
+                                Text(_tontine!.montant_cotisation+" FCFA",style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white
+                                ),)
+                              ]
+                          ),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          Row(
+                              children: [
+                                Text("Nombre participant: ",style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.white
+                                ),),
+                                Text(_tontine!.nombre_participant.toString(),style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white
+                                ),)
+                              ]
+                          ),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Fréquence cotisation: ",style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.white
+                                ),),
+                                Text(_tontine!.frequence,style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white
+                                ),)
+                              ]
+                          ),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Type de tirage: ",style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.white
+                                ),),
+                                Text(_tontine!.type,style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white
+                                ),)
+                              ]
+                          ),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Date de création: ",style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.white
+                                ),),
+                                Text(_tontine!.date_creation,style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white
+                                ),)
+                              ]
+                          ),
 
-                          ],
-                        ),
-                      ],
-                    )
-                ),
+                        ],
+                      ),
+                    ],
+                  )
               ),
             )
             )

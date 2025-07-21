@@ -101,7 +101,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
         automaticallyImplyLeading: false,
         leading: IconButton(onPressed: (){
           Navigator.pop(context);
-        }, icon: Icon(Icons.arrow_back_ios)),
+        }, icon: Icon(Icons.arrow_back)),
         title: Text("Cotisations",
         style: TextStyle(
           fontSize: 25,

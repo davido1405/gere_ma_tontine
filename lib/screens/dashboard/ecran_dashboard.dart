@@ -38,7 +38,7 @@ class _dashboardState extends State<dashboard> {
 
     final List<Widget>_pages=[
       acceuil(listsession:widget.listsession),
-      payer_cotisation(listsession:widget.listsession),
+      details_tontine(listsession:widget.listsession),
       notifications(listsession:widget.listsession),
       profil_participant(listsession:widget.listsession),
       notifications(listsession:widget.listsession),
@@ -47,7 +47,6 @@ class _dashboardState extends State<dashboard> {
       mon_tour(listsession:widget.listsession),
       payer_penalite(listsession:widget.listsession),
       creer_tontine(listsession:widget.listsession),
-      details_tontine(listsession:widget.listsession),
       participer_tontine(listsession:widget.listsession),
       parametre(listsession:widget.listsession)
     ];
@@ -60,7 +59,7 @@ class _dashboardState extends State<dashboard> {
         onTap: _onTap,
         items: [
         BottomNavigationBarItem(label: "Home", icon: Icon(_selectedIndex==0 ? Icons.home_outlined:Icons.home)),
-        BottomNavigationBarItem(label: "Cotisations",icon: Icon(_selectedIndex==1 ? Icons.currency_exchange_outlined:Icons.currency_exchange)),
+        BottomNavigationBarItem(label: "Détails tontine",icon: Icon(_selectedIndex==1 ? Icons.groups_outlined:Icons.groups)),
         BottomNavigationBarItem(label: "Notifications",icon: Icon(_selectedIndex==2 ? Icons.notifications_outlined:Icons.notifications)),
         BottomNavigationBarItem(label: "Profil",icon: Icon(_selectedIndex==3 ? Icons.person_outline:Icons.person))
       ],
