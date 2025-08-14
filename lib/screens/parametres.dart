@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:gerematontine/constants/colors.dart';
+import 'package:flutter/material.dart';import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/models/session.dart';
+
 
 class parametre extends StatefulWidget {
   final Session listsession;
@@ -97,38 +97,6 @@ class _parametreState extends State<parametre> {
           SizedBox(
             height: 15,
           ),
-          Text("Sécurité",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
-          SizedBox(
-            height: 10,
-          ),
-          Row(
-            children: [
-              Container(
-                height: 50,
-                width: 50,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: couleur.primaryPurple
-                ),
-                child: Center(child: Icon(Icons.lock_outline,color: Colors.white,),),
-              ),
-              Expanded(
-                child: GestureDetector(
-                  onTap: (){
-                    print("Vous voulez changer votre mot de passe");
-                  },
-                  child: ListTile(
-                    title: Text("Changer de mot de passe",style: TextStyle(
-                        fontWeight: FontWeight.bold
-                    ),),
-                  ),
-                ),
-              )
-            ],
-          ),
-          SizedBox(
-            height: 15,
-          ),
           Text("Préférences",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
           SizedBox(
             height: 10,
@@ -151,34 +119,6 @@ class _parametreState extends State<parametre> {
                   },
                   child: ListTile(
                     title: Text("Notifications",style: TextStyle(
-                        fontWeight: FontWeight.bold
-                    ),),
-                  ),
-                ),
-              )
-            ],
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Row(
-            children: [
-              Container(
-                height: 50,
-                width: 50,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: couleur.primaryPurple
-                ),
-                child: Center(child: Icon(Icons.dark_mode_outlined,color: Colors.white,),),
-              ),
-              Expanded(
-                child: GestureDetector(
-                  onTap: (){
-                    print("Thème");
-                  },
-                  child: ListTile(
-                    title: Text("Thème",style: TextStyle(
                         fontWeight: FontWeight.bold
                     ),),
                   ),

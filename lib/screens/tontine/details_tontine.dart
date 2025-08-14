@@ -44,6 +44,49 @@ class _details_tontineState extends State<details_tontine> {
       }
     }
   }
+
+  Future<void>envoyerRappelCotisation()async{
+    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=notifications&action=envoyer_rappel_cotisation");
+    final reponse=await http.post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
+        {
+          "code_tontine":widget.listsession.code_tontine,
+          "type_notification":"Rappel de cotisation"
+        }));
+    if(reponse.statusCode==200){
+      var data=jsonDecode(reponse.body) as Map<String,dynamic>;
+      bool success=data['success'];
+      if(success){
+        showDialog(context: context, builder: (BuildContext context){
+          return AlertDialog(
+            title: Center(child: Text("Statut notification"),),
+            content: Text(data['message']),
+            actions: [
+              Center(
+                child: TextButton.icon(onPressed: (){
+                  Navigator.of(context).pop();
+                }, label: Text("Ok"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
+              )
+            ],
+          );
+        });
+      }
+    }else{
+      showDialog(context: context, builder: (BuildContext context){
+        return AlertDialog(
+          title: Center(child: Text("Statut notification"),),
+          content: Text("Une erreur est survenu côté serveur"),
+          actions: [
+            Center(
+              child: TextButton.icon(onPressed: (){
+                Navigator.of(context).pop();
+              }, label: Text("Ok"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
+            )
+          ],
+        );
+      });
+    }
+
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,14 +157,10 @@ class _details_tontineState extends State<details_tontine> {
               children: [
                 if(widget.listsession.type_participant=="Organisateur")
                   TextButton(onPressed: (){
-
+                    envoyerRappelCotisation();
                   }, child: Text("Envoyer rappel de cotisation"),style: TextButton.styleFrom(
                     backgroundColor: couleur.lightGray
                   ),),
-                if(widget.listsession.type_participant=="Organisateur")
-                TextButton(onPressed: (){}, child: Text("Rappel personnalisé"),style: TextButton.styleFrom(
-                      backgroundColor: couleur.lightGray
-                  ),)
               ],
             ),
           ),
@@ -217,7 +256,7 @@ class _details_tontineState extends State<details_tontine> {
                               });
                             },
                             child: ListTile(
-                              title: Text(widget.listsession.type_participant==member.type?"Vous":member.nom_membre+" "+member.prenom_membre,style: TextStyle(
+                              title: Text(widget.listsession.email_participant==member.email?"Vous":member.nom_membre+" "+member.prenom_membre,style: TextStyle(
                                   fontWeight: FontWeight.bold
                               ),),
                               subtitle: Text("Type: "+member.type),

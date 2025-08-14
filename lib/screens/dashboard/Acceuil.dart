@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/models/session.dart';
@@ -8,9 +7,10 @@ import 'package:gerematontine/screens/auth/connexion_screen.dart';
 import 'package:gerematontine/screens/cotisations/payer_cotisation.dart';
 import 'package:gerematontine/screens/parametres.dart';
 import 'package:gerematontine/screens/penalites/payer_penalite.dart';
-import 'package:gerematontine/screens/tontine/details_tontine.dart';
 import 'package:gerematontine/screens/tontine/tour_tontine.dart';
+import 'package:gerematontine/screens/tontine/wallet_tontine.dart';
 import 'package:http/http.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class acceuil extends StatefulWidget {
   final Session listsession;
@@ -21,6 +21,30 @@ class acceuil extends StatefulWidget {
 }
 
 class _acceuilState extends State<acceuil> {
+  
+  Future<void> monTour() async{
+    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=participants&action=mon_tour");
+    final reponse=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
+        {
+          "code_participant":widget.listsession.code_participant,
+          "code_tontine":widget.listsession.code_tontine
+        }));
+
+    if(reponse.statusCode==200){
+      final tour=jsonDecode(reponse.body) as Map<String,dynamic>;
+      if(tour['success']){
+        Map<String,dynamic>donnee=tour['data'];
+        if(donnee!=null){
+          setState(() {
+            numeroTour=donnee['ordre'].toString();
+            statut=donnee['statut'];
+          });
+        }
+      }
+    }else{
+      print(reponse.statusCode);
+    }
+  }
 
   Future <void> totalCotisation() async{
     final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=cotisations&action=total_cotisation");
@@ -70,7 +94,7 @@ class _acceuilState extends State<acceuil> {
       final data=jsonDecode(reponse.body) as Map<String,dynamic>;
       if(data['success']==true){
         setState(() {
-           _tontine=Tontine.fromJson(data['data']);
+           tontine=Tontine.fromJson(data['data']);
         });
       }
     }
@@ -84,20 +108,23 @@ class _acceuilState extends State<acceuil> {
     totalPenalite();
     tontineInfo();
     totalPenalite();
+    monTour();
   }
-  String montantCotiser="0 FCFA";
+  String montantCotiser="0";
 
-  String montantPenalite="0 FCFA";
+  String montantPenalite="0";
 
   bool _critique=false;
 
-  Tontine? _tontine;
+  Tontine? tontine;
 
+  String numeroTour="N/A";
 
+  int statut=0;
 
   @override
   build(BuildContext context) {
-    if (_tontine == null) {
+    if (tontine==null) {
       return const Center(
         child: CircularProgressIndicator(),
       );
@@ -105,7 +132,7 @@ class _acceuilState extends State<acceuil> {
     return SafeArea(child: Column(
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 150,right: 10),
+          padding: const EdgeInsets.only(left: 145,right: 10),
           child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -135,7 +162,7 @@ class _acceuilState extends State<acceuil> {
           height: 15,
         ),
         Padding(
-          padding: const EdgeInsets.only(left: 10.0,right: 10.0),
+          padding: const EdgeInsets.only(left: 0.0,right: 5.0),
           child: Container(
             child: Column(
               children: [
@@ -165,7 +192,7 @@ class _acceuilState extends State<acceuil> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("Numéro de tour",style: TextStyle(
+                              Text("Mon numéro de tour",style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white
@@ -174,15 +201,21 @@ class _acceuilState extends State<acceuil> {
                               SizedBox(
                                 height: 10,
                               ),
-                              Text("3",
-                                style: TextStyle(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white
-                                ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(numeroTour,
+                                    style: TextStyle(
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white
+                                    ),
+                                  ),
+                                  Icon(statut==0?Icons.monetization_on_outlined:Icons.monetization_on,color: statut==0? Colors.red:Colors.green,size: 40,)
+                                ],
                               ),
                               SizedBox(
-                                height: 30,
+                                height: 5,
                               )
                             ],
                           ),
@@ -219,13 +252,13 @@ class _acceuilState extends State<acceuil> {
                               SizedBox(
                                 height: 15,
                               ),
-                              Text(montantCotiser+" FCFA",
-                                style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white
-                                ),
-                              )
+                              TweenAnimationBuilder(tween: Tween(begin: 0,end:double.parse(montantCotiser.toString())), duration: Duration(seconds: 2), builder: (context,value,child){
+                                return Text("${value.toStringAsFixed(2)} FCFA",style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white
+                                ),);
+                              })
                             ],
                           ),
                         ),
@@ -265,13 +298,14 @@ class _acceuilState extends State<acceuil> {
                                   SizedBox(
                                     height: 15,
                                   ),
-                                  Text(montantPenalite+" FCFA",
-                                    style: TextStyle(
+                                  TweenAnimationBuilder(tween: Tween(begin: 0,end: double.parse(montantPenalite)), duration: Duration(seconds: 2), builder: (context,value,child){
+                                    return Text("${value.toStringAsFixed(2)} FCFA",
+                                        style: TextStyle(
                                         fontSize: 30,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white
-                                    ),
-                                  )
+                                    ),);
+                                  })
                                 ],
                               ),
                               SizedBox(
@@ -291,26 +325,37 @@ class _acceuilState extends State<acceuil> {
           ),
         ),
         SizedBox(
-          height: 25,
+          height: 15,
         ),
         Padding(
-          padding: const EdgeInsets.only(right: 200),
+          padding: const EdgeInsets.only(left:10,right: 30),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Ma tontine",
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold
-              ),
-              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Ma tontine",
+                    style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold
+                    ),
+                  ),
+                  TextButton.icon(onPressed: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>walletTontine(tontine: tontine!,listsession: widget.listsession,)));
+                  }, label: Text("COFFRE",style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),),icon: Icon(Icons.wallet,size: 30,),)
+                ],
+              )
             ],
           ),
         ),
         Row(
           children: [
             Expanded(child: Card(
-              color: Colors.cyan[500],
+              color: Color(0xFF3D0C94), // une nuance plus foncée du même violet,
               margin: EdgeInsets.all(10),
               child: Padding(
                   padding: const EdgeInsets.all(10.0),
@@ -325,7 +370,7 @@ class _acceuilState extends State<acceuil> {
                                   fontSize: 15,
                                   color: Colors.white
                               ),),
-                              Text(_tontine!.code_tontine,style: TextStyle(
+                              Text(tontine!.code_tontine,style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white
@@ -342,7 +387,7 @@ class _acceuilState extends State<acceuil> {
                                     fontSize: 15,
                                     color: Colors.white
                                 ),),
-                                Text(_tontine!.nom_tontine,style: TextStyle(
+                                Text(tontine!.nom_tontine,style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
@@ -359,7 +404,7 @@ class _acceuilState extends State<acceuil> {
                                     fontSize: 15,
                                     color: Colors.white
                                 ),),
-                                Text(_tontine!.montant_cotisation+" FCFA",style: TextStyle(
+                                Text(tontine!.montant_cotisation+" FCFA",style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
@@ -375,7 +420,7 @@ class _acceuilState extends State<acceuil> {
                                     fontSize: 15,
                                     color: Colors.white
                                 ),),
-                                Text(_tontine!.nombre_participant.toString(),style: TextStyle(
+                                Text(tontine!.nombre_participant.toString(),style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
@@ -392,7 +437,7 @@ class _acceuilState extends State<acceuil> {
                                     fontSize: 15,
                                     color: Colors.white
                                 ),),
-                                Text(_tontine!.frequence,style: TextStyle(
+                                Text(tontine!.frequence,style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
@@ -409,7 +454,7 @@ class _acceuilState extends State<acceuil> {
                                     fontSize: 15,
                                     color: Colors.white
                                 ),),
-                                Text(_tontine!.type,style: TextStyle(
+                                Text(tontine!.type,style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
@@ -426,14 +471,13 @@ class _acceuilState extends State<acceuil> {
                                     fontSize: 15,
                                     color: Colors.white
                                 ),),
-                                Text(_tontine!.date_creation,style: TextStyle(
+                                Text(tontine!.date_creation,style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
                                 ),)
                               ]
                           ),
-
                         ],
                       ),
                     ],

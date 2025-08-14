@@ -1,16 +1,124 @@
 import 'package:flutter/material.dart';
+import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/models/session.dart';
 
 class changer_mot_passe extends StatefulWidget {
-  const changer_mot_passe({super.key, required Session listsession});
+  final Session listsession;
+  const changer_mot_passe({super.key, required this.listsession});
 
   @override
   State<changer_mot_passe> createState() => _changer_mot_passeState();
 }
 
 class _changer_mot_passeState extends State<changer_mot_passe> {
+
+
+  bool _cacher=true;
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      appBar: AppBar(
+        title: Center(child: Text("Changer mon mot de passe",style: TextStyle(
+          fontWeight: FontWeight.bold
+        ),),),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.only(left: 10.0,right: 10.0),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 30,
+            ),
+            TextField(
+              obscureText: true,
+              decoration: InputDecoration(
+                hint: Text("Saisissez l'ancien mot de passe"),
+                filled: true,
+                fillColor: couleur.lightGray,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12)
+                ),
+                focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: couleur.primaryPurple),
+                    borderRadius: BorderRadius.circular(12)
+                ),
+
+              ),
+            ),
+            SizedBox(
+              height: 15,
+            ),
+            TextField(
+              obscureText: _cacher,
+              decoration: InputDecoration(
+                hint: Text("Saisissez le nouveau mot de passe"),
+                filled: true,
+                  fillColor: couleur.lightGray,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12)
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: couleur.primaryPurple)
+                  ),
+                  suffixIcon: GestureDetector(
+                    onTap: (){
+                      setState(() {
+                        _cacher=!_cacher;
+                      });
+
+                      Future.delayed(Duration(seconds: 3),(){
+                        setState(() {
+                          _cacher=true;
+                        });
+                      });
+                    },
+                    child: Icon(_cacher? Icons.visibility:Icons.visibility_off,),
+                  )
+              ),
+            ),
+            SizedBox(
+              height: 15,
+            ),
+            GestureDetector(
+              onTap: (){
+                setState(() {
+                  _cacher=!_cacher;
+                });
+              },
+              child: TextField(
+                obscureText: true,
+                decoration: InputDecoration(
+                  hint: Text("Répétez le nouveau mot de passe"),
+                  filled: true,
+                  fillColor: couleur.lightGray,
+                  enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: couleur.primaryPurple),
+                      borderRadius: BorderRadius.circular(12)
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Center(
+              child: TextButton.icon(onPressed: (){
+                print("Vous avez changé votre mot de passe");
+              }, label: Text("Changer le mot de passe",style: TextStyle(
+                color: Colors.white
+              ),
+              ),
+                  icon: Icon(Icons.check_circle,color: Colors.white),style: TextButton.styleFrom(
+                  backgroundColor: couleur.primaryPurple
+                ),),
+            )
+          ],
+        ),
+      ),
+    );
   }
 }

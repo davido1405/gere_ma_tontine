@@ -4,6 +4,7 @@ import 'dart:convert' as convert;
 import 'package:flutter/material.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
+import 'package:gerematontine/screens/tontine/creer_tontine.dart';
 import 'package:http/http.dart' as http;
 import '../../constants/colors.dart';
 
@@ -25,11 +26,11 @@ class _participerState extends State<participer> {
 
   TextEditingController code=TextEditingController();
   bool _cacher=true;
-  
-  Future<void>participer(String x,String y)async{
+
+  Future<void>participer(String y)async{
     final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=participations&action=participer");
     final response=await http.post(url,headers:{"content-Type":"application/json"},body:jsonEncode({
-          "code_participant":x,
+          "code_participant":widget.listsession.code_participant,
           "code_tontine":y
         }));
     if(response.statusCode==200){
@@ -41,11 +42,24 @@ class _participerState extends State<participer> {
           Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>dashboard(listsession: widget.listsession)), (route)=>false);
         });
       }else{
-        if(data['message']=="Vous êtes déjà inscrit dans cette tontine");
-        setState(() {
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>dashboard(listsession: widget.listsession)), (route)=>false);
-
-        });
+        if(data['message']=="Vous êtes déjà inscrit dans cette tontine"){
+          setState(() {
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>dashboard(listsession: widget.listsession)), (route)=>false);
+          });
+        }else{
+          showDialog(context: context, builder: (BuildContext context){
+            return AlertDialog(
+              title: Text("Erreur"),
+              content: Text(data['message']),
+              actions: [
+                TextButton.icon(onPressed: (){
+                  Navigator.of(context).pop();
+                }, label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
+              ],
+            );
+          });
+          print(data['message']);
+        }
         }
     }else{
       showDialog(context: context, builder: (BuildContext contex){
@@ -61,7 +75,7 @@ class _participerState extends State<participer> {
       });
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -119,6 +133,12 @@ class _participerState extends State<participer> {
                         setState(() {
                           _cacher=!_cacher;
                         });
+
+                        Future.delayed(Duration(seconds: 3),(){
+                          setState(() {
+                            _cacher=true;
+                          });
+                        });
                       },
                       child: _cacher? Icon(Icons.visibility):Icon(Icons.visibility_off),
                     )
@@ -130,13 +150,21 @@ class _participerState extends State<participer> {
               ),
               Center(
                 child: TextButton.icon(onPressed: (){
-                  participer(widget.listsession.code_participant,code.text);
-                  print(widget.listsession.code_participant);
+                  participer(code.text);
                 }, label: Text("Participer",style: TextStyle(
                   color: Colors.white
                 ),),icon: Icon(Icons.rocket_launch,color: Colors.white,),style: TextButton.styleFrom(
                   backgroundColor: couleur.primaryPurple
-                ),))
+                ),)),
+              Center(
+                child: TextButton.icon(onPressed: (){
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>creer_tontine(listsession: widget.listsession,)));
+                }, label: Text("Créer ma tontine",style: TextStyle(
+                    color: Colors.white
+                ),),icon: Icon(Icons.rocket_launch,color: Colors.white,),style: TextButton.styleFrom(
+                    backgroundColor: couleur.primaryPurple
+                ),),
+              )
             ],
           ),)
         ],

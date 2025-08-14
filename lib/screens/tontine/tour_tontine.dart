@@ -18,6 +18,23 @@ class _tourTontineState extends State<tourTontine> {
           child: Text("Planing des tours"),
         ),
       ),
+      body: Padding(padding: EdgeInsets.all(8.0),child: Column(
+        children: [
+          SizedBox(height: 10,),
+          Card(
+
+            child: Row(
+              children: [
+                Column(
+                  children: [
+                    Text("Tour de ")
+                  ],
+                )
+              ],
+            ),
+          )
+        ],
+      ),)
     );
   }
 }

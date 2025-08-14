@@ -43,11 +43,8 @@ class _connexion_screenState extends State<connexion_screen> {
         var parti=data['data'];
         print(parti);
         setState(() {
-
           Session listsession=Session.fromJson(parti);
           Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>dashboard(listsession: listsession)),(route)=>false);
-
-
         });
       }else{
         showDialog(context: context, builder: (BuildContext contex){

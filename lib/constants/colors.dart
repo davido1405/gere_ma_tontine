@@ -7,5 +7,5 @@ class couleur{
   static const Color iconInactive = Color(0xFF9085A2);
   static const Color iconActive = Color(0xFF000000);
   static const Color background = Color(0xFFFFFFFF);
-
+  static const Color rose_pastel = Color(0xFFF3D0FF); // rose lavande
 }

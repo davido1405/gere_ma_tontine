@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:gerematontine/constants/colors.dart';
@@ -86,6 +87,11 @@ class _notificationsState extends State<notifications> {
 
   @override
   Widget build(BuildContext context) {
+    if(_listnotification==null){
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -133,24 +139,18 @@ class _notificationsState extends State<notifications> {
               ))
             ],
           ),
-
           SizedBox(
             height: 15,
           ),
           Container(
               height: 350,
-            width: 500,
+            width: 400,
             child: Column(
               children: [
                 Expanded(child: ListView.builder(
                   itemCount: _listnotification.length,
                     itemBuilder: (context,index){
                     final Notifications notifica=_listnotification[index];
-                    if(notifica.statut_notif=="Lu"){
-                      setState(() {
-                        _ouvert=true;
-                      });
-                    }
                     return GestureDetector(
                       onTap: (){
                         showDialog(context: context, builder: (BuildContext context){
@@ -158,43 +158,31 @@ class _notificationsState extends State<notifications> {
                             title: Center(child: Text("Details notification"),),
                             content: Container(
                               height: 100,
+                              width: MediaQuery.of(context).size.width*0.9,
                               child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Row(
-                                    children: [
-                                      Text(notifica.type_notif),
-
-                                    ],
-                                  ),Row(
-                                    children: [
-
-                                      Text(notifica.contenu_notif),
-
-                                    ],
-                                  ),
+                                  Text(notifica.type_notif,
+                                  overflow: TextOverflow.ellipsis,),
                                   SizedBox(
-                                    height: 20,
+                                    height: 10,
                                   ),
-                                  Row(
-                                    children: [
-                                      Text(notifica.date_envoie)
-                                    ],
+                                  Text(notifica.contenu_notif,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,),
+                                  SizedBox(
+                                    height: 10,
                                   ),
+                                  Text(notifica.date_envoie),
                                 ],
                               ),
                             ),
                             actions: [
-                              Center(child: Row(
-                                children: [
-                                  TextButton.icon(onPressed: (){
-                                    Navigator.of(context).pop();
-                                  }, label: Text("OK"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
-                                  TextButton.icon(onPressed: (){
-                                    marquerCommelu(int.parse(notifica.id_notif));
-                                    Navigator.of(context).pop();
-                                  }, label: Text("Supprimer"),icon: Icon(Icons.delete,color: Colors.red,),),
-                                ],
-                              ),)
+                              Center(child: TextButton.icon(onPressed: (){
+                                Navigator.of(context).pop();
+                                marquerCommelu(int.parse(notifica.id_notif));
+                                recupererNotif();
+                              }, label: Text("OK"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),)
                             ],
                           );
                         });
@@ -215,7 +203,14 @@ class _notificationsState extends State<notifications> {
                             ),
                             Column(
                               children: [
-                                Icon(_ouvert? Icons.done_all:Icons.done),
+                                Icon(
+                                  notifica.statut_notif == "Lu"
+                                      ? Icons.done_all // lu
+                                      : Icons.done,    // non lu
+                                  color: notifica.statut_notif == "Lu"
+                                      ? Colors.blue   // couleur pour "lu"
+                                      : Colors.grey,  // couleur pour "non lu"
+                                ),
                               ],
                             )
                           ],
