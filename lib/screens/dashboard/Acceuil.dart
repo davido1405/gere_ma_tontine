@@ -182,7 +182,7 @@ class _acceuilState extends State<acceuil> {
                   children: [
                     Expanded(child: GestureDetector(
                       onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (_)=>tourTontine(listsession: widget.listsession,)));
+                        Navigator.push(context, MaterialPageRoute(builder: (_)=>tourTontine(listsession: widget.listsession,  monTour: numeroTour, statut: statut,)));
                       },
                       child: Card(
                         color: couleur.primaryPurple,
@@ -342,7 +342,7 @@ class _acceuilState extends State<acceuil> {
                     ),
                   ),
                   TextButton.icon(onPressed: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>walletTontine(tontine: tontine!,listsession: widget.listsession,)));
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>walletTontine(tontine: tontine!,listsession: widget.listsession, numeroTour: int.parse(numeroTour), )));
                   }, label: Text("COFFRE",style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,

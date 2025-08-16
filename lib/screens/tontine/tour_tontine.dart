@@ -1,15 +1,79 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:gerematontine/models/beneficiare.dart';
 import 'package:gerematontine/models/session.dart';
+import 'package:http/http.dart';
+
+import '../../constants/colors.dart';
 
 class tourTontine extends StatefulWidget {
   final Session listsession;
-  const tourTontine({super.key, required this.listsession});
+  final String monTour;
+  final int statut;
+  const tourTontine({super.key, required this.listsession, required this.monTour,required this.statut});
 
   @override
   State<tourTontine> createState() => _tourTontineState();
 }
 
 class _tourTontineState extends State<tourTontine> {
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    verifierTour();
+    listeBeneficiare();
+  }
+
+  List<Beneficiare> _listOrdre=[];
+  Future<void>verifierTour()async{
+    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=participants&action=verifierTour");
+    final response=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
+        {
+          "code_tontine":widget.listsession.code_tontine
+        }));
+    if(response.statusCode==200){
+      final Map<String,dynamic>donnee=jsonDecode(response.body);
+      if(donnee['success']==true){
+        var tour=donnee['data'];
+        if(tour!=null){
+          setState(() {
+            nomBeneficiare=tour['nom_participant'];
+            prenomsBeneficiare=tour['prenoms_participant'];
+            positionBeneficiare=tour['ordre'];
+          });
+        }
+      }
+    }
+  }
+
+  //Liste des bénéficiares
+  Future<void>listeBeneficiare() async{
+    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=tontines&action=ordre_paiement");
+    final response=await post(url,headers: {'content-Type':'application/json'},body: jsonEncode(
+        {
+          "code_tontine":widget.listsession.code_tontine
+        }));
+    if(response.statusCode==200){
+      final Map<String,dynamic>donnee=jsonDecode(response.body);
+      bool succes=donnee['success'];
+      if(succes){
+        List<dynamic>resultats=donnee['data'];
+        if(resultats!=null){
+          setState(() {
+            _listOrdre=(resultats).map((resultats)=>Beneficiare.fromJson(resultats)).toList();
+          });
+        }
+      }
+    }
+  }
+
+  late String nomBeneficiare="N/A";
+  late String prenomsBeneficiare="N/A";
+  late int positionBeneficiare=0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,23 +82,175 @@ class _tourTontineState extends State<tourTontine> {
           child: Text("Planing des tours"),
         ),
       ),
-      body: Padding(padding: EdgeInsets.all(8.0),child: Column(
-        children: [
-          SizedBox(height: 10,),
-          Card(
-
-            child: Row(
-              children: [
-                Column(
+      body: SafeArea(child: Padding(
+        padding: EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Card(
+              color: couleur.primaryPurple,
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Tour de ")
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("Bénéficiare du tour",style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white
+                            ),),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Center(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Column(
+                                    children: [
+                                      Text("Nom bénéficiare:",style: TextStyle(
+                                          fontSize: 15,
+                                          color: Colors.white
+                                      ),),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Column(
+                                    children: [
+                                      Text(nomBeneficiare,style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white
+                                      ),)
+                                    ],
+                                  )
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Column(
+                                    children: [
+                                      Text("Prenoms bénéficiare:",style: TextStyle(
+                                          fontSize: 15,
+                                          color: Colors.white
+                                      ),),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Column(
+                                    children: [
+                                      Text(prenomsBeneficiare,style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white
+                                      ),)
+                                    ],
+                                  )
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Column(
+                                    children: [
+                                      Text("Position:",style: TextStyle(
+                                          fontSize: 15,
+                                          color: Colors.white
+                                      ),),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Column(
+                                    children: [
+                                      Text(positionBeneficiare.toString(),style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white
+                                      ),)
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        SizedBox(
+                          height: 25,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 10.0),
+                          child: Icon(Icons.emoji_events,size: 80,color:Colors.amber,),
+                        ),
+
+                      ],
+                    ),
                   ],
-                )
-              ],
+                ),
+              ),
             ),
-          )
+            Divider(
+              height: 10,
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Text("Prochains bénéficiare",style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 15
+            ),),
+            SizedBox(
+              height: 10,
+            ),
+            SizedBox(
+              height: 580,
+              width: double.maxFinite,
+              child: ListView.builder(
+                itemCount: _listOrdre.length,
+                itemBuilder: (context, index) {
+                  final Beneficiare prochain = _listOrdre[index];
+                  return ListTile(
+                    title: Text(widget.listsession.code_participant==prochain.codeBeneficiare?"Vous":
+                      "${prochain.prenomsBeneficiare} ${prochain.nomBeneficiare}",
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text("Position: ${prochain.positionBeneficiare}"),
+                    trailing: Icon(
+                      prochain.statutBeneficiare == 0
+                          ? Icons.timelapse
+                          : Icons.payments_rounded ,color: prochain.statutBeneficiare==0? Colors.black:Colors.green,
+                    ),
+                  );
+                },
+              ),
+            )
+
         ],
-      ),)
+        ),
+      ))
     );
   }
 }

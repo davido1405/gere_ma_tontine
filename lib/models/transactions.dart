@@ -5,7 +5,7 @@ class Transactions{
   late final String montant_transaction;
   late final String date_transaction;
   late final String mode_paiement;
-  late final int statut_paiement;
+  late final String statut_paiement;
   Transactions({required this.nom,required this.prenoms,required this.type_transaction,required this.montant_transaction,required this.date_transaction,required this.mode_paiement,required this.statut_paiement});
 
   factory Transactions.fromJson(Map<String,dynamic>json){
