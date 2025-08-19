@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/models/session.dart';
 
@@ -12,6 +13,9 @@ class changer_mot_passe extends StatefulWidget {
 
 class _changer_mot_passeState extends State<changer_mot_passe> {
 
+  Future<void>modifierMotpass()async{
+
+  }
 
   bool _cacher=true;
   @override
@@ -19,20 +23,23 @@ class _changer_mot_passeState extends State<changer_mot_passe> {
     return Scaffold(
       appBar: AppBar(
         title: Center(child: Text("Changer mon mot de passe",style: TextStyle(
+          fontSize: 20.sp,
           fontWeight: FontWeight.bold
         ),),),
       ),
       body: Padding(
-        padding: const EdgeInsets.only(left: 10.0,right: 10.0),
+        padding: EdgeInsets.only(left: 10.0.w,right: 10.0.w),
         child: Column(
           children: [
             SizedBox(
-              height: 30,
+              height: 30.h,
             ),
             TextField(
               obscureText: true,
               decoration: InputDecoration(
-                hint: Text("Saisissez l'ancien mot de passe"),
+                hint: Text("Saisissez l'ancien mot de passe",style: TextStyle(
+                fontSize: 14.sp,
+                ),),
                 filled: true,
                 fillColor: couleur.lightGray,
                 enabledBorder: OutlineInputBorder(
@@ -46,12 +53,14 @@ class _changer_mot_passeState extends State<changer_mot_passe> {
               ),
             ),
             SizedBox(
-              height: 15,
+              height: 15.h,
             ),
             TextField(
               obscureText: _cacher,
               decoration: InputDecoration(
-                hint: Text("Saisissez le nouveau mot de passe"),
+                hint: Text("Saisissez le nouveau mot de passe",style: TextStyle(
+                    fontSize: 14.sp,
+                ),),
                 filled: true,
                   fillColor: couleur.lightGray,
                   enabledBorder: OutlineInputBorder(
@@ -78,7 +87,7 @@ class _changer_mot_passeState extends State<changer_mot_passe> {
               ),
             ),
             SizedBox(
-              height: 15,
+              height: 15.h,
             ),
             GestureDetector(
               onTap: (){
@@ -89,7 +98,9 @@ class _changer_mot_passeState extends State<changer_mot_passe> {
               child: TextField(
                 obscureText: true,
                 decoration: InputDecoration(
-                  hint: Text("Répétez le nouveau mot de passe"),
+                  hint: Text("Répétez le nouveau mot de passe",style: TextStyle(
+                    fontSize: 14.sp,
+                  ),),
                   filled: true,
                   fillColor: couleur.lightGray,
                   enabledBorder: OutlineInputBorder(
@@ -103,12 +114,13 @@ class _changer_mot_passeState extends State<changer_mot_passe> {
               ),
             ),
             SizedBox(
-              height: 20,
+              height: 20.h,
             ),
             Center(
               child: TextButton.icon(onPressed: (){
                 print("Vous avez changé votre mot de passe");
               }, label: Text("Changer le mot de passe",style: TextStyle(
+                fontSize: 14.sp,
                 color: Colors.white
               ),
               ),

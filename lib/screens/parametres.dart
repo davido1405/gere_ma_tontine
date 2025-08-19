@@ -11,6 +11,13 @@ class parametre extends StatefulWidget {
 }
 
 class _parametreState extends State<parametre> {
+
+  SupportTech(){
+    final String contact="2250140373185";
+    final String message=Uri.encodeComponent("Bonjour, j'ai besoin d'aide avec GereMaTontine.");
+    final String url="https://wa.me/$contact?text=$message";
+    //launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

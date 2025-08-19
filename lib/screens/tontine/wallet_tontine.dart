@@ -2,10 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/models/tontines.dart';
 import 'package:gerematontine/models/transactions.dart';
 import 'package:gerematontine/models/wallet_tontine.dart';
+import 'package:gerematontine/screens/dashboard/Acceuil.dart';
 import 'package:http/http.dart';
 
 import '../../models/session.dart';
@@ -13,7 +15,7 @@ import '../../models/session.dart';
 class walletTontine extends StatefulWidget {
   final Tontine tontine;
   final Session listsession;
-  final int numeroTour;
+  final String numeroTour;
   const walletTontine({super.key,required this.listsession,required this.tontine,required this.numeroTour});
 
   @override
@@ -34,6 +36,7 @@ class _walletTontineState extends State<walletTontine> {
       if(mounted){
         setState(() {
           _ouvert=false;
+          _dialogShown=false;
         });
       }
     });
@@ -42,6 +45,10 @@ class _walletTontineState extends State<walletTontine> {
   List<Transactions>_listeTransac=[];
   bool _ouvert=true;
   bool _monTour=false;
+  late bool _dialogShown;
+  bool _pasJourprevu=false;
+  bool _masque=true;
+
   
   //Recupérer le wallet
   Future<void>recupererWallet() async{
@@ -93,10 +100,21 @@ Future<void>verifierTour()async{
       final Map<String,dynamic>donnee=jsonDecode(response.body);
       if(donnee['success']==true){
         var tour=donnee['data'];
-        if(widget.listsession.code_participant==tour['code_participant'] && widget.numeroTour==tour['ordre']){
-          setState(() {
-            _monTour=true;
-          });
+        if(widget.listsession.code_participant==tour['code_participant'] && int.parse(widget.numeroTour)==tour['ordre']){
+          //Récupérer la date du jour
+          String today = DateTime.now().toString();
+          String dateJour=today.split(" ")[0];
+          //Récupérer la date prévu
+          String datePrevu=tour['date_tour'].split(" ")[0];
+          if(dateJour==datePrevu){
+            setState(() {
+              _monTour=true;
+            });
+          }else{
+            setState(() {
+              _pasJourprevu=true;
+            });
+          }
         }
       }
     }
@@ -138,6 +156,7 @@ Future<void>retirer()async{
 
 
 
+
   @override
   Widget build(BuildContext context) {
     if(wallet==null){
@@ -145,133 +164,185 @@ Future<void>retirer()async{
         child: CircularProgressIndicator(),
       );
     }
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      _dialogShown = true; // empêcher les doublons
+      if(widget.numeroTour=="N/A"){
+        showDialog(context: context, builder: (BuildContext context){
+          return AlertDialog(
+            title: Center(child: Text("Oups !")),
+            content: SizedBox(
+              height: 200.h,
+              child: Text("Votre tontine n'est pas encore pleine"),
+            ),
+            actions: [
+              TextButton.icon(onPressed: (){
+                Navigator.of(context).pop();
+              }, label: Text("Compris !"),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
+            ],
+          );
+        });
+      }
+    });
     return Scaffold(
       appBar: AppBar(
         title: Center(
           child: Text("Compte de tontine",style: TextStyle(
+            fontSize: 20.sp,
             fontWeight: FontWeight.bold
           ),),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Container(
-              height: 175,
-              child: Card(
-                color: couleur.primaryPurple,
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Montant en caisse",style: TextStyle(
-                                fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                color: Colors.white
-                              ),),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              TweenAnimationBuilder(tween: Tween(begin: 0,end: double.parse(wallet!.solde_tontine.toString())), duration: Duration(seconds: 2), builder: (context,value,child){
-                                return Text(
-                                  value.toStringAsFixed(2)+" FCFA",style: TextStyle(
-                                    fontSize: 30,
+      body: RefreshIndicator(
+        onRefresh: recupererWallet,
+        child: Padding(
+          padding: EdgeInsets.all(8.0.w),
+          child: Column(
+            children: [
+              Container(
+                height: 175.h,
+                child: Card(
+                  color: couleur.primaryPurple,
+                  child: Padding(
+                    padding: EdgeInsets.all(10.0.w),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              height: 10.h,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Montant en caisse",style: TextStyle(
+                                  fontSize: 20.sp,
                                     fontWeight: FontWeight.bold,
                                   color: Colors.white
-                                ));
-                              })
-                            ],
-                          ),
-                          Center(
-                            child: Row(
+                                ),),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 10.h,
+                            ),
+                            Row(
                               children: [
-                                Center(
-                                  child: TextButton.icon(onPressed: (){
-                                    if(_monTour){
-                                      retirer();
-                                    }else{
-                                      showDialog(context: context, builder: (BuildContext context){
-                                        return AlertDialog(
-                                          title: Center(child: Text("Oups !"),),
-                                          content: Text("Vous prenez en position ${widget.numeroTour}"),
-                                          actions: [
-                                            Center(child: TextButton.icon(onPressed: (){
-                                              Navigator.of(context).pop();
-                                            }, label: Text("Compris !"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),)
-                                          ],
-                                        );
-                                      });
-                                    }
-                                  }, label: Text("Retrait"),icon: Icon(Icons.arrow_downward),style: TextButton.styleFrom(
-                                    backgroundColor: _monTour?Colors.white:Colors.grey
-                                  ),),
+                                _masque?
+                                  Text("*********",style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 30.sp,
+                                      fontWeight: FontWeight.w900
+                                  ),)
+                                  :TweenAnimationBuilder(tween: Tween(begin: 0,end: double.parse(wallet!.solde_tontine.toString())), duration: Duration(seconds: 2), builder: (context,value,child){
+                                  return Text(
+                                      value.toStringAsFixed(2)+" FCFA",style: TextStyle(
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white
+                                  ));
+                                }),
+                                SizedBox(
+                                  width: 10.w,
+                                ),
+                                GestureDetector(
+                                  onTap: (){
+                                    setState(() {
+                                      _masque=!_masque;
+                                    });
+                                  },
+                                  child: Icon(_masque? Icons.visibility:Icons.visibility_off,color: Colors.white,),
                                 )
                               ],
                             ),
-                          )
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 10.0),
-                            child: Icon(_ouvert?Icons.lock_open:Icons.lock_outline,size: 80,color: _ouvert? Colors.red:Colors.green,),
-                          ),
+                            Center(
+                              child: Row(
+                                children: [
+                                  Center(
+                                    child: TextButton.icon(onPressed: (){
+                                      if(_monTour){
+                                        retirer();
+                                      }else if(widget.numeroTour=="N/A"){
+                                        showDialog(context: context, builder: (BuildContext context){
+                                          return AlertDialog(
+                                            title: Center(child: Text("Désolé"),),
+                                            content: Text("Mon vieux, tout le monde n'est pas encore arrivé 😅."),
+                                            actions: [
+                                              Center(child: TextButton.icon(onPressed: (){
+                                                Navigator.of(context).pop();
+                                              }, label: Text("Compris !"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),)
+                                            ],
+                                          );
+                                        });
+                                      } else{
+                                        showDialog(context: context, builder: (BuildContext context){
+                                          return AlertDialog(
+                                            title: Center(child: Text("Désolé"),),
+                                            content: Text(_pasJourprevu?"Djo c'est ton tour, mais faut attendre la date. S'il te plaît 🙏🏾":"Mon vieux, tu es N°${widget.numeroTour}, faut pas presser le chauffeur 😅."),
+                                            actions: [
+                                              Center(child: TextButton.icon(onPressed: (){
+                                                Navigator.of(context).pop();
+                                              }, label: Text("Compris !"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),)
+                                            ],
+                                          );
+                                        });
+                                      }
+                                    }, label: Text("Retrait"),icon: Icon(Icons.arrow_downward),style: TextButton.styleFrom(
+                                      backgroundColor: _monTour?Colors.white:Colors.grey
+                                    ),),
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            SizedBox(
+                              height: 10.h,
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(right: 10.0.w),
+                              child: Icon(_ouvert?Icons.lock_open:Icons.lock_outline,size: 80.r,color: _ouvert? Colors.red:Colors.green,),
+                            ),
 
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Divider(
-              height: 5,
-              color: Colors.grey[400],
-            ),
-            SizedBox(
-              height: 15,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.compare_arrows,size: 25,),
-                SizedBox(
-                  width: 10,
-                ),
-                Text("Historique des transactions",style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold
-                ),)
-              ],
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Container(
-              height: 550,
-              child: Expanded(child: ListView.builder(
+              SizedBox(
+                height: 10.h,
+              ),
+              Divider(
+                height: 5.h,
+                color: Colors.grey[400],
+              ),
+              SizedBox(
+                height: 15.h,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.compare_arrows,size: 25.r,),
+                  SizedBox(
+                    width: 10.w,
+                  ),
+                  Text("Historique des transactions",style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold
+                  ),)
+                ],
+              ),
+              SizedBox(
+                height: 10.h,
+              ),
+              SizedBox(
+                  height:550.h,
+                  width: double.maxFinite,
+                  child: ListView.builder(
                   itemCount: _listeTransac.length,
                   itemBuilder: (context,index){
                     final Transactions transac=_listeTransac[index];
@@ -281,17 +352,31 @@ Future<void>retirer()async{
                       return AlertDialog(
                         title: Center(child: Text("Détails de transaction")),
                         content: Container(
-                          height: 145,
+                          height: 175.h,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("Nom :"+transac.nom),
-                              Text("Prénoms :"+transac.prenoms),
-                              Text("Type de transaction :"+transac.type_transaction),
-                              Text("Montant de transaction :"+transac.montant_transaction),
-                              Text("Date de transaction :"+transac.date_transaction),
-                              Text("Mode de paiement :"+transac.mode_paiement),
-                              Text(transac.statut_paiement==2?"Statut: Payée":"Statut: En attente"),
+                              Text("Nom :"+transac.nom,style: TextStyle(
+                                  fontSize: 15.sp
+                              ),),
+                              Text("Prénoms :"+transac.prenoms,style: TextStyle(
+                                  fontSize: 15.sp
+                              ),),
+                              Text("Type de transaction :"+transac.type_transaction,style: TextStyle(
+                                  fontSize: 15.sp
+                              ),),
+                              Text("Montant de transaction :"+transac.montant_transaction,style: TextStyle(
+                                  fontSize: 15.sp
+                              ),),
+                              Text("Date de transaction :"+transac.date_transaction,style: TextStyle(
+                                  fontSize: 15.sp
+                              ),),
+                              Text("Mode de paiement :"+transac.mode_paiement,style: TextStyle(
+                                  fontSize: 15.sp
+                              ),),
+                              Text("Statut: ${transac.statut_paiement}",style: TextStyle(
+                                  fontSize: 15.sp
+                              ),),
                             ],
                           ),
                         ),
@@ -307,6 +392,7 @@ Future<void>retirer()async{
                   },
                   child: ListTile(
                     title: Text((widget.listsession.nom_participant==transac.nom && widget.listsession.prenoms_participant==transac.prenoms)? "Vous":transac.prenoms+" "+transac.nom, style: TextStyle(
+                      fontSize: 16.sp,
                         fontWeight: FontWeight.bold
                     ),),
                     subtitle: Row(
@@ -315,8 +401,12 @@ Future<void>retirer()async{
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(transac.type_transaction),
-                            Text(transac.date_transaction)
+                            Text(transac.type_transaction,style: TextStyle(
+                              fontSize: 14.sp
+                            ),),
+                            Text(transac.date_transaction,style: TextStyle(
+                                fontSize: 14.sp
+                            ),)
                           ],
                         ),
                         Row(
@@ -331,11 +421,11 @@ Future<void>retirer()async{
                               ],
                             ),
                             SizedBox(
-                              width: 10,
+                              width: 10.h,
                             ),
                             Column(
                               children: [
-                                Icon(transac.type_transaction!="Retrait"? Icons.arrow_outward:Icons.arrow_downward,color:transac.type_transaction!="Retrait"? Colors.green:Colors.red,size: 20)
+                                Icon(transac.type_transaction!="Retrait"? Icons.arrow_outward:Icons.arrow_downward,color:transac.type_transaction!="Retrait"? Colors.green:Colors.red,size: 20.r)
                               ],
                             )
                           ],
@@ -344,9 +434,9 @@ Future<void>retirer()async{
                       ],
                     ),
                   ),
-                );})),
-            )
-          ],
+                );}))
+            ],
+          ),
         ),
       ),
     );

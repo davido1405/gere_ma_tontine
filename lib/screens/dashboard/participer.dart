@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:convert' as convert;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
 import 'package:gerematontine/screens/tontine/creer_tontine.dart';
@@ -27,11 +28,11 @@ class _participerState extends State<participer> {
   TextEditingController code=TextEditingController();
   bool _cacher=true;
 
-  Future<void>participer(String y)async{
+  Future<void>participer()async{
     final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=participations&action=participer");
     final response=await http.post(url,headers:{"content-Type":"application/json"},body:jsonEncode({
           "code_participant":widget.listsession.code_participant,
-          "code_tontine":y
+          "code_tontine":code.text
         }));
     if(response.statusCode==200){
       final Map<String,dynamic>data=jsonDecode(response.body);
@@ -59,6 +60,7 @@ class _participerState extends State<participer> {
             );
           });
           print(data['message']);
+          print(widget.listsession.code_participant);
         }
         }
     }else{
@@ -82,19 +84,23 @@ class _participerState extends State<participer> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Center(
-          child: Text("Participer",style: TextStyle(fontWeight: FontWeight.bold,letterSpacing: 1),),
+          child: Text("Participer",style: TextStyle(
+            fontSize: 20.sp,
+              fontWeight: FontWeight.bold,letterSpacing: 1),),
         ),
       ),
       body: Column(
         children: [
-          SizedBox(height: 30,),
+          SizedBox(height: 30.h,),
           Center(
-            child: Text("Scanner le QR Code de la tontine"),
+            child: Text("Scanner le QR Code de la tontine",style: TextStyle(
+              fontSize: 14.sp
+            ),),
           ),
-          SizedBox(height: 50,),
+          SizedBox(height: 50.h,),
           Center(child: Container(
-            width: 300,
-            height: 300,
+            width: 300.w,
+            height: 300.h,
             child: Center(child: Container(
               color: Colors.grey,
               child: Text("Un text"),
@@ -106,17 +112,21 @@ class _participerState extends State<participer> {
           ),
           Center(child: Column(
             children: [
-              Text("Ou vous avez un code de tontine ?"),
+              Text("Ou vous avez un code de tontine ?",style: TextStyle(
+                  fontSize: 14.sp
+              ),),
               SizedBox(
-                height: 15,
+                height: 15.h,
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 15,right: 15),
+                padding: EdgeInsets.only(left: 15.w,right: 15.w),
                 child: TextField(
                   controller: code,
                   obscureText: _cacher,
                   decoration: InputDecoration(
-                    label: Text("Code tontine"),
+                    label: Text("Code tontine",style: TextStyle(
+                        fontSize: 16.sp
+                    ),),
                     filled: true,
                     fillColor: couleur.lightGray,
                     enabledBorder: OutlineInputBorder(
@@ -150,8 +160,9 @@ class _participerState extends State<participer> {
               ),
               Center(
                 child: TextButton.icon(onPressed: (){
-                  participer(code.text);
+                  participer();
                 }, label: Text("Participer",style: TextStyle(
+                  fontSize: 14.sp,
                   color: Colors.white
                 ),),icon: Icon(Icons.rocket_launch,color: Colors.white,),style: TextButton.styleFrom(
                   backgroundColor: couleur.primaryPurple
@@ -160,6 +171,7 @@ class _participerState extends State<participer> {
                 child: TextButton.icon(onPressed: (){
                   Navigator.push(context, MaterialPageRoute(builder: (context)=>creer_tontine(listsession: widget.listsession,)));
                 }, label: Text("Créer ma tontine",style: TextStyle(
+                  fontSize: 14.sp,
                     color: Colors.white
                 ),),icon: Icon(Icons.rocket_launch,color: Colors.white,),style: TextButton.styleFrom(
                     backgroundColor: couleur.primaryPurple

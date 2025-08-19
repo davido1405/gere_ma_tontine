@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/penalites.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:http/http.dart';
@@ -60,13 +61,19 @@ class _payer_penaliteState extends State<payer_penalite> {
       if(success){
         showDialog(context: context, builder: (BuildContext context){
           return AlertDialog(
-            title: Center(child: Text("Statut paiement"),),
-            content: Text(data['message']),
+            title: Center(child: Text("Statut paiement",style: TextStyle(
+                fontSize: 15.sp
+            ),),),
+            content: Text(data['message'],style: TextStyle(
+                fontSize: 14.sp
+            ),),
             actions: [
               Center(
                 child: TextButton.icon(onPressed: (){
                   Navigator.of(context).pop();
-                }, label: Text("OK"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
+                }, label: Text("OK",style: TextStyle(
+                    fontSize: 14.sp
+                ),),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
               )
             ],
           );
@@ -75,14 +82,20 @@ class _payer_penaliteState extends State<payer_penalite> {
         showDialog(context: context, builder: (BuildContext context){
           return AlertDialog(
             title: Center(
-              child: Text("Statut paiement"),
+              child: Text("Statut paiement",style: TextStyle(
+                  fontSize: 15.sp
+              ),),
             ),
-            content: Text(data['message']),
+            content: Text(data['message'],style: TextStyle(
+                fontSize: 14.sp
+            ),),
             actions: [
               Center(
                 child: TextButton.icon(onPressed: (){
                   Navigator.of(context).pop();
-                }, label: Text("OK"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
+                }, label: Text("OK",style: TextStyle(
+                    fontSize: 14.sp
+                ),),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
               )
             ],
           );
@@ -104,134 +117,144 @@ class _payer_penaliteState extends State<payer_penalite> {
         }, icon: Icon(Icons.arrow_back)),
         title: Text("Pénalités",
           style: TextStyle(
-              fontSize: 25,
+              fontSize: 20.sp,
               fontWeight: FontWeight.bold
           ),),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 15.0,right: 15.0),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 15,
-            ),
-            TextField(
-              controller: montant,
-              decoration: InputDecoration(
-                  labelText: "Montant",
-                  fillColor: couleur.lightGray,
-                  filled: true,
-                  enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: couleur.primaryPurple)
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: couleur.primaryPurple)
-                  )
-              ),
-            ),
-            SizedBox(
-              height: 25,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 200),
-              child: Column(
-                children: [
-                  Text("Mode de paiement",style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold
-                  ),),
-                  SizedBox(
-                    height: 15,
-                  )
-                ],
-              ),
-            ),
-            Row(
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: fetchPenalite,
+          child: Padding(
+            padding: EdgeInsets.only(left: 15.0.w,right: 15.0.w),
+            child: Column(
               children: [
-                Expanded(child: Card(
-                    color: couleur.lightGray,
-                    child: Padding(padding: EdgeInsets.only(left: 5),child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        CircleAvatar(
-                          backgroundImage: AssetImage("assets/wave.png"),
-                        ),
-                        Text("Wave",style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: couleur.secondaryText
-                        ),
-                        ),
-                        Radio(value: "Wave", groupValue: _selectedOption, onChanged: (value){
-                          setState(() {
-                            _selectedOption=value;
-                          });
-                        })
-                      ],
-                    ),)
-                ))
-              ],
-            ),
+                SizedBox(
+                  height: 15,
+                ),
+                TextField(
+                  controller: montant,
+                  decoration: InputDecoration(
+                      label: Text("Montant",style: TextStyle(
+                        fontSize: 16.sp
+                      ),),
+                      fillColor: couleur.lightGray,
+                      filled: true,
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: couleur.primaryPurple)
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: couleur.primaryPurple)
+                      )
+                  ),
+                ),
+                SizedBox(
+                  height: 25.h,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(right: 200.w),
+                  child: Column(
+                    children: [
+                      Text("Mode de paiement",style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold
+                      ),),
+                      SizedBox(
+                        height: 15.h,
+                      )
+                    ],
+                  ),
+                ),
+                Row(
+                  children: [
+                    Expanded(child: Card(
+                        color: couleur.lightGray,
+                        child: Padding(padding: EdgeInsets.only(left: 5.w),child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            CircleAvatar(
+                              backgroundImage: AssetImage("assets/wave.png"),
+                            ),
+                            Text("Wave",style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.bold,
+                                color: couleur.secondaryText
+                            ),
+                            ),
+                            Radio(value: "Wave", groupValue: _selectedOption, onChanged: (value){
+                              setState(() {
+                                _selectedOption=value;
+                              });
+                            })
+                          ],
+                        ),)
+                    ))
+                  ],
+                ),
 
-            SizedBox(
-              height: 15,
-            ),
-            Row(
-              children: [
-                Expanded(child: ElevatedButton.icon(onPressed: (){
-                  String montantPay=montant.text;
-                  String modePai=_selectedOption.toString();
-                  payerPenalite(montantPay,modePai);
-                }, label: Text("Payer",style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white
-                ),),icon: Icon(Icons.attach_money_sharp,color: Colors.white,),style: ElevatedButton.styleFrom(
-                  backgroundColor: couleur.primaryPurple,
-                ),))
+                SizedBox(
+                  height: 15.h,
+                ),
+                Row(
+                  children: [
+                    Expanded(child: ElevatedButton.icon(onPressed: (){
+                      String montantPay=montant.text;
+                      String modePai=_selectedOption.toString();
+                      payerPenalite(montantPay,modePai);
+                    }, label: Text("Payer",style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white
+                    ),),icon: Icon(Icons.attach_money_sharp,color: Colors.white,),style: ElevatedButton.styleFrom(
+                      backgroundColor: couleur.primaryPurple,
+                    ),))
+                  ],
+                ),
+                SizedBox(
+                  height:20.h,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(right: 150.w),
+                  child: Column(
+                    children: [
+                      Text("Historique des pénalité",style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold
+                      ),),
+                      SizedBox(
+                        height: 15.h,
+                      ),
+                      SizedBox(
+                        height: 450.h,
+                        child: Column(
+                          children: [
+                            Expanded(
+                                child: ListView.builder(
+                                    itemCount: _listPenalite.length,
+                                    itemBuilder: (context,index){
+                                      final Penalite penalite=_listPenalite[index];
+                                      return ListTile(
+                                        title: Text(penalite.raison+"    "+penalite.date_penalite,style: TextStyle(
+                                            fontSize: 15.sp,
+                                            fontWeight: FontWeight.bold
+                                        ),),
+                                        subtitle: Text("Montant "+penalite.montant+" FCFA          "+penalite.statut,style: TextStyle(
+                                          fontSize: 14.sp
+                                        ),),
+                                      );
+                                    })
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                ),
               ],
             ),
-            SizedBox(
-              height:20,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 150),
-              child: Column(
-                children: [
-                  Text("Historique des pénalité",style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold
-                  ),),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  Container(
-                    height: 450,
-                    child: Column(
-                      children: [
-                        Expanded(
-                            child: ListView.builder(
-                                itemCount: _listPenalite.length,
-                                itemBuilder: (context,index){
-                                  final Penalite penalite=_listPenalite[index];
-                                  return ListTile(
-                                    title: Text(penalite.raison+"    "+penalite.date_penalite,style: TextStyle(
-                                        fontWeight: FontWeight.bold
-                                    ),),
-                                    subtitle: Text("Montant "+penalite.montant+" FCFA          "+penalite.statut),
-                                  );
-                                })
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

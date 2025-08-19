@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:gerematontine/models/tontines.dart';
@@ -132,13 +133,13 @@ class _acceuilState extends State<acceuil> {
     return SafeArea(child: Column(
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 145,right: 10),
+          padding: EdgeInsets.only(left: 145.w,right: 10.w),
           child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Center(
                   child: Text("Acceuil",style: TextStyle(
-                      fontSize: 25,
+                      fontSize: 25.sp,
                       fontWeight: FontWeight.bold
                   ),),
                 ),
@@ -159,20 +160,20 @@ class _acceuilState extends State<acceuil> {
           ),
         ),
         SizedBox(
-          height: 15,
+          height: 15.h,
         ),
         Padding(
-          padding: const EdgeInsets.only(left: 0.0,right: 5.0),
+          padding: EdgeInsets.only(left: 0.0.w,right: 5.0.w),
           child: Container(
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(left: 10),
+                  padding: EdgeInsets.only(left: 10.w),
                   child: Row(
                     children: [
                       Text("Bienvenu, ${widget.listsession.nom_participant} ${widget.listsession.prenoms_participant}",
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 20.sp,
                         fontWeight: FontWeight.bold
                       ),)
                     ],
@@ -186,36 +187,36 @@ class _acceuilState extends State<acceuil> {
                       },
                       child: Card(
                         color: couleur.primaryPurple,
-                        margin: EdgeInsets.all(10),
+                        margin: EdgeInsets.all(10.w),
                         child: Padding(
-                          padding: const EdgeInsets.all(10.0),
+                          padding: EdgeInsets.all(10.0.w),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text("Mon numéro de tour",style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 20.sp,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white
                               ),
                               ),
                               SizedBox(
-                                height: 10,
+                                height: 10.h,
                               ),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(numeroTour,
                                     style: TextStyle(
-                                        fontSize: 30,
+                                        fontSize: 30.sp,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white
                                     ),
                                   ),
-                                  Icon(statut==0?Icons.monetization_on_outlined:Icons.monetization_on,color: statut==0? Colors.red:Colors.green,size: 40,)
+                                  Icon(statut==0?Icons.monetization_on_outlined:Icons.monetization_on,color: statut==0? Colors.red:Colors.green,size: 40.r,)
                                 ],
                               ),
                               SizedBox(
-                                height: 5,
+                                height: 5.h,
                               )
                             ],
                           ),
@@ -231,30 +232,30 @@ class _acceuilState extends State<acceuil> {
                       },
                       child: Card(
                         color: couleur.primaryPurple,
-                        margin: EdgeInsets.all(5),
+                        margin: EdgeInsets.all(5.w),
                         child: Padding(
-                          padding: const EdgeInsets.all(15),
+                          padding: EdgeInsets.all(15.w),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text("Total",style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 20.sp,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white
                               ),
                               ),
                               Text("des cotisations",style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 20.sp,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white
                               ),
                               ),
                               SizedBox(
-                                height: 15,
+                                height: 15.h,
                               ),
                               TweenAnimationBuilder(tween: Tween(begin: 0,end:double.parse(montantCotiser.toString())), duration: Duration(seconds: 2), builder: (context,value,child){
                                 return Text("${value.toStringAsFixed(2)} FCFA",style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 20.sp,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white
                                 ),);
@@ -275,33 +276,33 @@ class _acceuilState extends State<acceuil> {
                       },
                       child: Card(
                         color: couleur.primaryPurple,
-                        margin: EdgeInsets.all(10),
+                        margin: EdgeInsets.all(10.w),
                         child: Padding(
-                          padding: const EdgeInsets.all(10.0),
+                          padding: EdgeInsets.all(10.0.w),
                           child: Row(
                             children: [
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text("Montant",style: TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 20.sp,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white
                                   ),
                                   ),
                                   Text("total des pénalités",style: TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 20.sp,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white
                                   ),
                                   ),
                                   SizedBox(
-                                    height: 15,
+                                    height: 15.h,
                                   ),
                                   TweenAnimationBuilder(tween: Tween(begin: 0,end: double.parse(montantPenalite)), duration: Duration(seconds: 2), builder: (context,value,child){
                                     return Text("${value.toStringAsFixed(2)} FCFA",
                                         style: TextStyle(
-                                        fontSize: 30,
+                                        fontSize: 30.sp,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white
                                     ),);
@@ -309,9 +310,9 @@ class _acceuilState extends State<acceuil> {
                                 ],
                               ),
                               SizedBox(
-                                width: 30,
+                                width: 30.w,
                               ),
-                              Icon(_critique?Icons.warning:Icons.trending_down,color: _critique? Colors.red:Colors.white,size: 100,)
+                              Icon(_critique?Icons.warning:Icons.trending_down,color: _critique? Colors.red:Colors.white,size: 100.r,)
                             ],
                           ),
                         ),
@@ -325,10 +326,10 @@ class _acceuilState extends State<acceuil> {
           ),
         ),
         SizedBox(
-          height: 15,
+          height: 15.h,
         ),
         Padding(
-          padding: const EdgeInsets.only(left:10,right: 30),
+          padding: EdgeInsets.only(left:10.w,right: 30.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -337,16 +338,16 @@ class _acceuilState extends State<acceuil> {
                 children: [
                   Text("Ma tontine",
                     style: TextStyle(
-                        fontSize: 30,
+                        fontSize: 30.sp,
                         fontWeight: FontWeight.bold
                     ),
                   ),
                   TextButton.icon(onPressed: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>walletTontine(tontine: tontine!,listsession: widget.listsession, numeroTour: int.parse(numeroTour), )));
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>walletTontine(tontine: tontine!,listsession: widget.listsession, numeroTour: numeroTour )));
                   }, label: Text("COFFRE",style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.bold,
-                  ),),icon: Icon(Icons.wallet,size: 30,),)
+                  ),),icon: Icon(Icons.wallet,size: 30.r,),)
                 ],
               )
             ],
@@ -356,9 +357,9 @@ class _acceuilState extends State<acceuil> {
           children: [
             Expanded(child: Card(
               color: Color(0xFF3D0C94), // une nuance plus foncée du même violet,
-              margin: EdgeInsets.all(10),
+              margin: EdgeInsets.all(10.w),
               child: Padding(
-                  padding: const EdgeInsets.all(10.0),
+                  padding: EdgeInsets.all(10.0.w),
                   child: Row(
                     children: [
                       Column(
@@ -367,91 +368,108 @@ class _acceuilState extends State<acceuil> {
                           Row(
                             children: [
                               Text("Code tontine: ",style: TextStyle(
-                                  fontSize: 15,
+                                  fontSize: 15.sp,
                                   color: Colors.white
                               ),),
                               Text(tontine!.code_tontine,style: TextStyle(
-                                  fontSize: 15,
+                                  fontSize: 15.sp,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white
                               ),)
                             ]
                           ),
                           SizedBox(
-                            height: 15,
+                            height: 15.h,
                           ),
                           Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text("Nom tontine: ",style: TextStyle(
-                                    fontSize: 15,
+                                    fontSize: 15.sp,
                                     color: Colors.white
                                 ),),
                                 Text(tontine!.nom_tontine,style: TextStyle(
-                                    fontSize: 15,
+                                    fontSize: 15.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
                                 ),)
                               ]
                           ),
                           SizedBox(
-                            height: 15,
+                            height: 15.h,
                           ),
                           Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text("Montant cotisation: ",style: TextStyle(
-                                    fontSize: 15,
+                                    fontSize: 15.sp,
                                     color: Colors.white
                                 ),),
                                 Text(tontine!.montant_cotisation+" FCFA",style: TextStyle(
-                                    fontSize: 15,
+                                    fontSize: 15.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
                                 ),)
                               ]
                           ),
                           SizedBox(
-                            height: 15,
+                            height: 15.h,
                           ),
                           Row(
                               children: [
                                 Text("Nombre participant: ",style: TextStyle(
-                                    fontSize: 15,
+                                    fontSize: 15.sp,
                                     color: Colors.white
                                 ),),
                                 Text(tontine!.nombre_participant.toString(),style: TextStyle(
-                                    fontSize: 15,
+                                    fontSize: 15.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
                                 ),)
                               ]
                           ),
                           SizedBox(
-                            height: 15,
+                            height: 15.h,
                           ),
                           Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text("Fréquence cotisation: ",style: TextStyle(
-                                    fontSize: 15,
+                                    fontSize: 15.sp,
                                     color: Colors.white
                                 ),),
                                 Text(tontine!.frequence,style: TextStyle(
-                                    fontSize: 15,
+                                    fontSize: 15.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
                                 ),)
                               ]
                           ),
                           SizedBox(
-                            height: 15,
+                            height: 15.h,
                           ),
                           Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text("Type de tirage: ",style: TextStyle(
-                                    fontSize: 15,
+                                Text("Fréquence paiement: ",style: TextStyle(
+                                    fontSize: 15.sp,
+                                    color: Colors.white
+                                ),),
+                                Text(tontine!.frequence_paiement,style: TextStyle(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white
+                                ),)
+                              ]
+                          ),
+                          SizedBox(
+                            height: 15.h,
+                          ),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Type de tontine: ",style: TextStyle(
+                                    fontSize: 15.sp,
                                     color: Colors.white
                                 ),),
                                 Text(tontine!.type,style: TextStyle(
@@ -462,17 +480,17 @@ class _acceuilState extends State<acceuil> {
                               ]
                           ),
                           SizedBox(
-                            height: 15,
+                            height: 15.h,
                           ),
                           Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text("Date de création: ",style: TextStyle(
-                                    fontSize: 15,
+                                    fontSize: 15.sp,
                                     color: Colors.white
                                 ),),
                                 Text(tontine!.date_creation,style: TextStyle(
-                                    fontSize: 15,
+                                    fontSize: 15.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
                                 ),)

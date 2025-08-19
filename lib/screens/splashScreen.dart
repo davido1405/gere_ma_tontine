@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/constants/colors.dart';
 
 import 'auth/connexion_screen.dart';
@@ -17,21 +18,22 @@ class _splashScreenState extends State<splashScreen> {
       body: Center(
         child: Center(
           child: Container(
-            padding: EdgeInsets.only(top: 400),
+            padding: EdgeInsets.only(top: 400.h),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text("Welcome to GereMaTontine",
                 style: TextStyle(
                   color: couleur.secondaryText,
-                  fontSize: 25,
+                  fontSize: 25.sp,
                   fontWeight: FontWeight.bold
                 ),),
                 Padding(
-                  padding: const EdgeInsets.all(55.0),
+                  padding: EdgeInsets.all(55.0.w),
                   child: ElevatedButton.icon(onPressed: (){
                     Navigator.push(context, MaterialPageRoute(builder: (context)=>connexion_screen()));
                   }, label: Text("Commencer",style: TextStyle(
+                      fontSize: 15.sp,
                     color: Colors.white,
                     fontWeight: FontWeight.bold
                   ),),icon: Icon(Icons.rocket_launch,color: Colors.white,),style: ElevatedButton.styleFrom(

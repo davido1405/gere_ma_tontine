@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/beneficiare.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:http/http.dart';
@@ -79,17 +80,19 @@ class _tourTontineState extends State<tourTontine> {
     return Scaffold(
       appBar: AppBar(
         title: Center(
-          child: Text("Planing des tours"),
+          child: Text("Planing des tours",style: TextStyle(
+            fontSize: 20.sp
+          ),),
         ),
       ),
       body: SafeArea(child: Padding(
-        padding: EdgeInsets.all(8.0),
+        padding: EdgeInsets.all(8.0.w),
         child: Column(
           children: [
             Card(
               color: couleur.primaryPurple,
               child: Padding(
-                padding: const EdgeInsets.all(10.0),
+                padding: EdgeInsets.all(10.0.w),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -97,20 +100,20 @@ class _tourTontineState extends State<tourTontine> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SizedBox(
-                          height: 10,
+                          height: 10.h,
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text("Bénéficiare du tour",style: TextStyle(
-                                fontSize: 20,
+                                fontSize: 20.sp,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white
                             ),),
                           ],
                         ),
                         SizedBox(
-                          height: 10,
+                          height: 10.h,
                         ),
                         Center(
                           child: Column(
@@ -121,18 +124,18 @@ class _tourTontineState extends State<tourTontine> {
                                   Column(
                                     children: [
                                       Text("Nom bénéficiare:",style: TextStyle(
-                                          fontSize: 15,
+                                          fontSize: 15.sp,
                                           color: Colors.white
                                       ),),
                                     ],
                                   ),
                                   SizedBox(
-                                    width: 10,
+                                    width: 10.h,
                                   ),
                                   Column(
                                     children: [
                                       Text(nomBeneficiare,style: TextStyle(
-                                          fontSize: 18,
+                                          fontSize: 18.sp,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white
                                       ),)
@@ -145,18 +148,18 @@ class _tourTontineState extends State<tourTontine> {
                                   Column(
                                     children: [
                                       Text("Prenoms bénéficiare:",style: TextStyle(
-                                          fontSize: 15,
+                                          fontSize: 15.sp,
                                           color: Colors.white
                                       ),),
                                     ],
                                   ),
                                   SizedBox(
-                                    width: 10,
+                                    width: 10.h,
                                   ),
                                   Column(
                                     children: [
                                       Text(prenomsBeneficiare,style: TextStyle(
-                                          fontSize: 18,
+                                          fontSize: 18.sp,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white
                                       ),)
@@ -169,18 +172,18 @@ class _tourTontineState extends State<tourTontine> {
                                   Column(
                                     children: [
                                       Text("Position:",style: TextStyle(
-                                          fontSize: 15,
+                                          fontSize: 15.sp,
                                           color: Colors.white
                                       ),),
                                     ],
                                   ),
                                   SizedBox(
-                                    width: 10,
+                                    width: 10.h,
                                   ),
                                   Column(
                                     children: [
                                       Text(positionBeneficiare.toString(),style: TextStyle(
-                                          fontSize: 18,
+                                          fontSize: 18.sp,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white
                                       ),)
@@ -196,11 +199,11 @@ class _tourTontineState extends State<tourTontine> {
                     Column(
                       children: [
                         SizedBox(
-                          height: 25,
+                          height: 25.h,
                         ),
                         Padding(
-                          padding: const EdgeInsets.only(right: 10.0),
-                          child: Icon(Icons.emoji_events,size: 80,color:Colors.amber,),
+                          padding: EdgeInsets.only(right: 10.0.w),
+                          child: Icon(Icons.emoji_events,size: 80.r,color:Colors.amber,),
                         ),
 
                       ],
@@ -210,21 +213,21 @@ class _tourTontineState extends State<tourTontine> {
               ),
             ),
             Divider(
-              height: 10,
+              height: 10.h,
             ),
             SizedBox(
-              height: 10,
+              height: 10.h,
             ),
             Text("Prochains bénéficiare",style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 15
+                fontSize: 15.sp
             ),),
             SizedBox(
-              height: 10,
+              height: 10.h,
             ),
             SizedBox(
-              height: 580,
-              width: double.maxFinite,
+              height: 580.h,
+              width: double.maxFinite.w,
               child: ListView.builder(
                 itemCount: _listOrdre.length,
                 itemBuilder: (context, index) {
@@ -233,11 +236,19 @@ class _tourTontineState extends State<tourTontine> {
                     title: Text(widget.listsession.code_participant==prochain.codeBeneficiare?"Vous":
                       "${prochain.prenomsBeneficiare} ${prochain.nomBeneficiare}",
                       style: TextStyle(
-                        fontSize: 17,
+                        fontSize: 17.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    subtitle: Text("Position: ${prochain.positionBeneficiare}"),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [Text("Position: ${prochain.positionBeneficiare}",
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                        ),),Text("Date prévu: ${prochain.dateTour.split(" ")[0]}",
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                        ),)],),
                     trailing: Icon(
                       prochain.statutBeneficiare == 0
                           ? Icons.timelapse

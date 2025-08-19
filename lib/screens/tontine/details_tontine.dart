@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/membres.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:http/http.dart' as http;
@@ -92,16 +93,18 @@ class _details_tontineState extends State<details_tontine> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Center(child: Text("Détails tontine",style: TextStyle(fontWeight: FontWeight.bold),),),
+        title: Center(child: Text("Détails tontine",style: TextStyle(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.bold),),),
       ),
       body: Column(
         children: [
           SizedBox(
-            height: 20,
+            height: 20.h,
           ),
             Center(child: Container(
-              height: 200,
-              width: 350,
+              height: 200.h,
+              width: 350.w,
               decoration: BoxDecoration(
                   color: couleur.primaryPurple,
                   borderRadius: BorderRadius.circular(12)
@@ -111,7 +114,7 @@ class _details_tontineState extends State<details_tontine> {
                   children: [
                     if(widget.listsession.type_participant=="Organisateur")
                       Container(
-                        height: 180,
+                        height: 180.h,
                         decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12)
@@ -120,7 +123,7 @@ class _details_tontineState extends State<details_tontine> {
                       ),
                     if(widget.listsession.type_participant!="Organisateur")
                       Container(
-                        height: 180,
+                        height: 180.h,
                         decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12)
@@ -129,15 +132,15 @@ class _details_tontineState extends State<details_tontine> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             ImageFiltered(
-                              imageFilter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                              imageFilter: ImageFilter.blur(sigmaX: 5.0.w, sigmaY: 5.0.h),
                               child: Image.asset("assets/qrCode.png", height: 150),
                             ),
-                            SizedBox(height: 10),
+                            SizedBox(height: 10.h),
                             Text(
                               "QR réservé à l’organisateur",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 13,
+                                fontSize: 13.sp,
                                 color: Colors.black,
                               ),
                             ),
@@ -148,40 +151,43 @@ class _details_tontineState extends State<details_tontine> {
             ),
             ),
           SizedBox(
-            height: 15,
+            height: 15.h,
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 25,right: 25),
+            padding: EdgeInsets.only(left: 25.w,right: 25.w),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 if(widget.listsession.type_participant=="Organisateur")
                   TextButton(onPressed: (){
                     envoyerRappelCotisation();
-                  }, child: Text("Envoyer rappel de cotisation"),style: TextButton.styleFrom(
+                  },style: TextButton.styleFrom(
                     backgroundColor: couleur.lightGray
-                  ),),
+                  ), child: Text("Envoyer rappel de cotisation",style: TextStyle(
+                    fontSize: 14.sp,
+                  ),),),
               ],
             ),
           ),
           SizedBox(
-            height: 15,
+            height: 15.h,
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 10),
+            padding: EdgeInsets.only(left: 10.w),
             child: Row(
               children: [
                 Text("Liste des participants à cette tontine",style: TextStyle(
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.bold
                 ),)
               ],
             ),
           ),
           SizedBox(
-            height: 15,
+            height: 15.h,
           ),
           SizedBox(
-            height: 410,
+            height: 410.h,
             child: Column(
               children: [
                 Expanded(
@@ -194,7 +200,9 @@ class _details_tontineState extends State<details_tontine> {
                               showDialog(context: context, builder: (BuildContext context){
                                 return AlertDialog(
                                   title: Center(
-                                    child: Text("Détails membre"),
+                                    child: Text("Détails membre",style: TextStyle(
+                                      fontSize: 18.sp
+                                    ),),
                                   ),
                                   content: Container(
                                     height: 145,
@@ -202,43 +210,55 @@ class _details_tontineState extends State<details_tontine> {
                                       children: [
                                         Row(
                                           children: [
-                                            Text("Nom membre: ${member.nom_membre}")
+                                            Text("Nom membre: ${member.nom_membre}",style: TextStyle(
+                                                fontSize: 14.sp
+                                            ),)
                                           ],
                                         ),
                                         SizedBox(
-                                          height: 5,
+                                          height: 5.h,
                                         ),
                                         Row(
                                           children: [
-                                            Text("Prénoms membre : ${member.prenom_membre}")
+                                            Text("Prénoms membre : ${member.prenom_membre}",style: TextStyle(
+                                        fontSize: 14.sp
+                                        ),)
                                           ],
                                         ),SizedBox(
-                                          height: 5,
+                                          height: 5.h,
                                         ),
                                         Row(
                                           children: [
-                                            Text("Email membre : ${member.email}")
+                                            Text("Email membre : ${member.email}",style: TextStyle(
+                                            fontSize: 14.sp
+                                            ),)
                                           ],
                                         ),SizedBox(
-                                          height: 5,
+                                          height: 5.h,
                                         ),
                                         Row(
                                           children: [
-                                            Text("Numéro membre : ${member.numero}")
+                                            Text("Numéro membre : ${member.numero}",style: TextStyle(
+                                                fontSize: 14.sp
+                                            ),)
                                           ],
                                         ),SizedBox(
-                                          height: 5,
+                                          height: 5.h,
                                         ),
                                         Row(
                                           children: [
-                                            Text("Date d'intégration : ${member.date_participation}")
+                                            Text("Date d'intégration : ${member.date_participation}",style: TextStyle(
+                                                fontSize: 14.sp
+                                            ),)
                                           ],
                                         ),SizedBox(
-                                          height: 5,
+                                          height: 5.h,
                                         ),
                                         Row(
                                           children: [
-                                            Text("Type: ${member.type}")
+                                            Text("Type: ${member.type}",style: TextStyle(
+                                                fontSize: 14.sp
+                                            ),)
                                           ],
                                         ),
                                       ],
@@ -248,7 +268,9 @@ class _details_tontineState extends State<details_tontine> {
                                     Center(
                                       child: TextButton.icon(onPressed: (){
                                         Navigator.of(context).pop();
-                                      }, label: Text("OK"),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
+                                      }, label: Text("OK",style: TextStyle(
+                                          fontSize: 14.sp
+                                      ),),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
                                       ,
                                     )
                                   ],
@@ -257,9 +279,12 @@ class _details_tontineState extends State<details_tontine> {
                             },
                             child: ListTile(
                               title: Text(widget.listsession.email_participant==member.email?"Vous":member.nom_membre+" "+member.prenom_membre,style: TextStyle(
+                                  fontSize: 15.sp,
                                   fontWeight: FontWeight.bold
                               ),),
-                              subtitle: Text("Type: "+member.type),
+                              subtitle: Text("Type: "+member.type,style: TextStyle(
+                                fontSize: 14.sp
+                              ),),
                             ),
                           );
                         })

@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';import 'package:gerematontine/screens/splashScreen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';import 'package:gerematontine/screens/splashScreen.dart';
 import 'package:gerematontine/screens/auth/connexion_screen.dart';
 import 'package:gerematontine/constants/colors.dart';
 
@@ -20,7 +21,12 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return  MaterialApp(
+    return  ScreenUtilInit(
+      designSize: const Size(412, 915),//Dimenssion de l'écran utilisé dans le dévéloppement
+      minTextAdapt: true,//Adapter la taille des textes
+      splitScreenMode: true,//Accepter les écrans partagés/tablette
+      builder: (context, child){
+        return MaterialApp(
           debugShowCheckedModeBanner: false,
           initialRoute: '/',
           routes: {
@@ -28,6 +34,9 @@ class _MyAppState extends State<MyApp> {
             '/screens/auth/connexion_screen': (context) => const connexion_screen(),
           },
         );
+      },
+
+    );
   }
 }
 

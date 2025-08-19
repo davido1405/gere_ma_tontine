@@ -9,10 +9,8 @@ import 'package:gerematontine/screens/parametres.dart';
 import 'package:gerematontine/screens/participant/profil_participant.dart';
 import 'package:gerematontine/screens/tontine/creer_tontine.dart';
 import 'package:gerematontine/screens/tontine/details_tontine.dart';
-import 'package:gerematontine/screens/tontine/participer_tontine.dart';
 import '../participant/changer_mot_passe.dart';
 import '../participant/modifier_profil.dart';
-import '../participant/mon_tour.dart';
 import '../penalites/payer_penalite.dart';
 
 class dashboard extends StatefulWidget {
@@ -44,10 +42,8 @@ class _dashboardState extends State<dashboard> {
       notifications(listsession:widget.listsession),
       changer_mot_passe(listsession:widget.listsession),
       modifier_profil(listsession:widget.listsession),
-      mon_tour(listsession:widget.listsession),
       payer_penalite(listsession:widget.listsession),
       creer_tontine(listsession:widget.listsession),
-      participer_tontine(listsession:widget.listsession),
       parametre(listsession:widget.listsession)
     ];
 

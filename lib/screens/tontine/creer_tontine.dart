@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:gerematontine/screens/dashboard/Acceuil.dart';
@@ -23,15 +24,18 @@ class _creer_tontineState extends State<creer_tontine> {
     super.initState();
     typeTontines();
     frequenceTontines();
+    frequencePaiementTontines();
   }
   
   List<String>typeTontine=[];
 
   List<String>frequenceCotisa=[];
+  List<String>frequencePaiemen=[];
 
   String? _typeChoisi;
 
   String? _frequenceChoisi;
+  String?_frequencePaiementChoisi;
 
 
 
@@ -79,6 +83,25 @@ class _creer_tontineState extends State<creer_tontine> {
       print(reponse.statusCode);
     }
   }
+//Lister frequence paiement
+  Future<void>frequencePaiementTontines()async{
+    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=type_tontine&action=lister_frequence_paiement");
+    final reponse=await http.get(url);
+    if(reponse.statusCode==200){
+      final Map<String,dynamic>data=jsonDecode(reponse.body);
+      if(data['success']){
+        List<dynamic>list=data['data'];
+        setState(() {
+          frequencePaiemen=list.map<String>((item)=>item['frequence_paiement'].toString()).toList();
+        });
+      }else{
+        print(data['message']);
+      }
+
+    }else{
+      print(reponse.statusCode);
+    }
+  }
   
   
   Future<void>creerTontine() async{
@@ -90,7 +113,9 @@ class _creer_tontineState extends State<creer_tontine> {
           "type_tontine":_typeChoisi,
           "montant_cotisation":int.parse(montantCotisation.text),
           "nombre_participant":int.parse(nombreParticipant.text),
-          "frequence":_frequenceChoisi
+          "frequence":_frequenceChoisi,
+          "frequence_paiement":_frequencePaiementChoisi,
+          "montant_penalite":int.parse(montantPenalite.text)
         }));
     if(reponse.statusCode==200){
       final Map<String,dynamic>data=jsonDecode(reponse.body);
@@ -123,16 +148,20 @@ class _creer_tontineState extends State<creer_tontine> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(child: Text("Créer une tontine",style: TextStyle(fontWeight: FontWeight.bold),),),
+        title: Center(child: Text("Créer une tontine",style: TextStyle(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.bold),),),
       ),
-      body: Padding(padding: EdgeInsets.only(left: 10.0,right: 10.0),
+      body: Padding(padding: EdgeInsets.only(left: 10.0.w,right: 10.0.w),
       child: Column(
         children: [
-          SizedBox(height: 20.0,),
+          SizedBox(height: 20.0.h,),
           TextField(
             controller: nomTontine,
             decoration: InputDecoration(
-              label: Text('Nom tontine'),
+              label: Text('Nom tontine',style: TextStyle(
+                fontSize: 16.sp
+              ),),
               filled: true,
               fillColor: couleur.lightGray,
               focusedBorder: OutlineInputBorder(
@@ -145,11 +174,13 @@ class _creer_tontineState extends State<creer_tontine> {
               )
             ),
           ),
-          SizedBox(height: 15.0,),
+          SizedBox(height: 15.0.h,),
           TextField(
             controller: montantCotisation,
             decoration: InputDecoration(
-                label: Text('Montant de cotisation'),
+                label: Text('Montant de cotisation',style: TextStyle(
+                    fontSize: 16.sp
+                ),),
                 filled: true,
                 fillColor: couleur.lightGray,
                 focusedBorder: OutlineInputBorder(
@@ -163,11 +194,13 @@ class _creer_tontineState extends State<creer_tontine> {
                 )
             ),
           ),
-          SizedBox(height: 10.0,),
+          SizedBox(height: 10.0.h,),
           TextField(
             controller: nombreParticipant,
             decoration: InputDecoration(
-                label: Text('Nombre de participant'),
+                label: Text('Nombre de participant',style: TextStyle(
+                    fontSize: 16.sp
+                ),),
                 filled: true,
                 fillColor: couleur.lightGray,
                 focusedBorder: OutlineInputBorder(
@@ -181,12 +214,14 @@ class _creer_tontineState extends State<creer_tontine> {
                 )
             ),
           ),
-          SizedBox(height: 10.0,),
+          SizedBox(height: 10.0.h,),
 
           //Sélectionner le type de tontine
           DropdownButtonFormField<String>(
               decoration: InputDecoration(
-                labelText: "Sélectionner le type de tontine",
+                label: Text("Sélectionner le type de tontine",style: TextStyle(
+                    fontSize: 16.sp
+                ),),
                 filled: true,
                 fillColor: couleur.lightGray,
                 contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -199,7 +234,9 @@ class _creer_tontineState extends State<creer_tontine> {
                   borderSide: BorderSide(color: Color(0xFF5E35B1), width: 2),
                 ),
               ),
-              hint:Text("Sélectionner le type de tontine"),
+              hint:Text("Sélectionner le type de tontine",style: TextStyle(
+                  fontSize: 16.sp
+              ),),
               value:_typeChoisi,
               items: typeTontine.map<DropdownMenuItem<String>>((String value){
                 return DropdownMenuItem<String>(value: value,child:Text(value),);
@@ -208,12 +245,14 @@ class _creer_tontineState extends State<creer_tontine> {
               _typeChoisi=_nouvelleValeur;
             });
           }),
-          SizedBox(height: 10.0,),
+          SizedBox(height: 10.0.h,),
 
           //Sélectionner les fréquences de cotisations
           DropdownButtonFormField<String>(
               decoration: InputDecoration(
-                labelText: "Sélectionner la fréquence des cotisations",
+                label: Text("Sélectionner la fréquence des cotisations",style: TextStyle(
+                    fontSize: 16.sp
+                ),),
                 filled: true,
                 fillColor: couleur.lightGray,
                 contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -226,7 +265,9 @@ class _creer_tontineState extends State<creer_tontine> {
                   borderSide: BorderSide(color: Color(0xFF5E35B1), width: 2),
                 ),
               ),
-              hint:Text("Sélectionner la fréquence des cotisations"),
+              hint:Text("Sélectionner la fréquence des cotisations",style: TextStyle(
+                  fontSize: 16.sp
+              ),),
               value:_frequenceChoisi,
               items: frequenceCotisa.map<DropdownMenuItem<String>>((String value){
                 return DropdownMenuItem<String>(value: value,child:Text(value),);
@@ -235,11 +276,43 @@ class _creer_tontineState extends State<creer_tontine> {
               _frequenceChoisi=_nouvelleValeur;
             });
           }),
-          SizedBox(height: 10.0,),
+          SizedBox(height: 10.0.h,),
+          //Sélectionner les fréquences des paiements
+          DropdownButtonFormField<String>(
+              decoration: InputDecoration(
+                label: Text("Sélectionner la fréquence des paiements",style: TextStyle(
+                    fontSize: 16.sp
+                ),),
+                filled: true,
+                fillColor: couleur.lightGray,
+                contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Color(0xFF7E57C2)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Color(0xFF5E35B1), width: 2),
+                ),
+              ),
+              hint:Text("Sélectionner la fréquence des paiements",style: TextStyle(
+                  fontSize: 16.sp
+              ),),
+              value:_frequencePaiementChoisi,
+              items: frequencePaiemen.map<DropdownMenuItem<String>>((String value){
+                return DropdownMenuItem<String>(value: value,child:Text(value),);
+              }).toList(), onChanged: (String? _nouvelleValeur){
+            setState(() {
+              _frequencePaiementChoisi=_nouvelleValeur;
+            });
+          }),
+          SizedBox(height: 10.0.h,),
           TextField(
             controller: montantPenalite,
             decoration: InputDecoration(
-                label: Text('Montant de pénalité'),
+                label: Text('Montant de pénalité',style: TextStyle(
+                    fontSize: 16.sp
+                ),),
                 filled: true,
                 fillColor: couleur.lightGray,
                 focusedBorder: OutlineInputBorder(
@@ -256,11 +329,11 @@ class _creer_tontineState extends State<creer_tontine> {
                 )
             ),
           ),
-          SizedBox(height: 20.0,),
+          SizedBox(height: 20.0.h,),
           Center(
             child: TextButton(onPressed: (){
               creerTontine();
-            }, child: Text("Valider",style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold,color: Colors.white),),style: TextButton.styleFrom(
+            }, child: Text("Valider",style: TextStyle(fontSize: 15.sp,fontWeight: FontWeight.bold,color: Colors.white),),style: TextButton.styleFrom(
               backgroundColor: couleur.primaryPurple
             ),),
           )

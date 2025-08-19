@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
 import 'package:http/http.dart' as http;
@@ -59,22 +60,24 @@ class _inscription_screenState extends State<inscription_screen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(child: Text("Inscription",style: TextStyle(fontWeight: FontWeight.bold),),),
+        title: Center(child: Text("Inscription",style: TextStyle(fontSize:22.sp,fontWeight: FontWeight.bold),),),
       ),
       body: Center(
-        child: Padding(padding: EdgeInsets.only(top: 20),
+        child: Padding(padding: EdgeInsets.only(top: 20.h),
         child: Container(
           child: Padding(
-            padding: const EdgeInsets.only(left: 20,right: 20),
+            padding: EdgeInsets.only(left: 20.w,right: 20.w),
             child: Column(
               children: [
                 SizedBox(
-                  height: 40,
+                  height: 40.h,
                 ),
                 TextField(
                   controller: nom,
                   decoration: InputDecoration(
-                    labelText: "Nom",
+                    label: Text("Nom",style: TextStyle(
+                      fontSize: 16.sp
+                    ),),
                     filled: true,
                     fillColor: couleur.lightGray,
                     enabledBorder: OutlineInputBorder(
@@ -88,12 +91,14 @@ class _inscription_screenState extends State<inscription_screen> {
                   ),
                 ),
                 SizedBox(
-                  height: 35,
+                  height: 35.h,
                 ),
                 TextField(
                   controller: prenoms,
                   decoration: InputDecoration(
-                    labelText: "Prénoms",
+                    label: Text("Prénoms",style: TextStyle(
+                        fontSize: 16.sp
+                    ),),
                       filled: true,
                       fillColor: couleur.lightGray,
                       enabledBorder: OutlineInputBorder(
@@ -107,12 +112,14 @@ class _inscription_screenState extends State<inscription_screen> {
                   ),
                 ),
                 SizedBox(
-                  height: 35,
+                  height: 35.h,
                 ),
                 TextField(
                   controller: mail,
                   decoration: InputDecoration(
-                    labelText: "E-mail",
+                    label:Text("E-mail",style: TextStyle(
+                        fontSize: 16.sp
+                    ),),
                       filled: true,
                       fillColor: couleur.lightGray,
                       enabledBorder: OutlineInputBorder(
@@ -126,14 +133,16 @@ class _inscription_screenState extends State<inscription_screen> {
                   ),
                 ),
                 SizedBox(
-                  height: 35,
+                  height: 35.h,
                 ),
                 TextField(
                   controller: motpass,
                   obscureText: _cacher,
                   decoration: InputDecoration(
 
-                    labelText: "Mot de passe",
+                    label: Text("Mot de passe",style: TextStyle(
+                        fontSize: 16.sp
+                    ),),
                       filled: true,
                       fillColor: couleur.lightGray,
                       enabledBorder: OutlineInputBorder(
@@ -156,12 +165,14 @@ class _inscription_screenState extends State<inscription_screen> {
                   ),
                 ),
                 SizedBox(
-                  height: 35,
+                  height: 35.h,
                 ),
                 TextField(
                   controller: numero,
                   decoration: InputDecoration(
-                    label: Text("Numéro Wave"),
+                    label:Text("Numéro Wave",style: TextStyle(
+                        fontSize: 16.sp
+                    ),),
                       filled: true,
                       fillColor: couleur.lightGray,
                       enabledBorder: OutlineInputBorder(
@@ -175,20 +186,20 @@ class _inscription_screenState extends State<inscription_screen> {
                   ),
                 ),
                 SizedBox(
-                  height: 25,
+                  height: 25.h,
                 ),
                 Row(
                   children: [
                     Expanded(child: ElevatedButton(onPressed: (){
                       inscription();
-                    }, child: Text("M'inscrire",style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15
-                    ),),
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: couleur.primaryPurple
-                    ),))
+                    ), child: Text("M'inscrire",style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15.sp
+                    ),),))
                   ],
                 )
               ],

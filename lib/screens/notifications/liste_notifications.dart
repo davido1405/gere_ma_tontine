@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:gerematontine/models/notification.dart';
@@ -70,12 +71,18 @@ class _notificationsState extends State<notifications> {
       if(data['success']==true){
         showDialog(context: context, builder: (BuildContext context){
           return AlertDialog(
-            title: Center(child: Text("Confirmation"),),
-            content: Text("Message marqué lu"),
+            title: Center(child: Text("Confirmation",style: TextStyle(
+                fontSize: 15.sp
+            ),),),
+            content: Text("Message marqué lu",style: TextStyle(
+              fontSize: 14.sp
+            ),),
             actions: [
               Center(child: TextButton.icon(onPressed: (){
                 Navigator.of(context).pop();
-              }, label: Text("OK"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),)
+              }, label: Text("OK",style: TextStyle(
+                  fontSize: 14.sp
+              ),),icon: Icon(Icons.verified,color: Colors.lightGreen,),),)
             ],
           );
         });
@@ -97,15 +104,16 @@ class _notificationsState extends State<notifications> {
         automaticallyImplyLeading: false,
         title: Center(
           child: Text("Notifications",style: TextStyle(
+            fontSize: 20.sp,
             fontWeight: FontWeight.bold
           ),),
         ),
       ),
-      body: Padding(padding: EdgeInsets.only(left: 10,right: 10),
+      body: Padding(padding: EdgeInsets.only(left: 10.w,right: 10.w),
       child: Column(
         children: [
           SizedBox(
-            height: 15,
+            height: 15.h,
           ),
           Row(
             children: [
@@ -119,11 +127,13 @@ class _notificationsState extends State<notifications> {
                       filre="Lu";
                     });
                     recupererNotif();
-                  }, label: Text("Lu"),style: TextButton.styleFrom(
+                  }, label: Text("Lu",style: TextStyle(
+                      fontSize: 14.sp
+                  ),),style: TextButton.styleFrom(
                       backgroundColor: _lu ? Color(0xFFB39DDB) : Color(0xFFD1C4E9)
                   ) ,),
                   SizedBox(
-                    width: 10,
+                    width: 10.h,
                   ),
                   TextButton.icon(onPressed: (){
                     setState(() {
@@ -132,7 +142,9 @@ class _notificationsState extends State<notifications> {
                       filre="Non lu";
                     });
                     recupererNotif();
-                  }, label: Text("Non lu"),style: TextButton.styleFrom(
+                  }, label: Text("Non lu",style: TextStyle(
+                      fontSize: 14.sp
+                  ),),style: TextButton.styleFrom(
                       backgroundColor: _nonlu ? Color(0xFFB39DDB) : Color(0xFFD1C4E9)
                   ) ,),
                 ],
@@ -140,11 +152,11 @@ class _notificationsState extends State<notifications> {
             ],
           ),
           SizedBox(
-            height: 15,
+            height: 15.h,
           ),
           Container(
-              height: 350,
-            width: 400,
+              height: 350.h,
+            width: 400.w,
             child: Column(
               children: [
                 Expanded(child: ListView.builder(
@@ -155,9 +167,11 @@ class _notificationsState extends State<notifications> {
                       onTap: (){
                         showDialog(context: context, builder: (BuildContext context){
                           return AlertDialog(
-                            title: Center(child: Text("Details notification"),),
+                            title: Center(child: Text("Détails notification",style: TextStyle(
+                                fontSize: 16.sp
+                            ),),),
                             content: Container(
-                              height: 100,
+                              height: 120.h,
                               width: MediaQuery.of(context).size.width*0.9,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,13 +179,13 @@ class _notificationsState extends State<notifications> {
                                   Text(notifica.type_notif,
                                   overflow: TextOverflow.ellipsis,),
                                   SizedBox(
-                                    height: 10,
+                                    height: 10.h,
                                   ),
                                   Text(notifica.contenu_notif,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,),
                                   SizedBox(
-                                    height: 10,
+                                    height: 10.h,
                                   ),
                                   Text(notifica.date_envoie),
                                 ],
@@ -182,7 +196,9 @@ class _notificationsState extends State<notifications> {
                                 Navigator.of(context).pop();
                                 marquerCommelu(int.parse(notifica.id_notif));
                                 recupererNotif();
-                              }, label: Text("OK"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),)
+                              }, label: Text("OK",style: TextStyle(
+                                  fontSize: 14.sp
+                              ),),icon: Icon(Icons.verified,color: Colors.lightGreen,),),)
                             ],
                           );
                         });
@@ -193,13 +209,13 @@ class _notificationsState extends State<notifications> {
                             Column(
                               children: [
                                 Text(notifica.type_notif,style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 20.sp,
                                   fontWeight: FontWeight.w500
                                 ),),
                               ],
                             ),
                             SizedBox(
-                              width: 125,
+                              width: 125.w,
                             ),
                             Column(
                               children: [
@@ -219,9 +235,11 @@ class _notificationsState extends State<notifications> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(notifica.contenu_notif.substring(0,25)+"...",style: TextStyle(
-                                fontSize: 15
+                                fontSize: 15.sp
                             ),),
-                            Text(notifica.date_envoie)
+                            Text(notifica.date_envoie,style: TextStyle(
+                                fontSize: 14.sp
+                            ),)
                           ],
                         ),
                       ),

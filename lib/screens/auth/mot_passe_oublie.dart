@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/constants/colors.dart';
 
 class mot_passe_oublie extends StatefulWidget {
@@ -16,22 +17,29 @@ class _mot_passe_oublieState extends State<mot_passe_oublie> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Mot de passe oublié"),
+        title: Center(
+          child: Text("Mot de passe oublié",style: TextStyle(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.bold
+          ),),
+        ),
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.only(left: 20,right: 20),
+          padding: EdgeInsets.only(left: 20.w,right: 20.w),
           child: Container(
-            child: Padding(padding: EdgeInsets.only(top: 35),
+            child: Padding(padding: EdgeInsets.only(top: 35.h),
             child: Column(
               children: [
                 SizedBox(
-                  height: 10,
+                  height: 10.h,
                 ),
                 TextField(
                   controller: email,
                   decoration: InputDecoration(
-                    labelText: "Email",
+                    label: Text("Email",style: TextStyle(
+                        fontSize: 16.sp
+                    ),),
                     filled: true,
                     fillColor: couleur.lightGray,
                     enabledBorder: OutlineInputBorder(
@@ -45,10 +53,10 @@ class _mot_passe_oublieState extends State<mot_passe_oublie> {
                   )
                 ),
                 SizedBox(
-                  height: 15,
+                  height: 15.h,
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(left:20,right: 20),
+                  padding: EdgeInsets.only(left:20.w,right: 20.w),
                   child: Row(
                     children: [
                       Expanded(child: ElevatedButton(onPressed: (){
@@ -60,6 +68,7 @@ class _mot_passe_oublieState extends State<mot_passe_oublie> {
                         );
                         print(data);
                       }, child: Text("Reinitialiser mot de passe",style: TextStyle(
+
                         color: Colors.white
                       ),),
                       style: ElevatedButton.styleFrom(

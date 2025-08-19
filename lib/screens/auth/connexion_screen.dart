@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:gerematontine/screens/auth/inscription_screen.dart';
 import 'package:gerematontine/screens/auth/mot_passe_oublie.dart';
 import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
+import 'package:gerematontine/screens/dashboard/participer.dart';
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
 
@@ -39,12 +41,19 @@ class _connexion_screenState extends State<connexion_screen> {
     if(response.statusCode==200){
       var data=jsonDecode(response.body) as Map<String,dynamic>;
       bool success=data['success'];
-      if(success==true){
+      if(success==true && data['message']=="Connexion réussie"){
         var parti=data['data'];
         print(parti);
         setState(() {
           Session listsession=Session.fromJson(parti);
           Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>dashboard(listsession: listsession)),(route)=>false);
+        });
+      }else if(success==true && data['message']=="Connexion réussie (pas encore de tontine)"){
+        var parti=data['data'];
+        print(parti);
+        setState(() {
+          Session listsession=Session.fromJson(parti);
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>participer(listsession: listsession)),(route)=>false);
         });
       }else{
         showDialog(context: context, builder: (BuildContext contex){
@@ -76,7 +85,7 @@ class _connexion_screenState extends State<connexion_screen> {
             children: [
               Text("Welcome back",
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
                 color: couleur.secondaryText
               ),),
@@ -86,7 +95,9 @@ class _connexion_screenState extends State<connexion_screen> {
                   TextField(
                     controller: email,
                     decoration: InputDecoration(
-                        labelText: "Email",
+                        label: Text("Email",style: TextStyle(
+                          fontSize: 16.sp
+                        ),),
                       filled: true,
                       fillColor: couleur.lightGray,
                       enabledBorder: OutlineInputBorder(
@@ -101,14 +112,16 @@ class _connexion_screenState extends State<connexion_screen> {
                     ),
                   ),
                   SizedBox(
-                    height: 20,
+                    height: 20.h,
                   ),
 
                   TextField(
                     controller: mot_pass,
                     obscureText: _cacher,
                     decoration: InputDecoration(
-                      labelText: "Mot de passe",
+                      label: Text("Mot de passe",style: TextStyle(
+                        fontSize: 16.sp,
+                      ),),
                         filled: true,
                         fillColor: couleur.lightGray,
                         enabledBorder: OutlineInputBorder(
@@ -131,7 +144,7 @@ class _connexion_screenState extends State<connexion_screen> {
                     ),
                   ),
                   SizedBox(
-                    height: 20,
+                    height: 20.h,
                   ),
                   Row(
                     children: [
@@ -139,30 +152,31 @@ class _connexion_screenState extends State<connexion_screen> {
                         String mail=email.text;
                         String motpass=mot_pass.text;
                         connexion(mail, motpass);
-                        }, child: Text("Login",style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18
-                        ),),style: ElevatedButton.styleFrom(
+                        },style: ElevatedButton.styleFrom(
                           backgroundColor: couleur.primaryPurple
-                        ),)
+                        ), child: Text("Login",style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18.sp
+                        ),),)
                       )
                     ],
                   ),
                   SizedBox(
-                    height: 15,
+                    height: 15.h,
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(left: 5.0,right: 40.0),
+                    padding: EdgeInsets.only(left: 5.0.w,right: 40.0.w),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Expanded(
-                          flex: 30,
+                          flex: 20,
                             child: TextButton(onPressed: (){
                               Navigator.push(context,MaterialPageRoute(builder: (context)=>mot_passe_oublie()));
                             },style: ButtonStyle(
                               overlayColor: MaterialStateProperty.all(Colors.transparent) //Décactiver l'animation autour du bouton
                             ), child: Text("Mot de passe oublié",style: TextStyle(
+                              fontSize: 14.sp,
                                 decoration: TextDecoration.underline
                             )
                             )
@@ -175,6 +189,7 @@ class _connexion_screenState extends State<connexion_screen> {
                             },style: ButtonStyle(
                                 overlayColor: MaterialStateProperty.all(Colors.transparent) //Décactiver l'animation autour du bouton
                             ), child: Text("S'incrire",style: TextStyle(
+                                fontSize: 14.sp,
                                 decoration: TextDecoration.underline
                             )
                             )

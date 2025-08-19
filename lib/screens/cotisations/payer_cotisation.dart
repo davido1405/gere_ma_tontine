@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:convert' as convert;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/cotisation.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:flutter/material.dart';
@@ -104,194 +105,238 @@ class _payer_cotisationState extends State<payer_cotisation> {
         }, icon: Icon(Icons.arrow_back)),
         title: Text("Cotisations",
         style: TextStyle(
-          fontSize: 25,
+          fontSize: 20.sp,
           fontWeight: FontWeight.bold
         ),),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 15.0,right: 15.0),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 15,
-            ),
-            TextField(
-              controller: montant,
-              decoration: InputDecoration(
-                labelText: "Montant",
-                fillColor: couleur.lightGray,
-                filled: true,
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: couleur.primaryPurple)
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: fetchCotisation,
+          child: Padding(
+            padding: EdgeInsets.only(left: 15.0.w,right: 15.0.w),
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 15.h,
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: couleur.primaryPurple)
-                )
-              ),
-            ),
-            SizedBox(
-              height: 25,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 200),
-              child: Column(
-                children: [
-                  Text("Mode de paiement",style: TextStyle(
-                    fontSize: 18,
+                TextField(
+                  controller: montant,
+                  decoration: InputDecoration(
+                    label: Text("Montant (Exemple: 2000)",style: TextStyle(
+                      fontSize: 14.sp
+                    ),),
+                    fillColor: couleur.lightGray,
+                    filled: true,
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: couleur.primaryPurple)
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: couleur.primaryPurple)
+                    )
+                  ),
+                ),
+                SizedBox(
+                  height: 25.h,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(right: 200.w),
+                  child: Column(
+                    children: [
+                      Text("Mode de paiement",style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold
+                      ),),
+                      SizedBox(
+                        height: 15.h,
+                      )
+                    ],
+                  ),
+                ),
+                Row(
+                  children: [
+                    Expanded(child: Card(
+                        color: couleur.lightGray,
+                        child: Padding(padding: EdgeInsets.only(left: 5.w),child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            CircleAvatar(
+                              backgroundImage: AssetImage("assets/wave.png"),
+                            ),
+                            Text("Wave",style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.bold,
+                                color: couleur.secondaryText
+                            ),
+                            ),
+                            Radio(value: "Wave", groupValue: _selectedOption, onChanged: (value){
+                              setState(() {
+                                _selectedOption=value;
+                              });
+                            })
+                          ],
+                        ),)
+                    ))
+                  ],
+                ),
+                SizedBox(
+                  height: 15.h,
+                ),
+                Row(
+                  children: [
+                    Expanded(child: ElevatedButton.icon(onPressed: (){
+                      String montantPay=montant.text;
+                      String modePai=_selectedOption.toString();
+                      payerCotisation(montantPay,modePai);
+                      montant.clear();
+                    }, label: Text("Payer",style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white
+                    ),),icon: Icon(Icons.attach_money_sharp,color: Colors.white,),style: ElevatedButton.styleFrom(
+                      backgroundColor: couleur.primaryPurple,
+                    ),))
+                  ],
+                ),
+                SizedBox(
+                  height:20.h,
+                ),
+              Padding(
+                padding: EdgeInsets.only(right: 150.w),
+                child: Column(
+                  children: [
+                    Text("Historique de cotisation",style: TextStyle(
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.bold
-                  ),),
-                  SizedBox(
-                    height: 15,
-                  )
-                ],
+                ),)
+                  ],
+                ),
               ),
-            ),
-            Row(
-              children: [
-                Expanded(child: Card(
-                    color: couleur.lightGray,
-                    child: Padding(padding: EdgeInsets.only(left: 5),child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        CircleAvatar(
-                          backgroundImage: AssetImage("assets/wave.png"),
-                        ),
-                        Text("Wave",style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: couleur.secondaryText
-                        ),
-                        ),
-                        Radio(value: "Wave", groupValue: _selectedOption, onChanged: (value){
-                          setState(() {
-                            _selectedOption=value;
-                          });
-                        })
-                      ],
-                    ),)
-                ))
-              ],
-            ),
-            SizedBox(
-              height: 15,
-            ),
-            Row(
-              children: [
-                Expanded(child: ElevatedButton.icon(onPressed: (){
-                  String montantPay=montant.text;
-                  String modePai=_selectedOption.toString();
-                  payerCotisation(montantPay,modePai);
-                  montant.clear();
-                }, label: Text("Payer",style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white
-                ),),icon: Icon(Icons.attach_money_sharp,color: Colors.white,),style: ElevatedButton.styleFrom(
-                  backgroundColor: couleur.primaryPurple,
-                ),))
-              ],
-            ),
-            SizedBox(
-              height:20,
-            ),
-          Padding(
-            padding: const EdgeInsets.only(right: 150),
-            child: Column(
-              children: [
-                Text("Historique de cotisation",style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold
-            ),)
-              ],
-            ),
-          ),
-            SizedBox(
-            height: 10,
-          ),
-          SizedBox(
-            height: 425,
-            child: Column(
-              children: [
-                Expanded(
-                    child: ListView.builder(
-                        itemCount: _listCotisation.length,
-                        itemBuilder: (context,index){
-                          final Cotisation cotisa=_listCotisation[index];
-                          return GestureDetector(
-                            onTap: (){
-                              showDialog(context: context, builder: (BuildContext context){
-                                return AlertDialog(
-                                  title: Center(
-                                    child: Text("Details cotisation"),
-                                  ),
-                                  content: Container(
-                                    height: 120,
-                                    child: Column(
+                SizedBox(
+                height: 10.h,
+              ),
+              SizedBox(
+                height: 425.h,
+                child: Column(
+                  children: [
+                    Expanded(
+                        child: ListView.builder(
+                            itemCount: _listCotisation.length,
+                            itemBuilder: (context,index){
+                              final Cotisation cotisa=_listCotisation[index];
+                              return GestureDetector(
+                                onTap: (){
+                                  showDialog(context: context, builder: (BuildContext context){
+                                    return AlertDialog(
+                                      title: Center(
+                                        child: Text("Détails cotisation",style:
+                                          TextStyle(
+                                            fontSize: 18.sp
+                                          ),),
+                                      ),
+                                      content: SizedBox(
+                                        height: 125.h,
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Text("Code transaction : ${cotisa.code_cotisation}",style: TextStyle(
+                                                  fontSize: 14.sp
+                                                ),)
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 5.h,
+                                            ),
+                                            Row(
+                                              children: [
+                                                Text("Montant transaction : ${cotisa.montant} FCFA",style: TextStyle(
+                                                    fontSize: 14.sp
+                                                ),)
+                                              ],
+                                            ),SizedBox(
+                                              height: 5.h,
+                                            ),
+                                            Row(
+                                              children: [
+                                                Text("Mode de paiement : ${cotisa.mode_paiement}",style: TextStyle(
+                                                    fontSize: 14.sp
+                                                ),)
+                                              ],
+                                            ),SizedBox(
+                                              height: 5.h,
+                                            ),
+                                            Row(
+                                              children: [
+                                                Text("Date de transaction : ${cotisa.date_paiement}",style: TextStyle(
+                                                    fontSize: 14.sp
+                                                ),)
+                                              ],
+                                            ),SizedBox(
+                                              height: 5.h,
+                                            ),
+                                            Row(
+                                              children: [
+                                                Text("Satut de transaction : ${cotisa.statut_paiement}",style: TextStyle(
+                                                    fontSize: 14.sp
+                                                ),)
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      actions: [
+                                        Center(
+                                          child: TextButton.icon(onPressed: (){
+                                            Navigator.of(context).pop();
+                                          }, label: Text("OK",style: TextStyle(
+                                              fontSize: 14.sp
+                                          ),),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
+                                          ,
+                                        )
+                                        ],
+                                    );
+                                  });
+                                },
+                                child: ListTile(
+                                    title: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Row(
-                                          children: [
-                                            Text("Code transaction : ${cotisa.code_cotisation}")
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height: 5,
-                                        ),
-                                        Row(
-                                          children: [
-                                            Text("Montant transaction : ${cotisa.montant} FCFA")
-                                          ],
-                                        ),SizedBox(
-                                          height: 5,
-                                        ),
-                                        Row(
-                                          children: [
-                                            Text("Mode de paiement : ${cotisa.mode_paiement}")
-                                          ],
-                                        ),SizedBox(
-                                          height: 5,
-                                        ),
-                                        Row(
-                                          children: [
-                                            Text("Date de transaction : ${cotisa.date_paiement}")
-                                          ],
-                                        ),SizedBox(
-                                          height: 5,
-                                        ),
-                                        Row(
-                                          children: [
-                                            Text("Satut de transaction : ${cotisa.statut_paiement}")
-                                          ],
-                                        ),
+                                        Text(cotisa.code_cotisation,style: TextStyle(
+                                            fontSize: 15.sp,
+                                          fontWeight: FontWeight.bold
+                                        ),),
+                                        Text(cotisa.date_paiement.split(" ")[0],style: TextStyle(
+                                            fontSize: 15.sp,
+                                            fontWeight: FontWeight.bold
+                                        ),)
                                       ],
                                     ),
-                                  ),
-                                  actions: [
-                                    Center(
-                                      child: TextButton.icon(onPressed: (){
-                                        Navigator.of(context).pop();
-                                      }, label: Text("OK"),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
-                                      ,
-                                    )
-                                    ],
-                                );
-                              });
-                            },
-                            child: ListTile(
-                                title: Text(cotisa.code_cotisation+"    "+cotisa.date_paiement,style: TextStyle(
-                                  fontWeight: FontWeight.bold
-                                ),),
-                            subtitle: Text("Montant "+cotisa.montant+" FCFA          "+cotisa.statut_paiement),
-                            ),
-                          );
-                        })
+                                subtitle: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text("Montant: "+cotisa.montant+" FCFA",style: TextStyle(
+                                        fontSize: 14.sp
+                                    ),),
+                                    Text(cotisa.statut_paiement,style: TextStyle(
+                                      color: Colors.green,
+                                        fontSize: 14.sp
+                                    ),),
+                                  ],
+
+                                ),
+                                ),
+                              );
+                            })
+                    ),
+                  ],
                 ),
+              )
               ],
             ),
-          )
-          ],
+          ),
         ),
       ),
     );
