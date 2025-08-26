@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';import 'package:gerematontine/constants/colors.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/models/session.dart';
 
 
@@ -32,20 +33,20 @@ class _parametreState extends State<parametre> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            height: 15,
+            height: 10.h,
           ),
           Text("Informations du compte",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
           SizedBox(
-            height: 10,
+            height: 10.h,
           ),
           Row(
             children: [
               Container(
-                height: 50,
-                width: 50,
+                height: 50.h,
+                width: 50.w,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
-                  color: couleur.primaryPurple
+                  color: Color( 0xFF2596be),//couleur.primaryPurple
                 ),
                 child: Center(child: Icon(Icons.person_outline,color: Colors.white,),),
               ),
@@ -62,11 +63,11 @@ class _parametreState extends State<parametre> {
           Row(
             children: [
               Container(
-                height: 50,
-                width: 50,
+                height: 50.h,
+                width: 50.w,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: couleur.primaryPurple
+                    color: Color( 0xFF2596be),//couleur.primaryPurple
                 ),
                 child: Center(child: Icon(Icons.phone_outlined,color: Colors.white,),),
               ),
@@ -83,11 +84,11 @@ class _parametreState extends State<parametre> {
           Row(
             children: [
               Container(
-                height: 50,
-                width: 50,
+                height: 50.h,
+                width: 50.w,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: couleur.primaryPurple
+                    color: Color( 0xFF2596be),//couleur.primaryPurple
                 ),
                 child: Center(child: Icon(Icons.shield_outlined,color: Colors.white,),),
               ),
@@ -102,20 +103,20 @@ class _parametreState extends State<parametre> {
             ],
           ),
           SizedBox(
-            height: 15,
+            height: 10.h,
           ),
           Text("Préférences",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
           SizedBox(
-            height: 10,
+            height: 10.h,
           ),
           Row(
             children: [
               Container(
-                height: 50,
-                width: 50,
+                height: 50.h,
+                width: 50.w,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: couleur.primaryPurple
+                    color: Color( 0xFF2596be),//couleur.primaryPurple
                 ),
                 child: Center(child: Icon(Icons.notifications_outlined,color: Colors.white,),),
               ),
@@ -134,20 +135,20 @@ class _parametreState extends State<parametre> {
             ],
           ),
           SizedBox(
-            height: 15,
+            height: 10.h,
           ),
           Text("Support technique",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
           SizedBox(
-            height: 10,
+            height: 10.h,
           ),
           Row(
             children: [
               Container(
-                height: 50,
-                width: 50,
+                height: 50.h,
+                width: 50.w,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: couleur.primaryPurple
+                    color: Color( 0xFF2596be),//couleur.primaryPurple
                 ),
                 child: Center(child: Icon(Icons.help_outline,color: Colors.white,),),
               ),
@@ -168,11 +169,11 @@ class _parametreState extends State<parametre> {
           Row(
             children: [
               Container(
-                height: 50,
-                width: 50,
+                height: 50.h,
+                width: 50.w,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: couleur.primaryPurple
+                    color: Color( 0xFF2596be),//couleur.primaryPurple
                 ),
                 child: Center(child: Icon(Icons.support_agent_outlined,color: Colors.white,),),
               ),

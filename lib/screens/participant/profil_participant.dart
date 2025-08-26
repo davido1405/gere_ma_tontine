@@ -76,7 +76,7 @@ class _profil_participantState extends State<profil_participant> {
                     height: 45.h,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      color: couleur.primaryPurple
+                      color: Color( 0xFF2596be),//couleur.primaryPurple
                     ),
                     child: Icon(Icons.edit_document,color: Colors.white,),
                   ),Expanded(
@@ -103,7 +103,7 @@ class _profil_participantState extends State<profil_participant> {
                     height: 45.h,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      color: couleur.primaryPurple
+                      color: Color( 0xFF2596be),//couleur.primaryPurple
                     ),
                     child: Icon(Icons.lock_outline,color: Colors.white,),
                   ),

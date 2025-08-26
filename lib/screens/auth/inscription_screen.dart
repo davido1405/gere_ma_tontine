@@ -7,6 +7,7 @@ import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
 import 'package:http/http.dart' as http;
 
 import '../../constants/colors.dart';
+import '../../constants/server.dart';
 import '../dashboard/participer.dart';
 
 class inscription_screen extends StatefulWidget {
@@ -28,7 +29,7 @@ class _inscription_screenState extends State<inscription_screen> {
   
   //Inscription
   Future<void>inscription() async{
-    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=participants&action=inscrir_participant");
+    final url=Uri.parse("${adress}?ressource=participants&action=inscrir_participant");
     final reponse=await http.post(url,headers: {'content-Type':"application/json"},body: jsonEncode(
         {
           "nom": nom.text,
@@ -59,151 +60,150 @@ class _inscription_screenState extends State<inscription_screen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Center(child: Text("Inscription",style: TextStyle(fontSize:22.sp,fontWeight: FontWeight.bold),),),
       ),
       body: Center(
         child: Padding(padding: EdgeInsets.only(top: 20.h),
-        child: Container(
-          child: Padding(
-            padding: EdgeInsets.only(left: 20.w,right: 20.w),
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 40.h,
+        child: Padding(
+          padding: EdgeInsets.only(left: 20.w,right: 20.w),
+          child: Column(
+            children: [
+              SizedBox(
+                height: 40.h,
+              ),
+              TextField(
+                controller: nom,
+                decoration: InputDecoration(
+                  label: Text("Nom",style: TextStyle(
+                    fontSize: 16.sp
+                  ),),
+                  filled: true,
+                  fillColor: couleur.lightGray,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: couleur.lightGray)
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: couleur.secondaryText)
+                  )
                 ),
-                TextField(
-                  controller: nom,
-                  decoration: InputDecoration(
-                    label: Text("Nom",style: TextStyle(
+              ),
+              SizedBox(
+                height: 35.h,
+              ),
+              TextField(
+                controller: prenoms,
+                decoration: InputDecoration(
+                  label: Text("Prénoms",style: TextStyle(
                       fontSize: 16.sp
-                    ),),
+                  ),),
                     filled: true,
                     fillColor: couleur.lightGray,
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: couleur.lightGray)
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: couleur.lightGray)
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: couleur.secondaryText)
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: couleur.secondaryText)
                     )
-                  ),
                 ),
-                SizedBox(
-                  height: 35.h,
+              ),
+              SizedBox(
+                height: 35.h,
+              ),
+              TextField(
+                controller: mail,
+                decoration: InputDecoration(
+                  label:Text("E-mail",style: TextStyle(
+                      fontSize: 16.sp
+                  ),),
+                    filled: true,
+                    fillColor: couleur.lightGray,
+                    enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: couleur.lightGray)
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: couleur.secondaryText)
+                    )
                 ),
-                TextField(
-                  controller: prenoms,
-                  decoration: InputDecoration(
-                    label: Text("Prénoms",style: TextStyle(
-                        fontSize: 16.sp
-                    ),),
-                      filled: true,
-                      fillColor: couleur.lightGray,
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: couleur.lightGray)
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: couleur.secondaryText)
-                      )
-                  ),
-                ),
-                SizedBox(
-                  height: 35.h,
-                ),
-                TextField(
-                  controller: mail,
-                  decoration: InputDecoration(
-                    label:Text("E-mail",style: TextStyle(
-                        fontSize: 16.sp
-                    ),),
-                      filled: true,
-                      fillColor: couleur.lightGray,
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: couleur.lightGray)
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: couleur.secondaryText)
-                      )
-                  ),
-                ),
-                SizedBox(
-                  height: 35.h,
-                ),
-                TextField(
-                  controller: motpass,
-                  obscureText: _cacher,
-                  decoration: InputDecoration(
+              ),
+              SizedBox(
+                height: 35.h,
+              ),
+              TextField(
+                controller: motpass,
+                obscureText: _cacher,
+                decoration: InputDecoration(
 
-                    label: Text("Mot de passe",style: TextStyle(
-                        fontSize: 16.sp
-                    ),),
-                      filled: true,
-                      fillColor: couleur.lightGray,
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: couleur.lightGray)
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: couleur.secondaryText)
-                      ),
-                    prefixIcon: Icon(Icons.lock),
-                    suffixIcon: GestureDetector(
-                      onTap: (){
-                        setState(() {
-                          _cacher=!_cacher;
-                        });
-                      },
-                      child: _cacher? Icon(Icons.visibility):Icon(Icons.visibility_off),
-                    )
-                  ),
-                ),
-                SizedBox(
-                  height: 35.h,
-                ),
-                TextField(
-                  controller: numero,
-                  decoration: InputDecoration(
-                    label:Text("Numéro Wave",style: TextStyle(
-                        fontSize: 16.sp
-                    ),),
-                      filled: true,
-                      fillColor: couleur.lightGray,
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: couleur.lightGray)
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: couleur.secondaryText)
-                      )
-                  ),
-                ),
-                SizedBox(
-                  height: 25.h,
-                ),
-                Row(
-                  children: [
-                    Expanded(child: ElevatedButton(onPressed: (){
-                      inscription();
+                  label: Text("Mot de passe",style: TextStyle(
+                      fontSize: 16.sp
+                  ),),
+                    filled: true,
+                    fillColor: couleur.lightGray,
+                    enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: couleur.lightGray)
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: couleur.secondaryText)
+                    ),
+                  prefixIcon: Icon(Icons.lock),
+                  suffixIcon: GestureDetector(
+                    onTap: (){
+                      setState(() {
+                        _cacher=!_cacher;
+                      });
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: couleur.primaryPurple
-                    ), child: Text("M'inscrire",style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15.sp
-                    ),),))
-                  ],
-                )
-              ],
-            ),
+                    child: _cacher? Icon(Icons.visibility):Icon(Icons.visibility_off),
+                  )
+                ),
+              ),
+              SizedBox(
+                height: 35.h,
+              ),
+              TextField(
+                controller: numero,
+                decoration: InputDecoration(
+                  label:Text("Numéro Wave",style: TextStyle(
+                      fontSize: 16.sp
+                  ),),
+                    filled: true,
+                    fillColor: couleur.lightGray,
+                    enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: couleur.lightGray)
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: couleur.secondaryText)
+                    )
+                ),
+              ),
+              SizedBox(
+                height: 25.h,
+              ),
+              Row(
+                children: [
+                  Expanded(child: ElevatedButton(onPressed: (){
+                    inscription();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: couleur.primaryPurple
+                  ), child: Text("M'inscrire",style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15.sp
+                  ),),))
+                ],
+              )
+            ],
           ),
         ),),
       ),

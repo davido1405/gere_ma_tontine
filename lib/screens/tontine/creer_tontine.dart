@@ -8,6 +8,8 @@ import 'package:gerematontine/screens/dashboard/Acceuil.dart';
 import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
 import 'package:http/http.dart' as http;
 
+import '../../constants/server.dart';
+
 class creer_tontine extends StatefulWidget {
   final Session listsession;
   const creer_tontine({super.key, required this.listsession});
@@ -46,7 +48,7 @@ class _creer_tontineState extends State<creer_tontine> {
   TextEditingController montantPenalite=TextEditingController();
 
   Future<void>typeTontines()async{
-    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=type_tontine&action=type_dispo");
+    final url=Uri.parse("${adress}?ressource=type_tontine&action=type_dispo");
     final reponse=await http.get(url);
     if(reponse.statusCode==200){
       final Map<String,dynamic>data=jsonDecode(reponse.body);
@@ -66,7 +68,7 @@ class _creer_tontineState extends State<creer_tontine> {
 
 
   Future<void>frequenceTontines()async{
-    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=type_tontine&action=lister_frequence");
+    final url=Uri.parse("${adress}?ressource=type_tontine&action=lister_frequence");
     final reponse=await http.get(url);
     if(reponse.statusCode==200){
       final Map<String,dynamic>data=jsonDecode(reponse.body);
@@ -85,7 +87,7 @@ class _creer_tontineState extends State<creer_tontine> {
   }
 //Lister frequence paiement
   Future<void>frequencePaiementTontines()async{
-    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=type_tontine&action=lister_frequence_paiement");
+    final url=Uri.parse("${adress}?ressource=type_tontine&action=lister_frequence_paiement");
     final reponse=await http.get(url);
     if(reponse.statusCode==200){
       final Map<String,dynamic>data=jsonDecode(reponse.body);
@@ -105,7 +107,7 @@ class _creer_tontineState extends State<creer_tontine> {
   
   
   Future<void>creerTontine() async{
-    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=tontines&action=creer_tontine");
+    final url=Uri.parse("${adress}?ressource=tontines&action=creer_tontine");
     final reponse=await http.post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
         {
           "code_participant":widget.listsession.code_participant,
@@ -147,6 +149,7 @@ class _creer_tontineState extends State<creer_tontine> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Center(child: Text("Créer une tontine",style: TextStyle(
             fontSize: 20.sp,
@@ -255,14 +258,14 @@ class _creer_tontineState extends State<creer_tontine> {
                 ),),
                 filled: true,
                 fillColor: couleur.lightGray,
-                contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Color(0xFF7E57C2)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Color(0xFF5E35B1), width: 2),
+                  borderSide: BorderSide(color: Color(0xFF5E35B1), width: 2.w),
                 ),
               ),
               hint:Text("Sélectionner la fréquence des cotisations",style: TextStyle(
@@ -285,14 +288,14 @@ class _creer_tontineState extends State<creer_tontine> {
                 ),),
                 filled: true,
                 fillColor: couleur.lightGray,
-                contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Color(0xFF7E57C2)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Color(0xFF5E35B1), width: 2),
+                  borderSide: BorderSide(color: Color(0xFF5E35B1), width: 2.w),
                 ),
               ),
               hint:Text("Sélectionner la fréquence des paiements",style: TextStyle(
@@ -333,9 +336,9 @@ class _creer_tontineState extends State<creer_tontine> {
           Center(
             child: TextButton(onPressed: (){
               creerTontine();
-            }, child: Text("Valider",style: TextStyle(fontSize: 15.sp,fontWeight: FontWeight.bold,color: Colors.white),),style: TextButton.styleFrom(
+            },style: TextButton.styleFrom(
               backgroundColor: couleur.primaryPurple
-            ),),
+            ), child: Text("Valider",style: TextStyle(fontSize: 15.sp,fontWeight: FontWeight.bold,color: Colors.white),),),
           )
 
         ],

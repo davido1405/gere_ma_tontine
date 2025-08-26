@@ -8,6 +8,7 @@ import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
 
 import '../../constants/colors.dart';
+import '../../constants/server.dart';
 
 class payer_penalite extends StatefulWidget {
   final Session listsession;
@@ -32,7 +33,7 @@ class _payer_penaliteState extends State<payer_penalite> {
     fetchPenalite();
   }
   Future<void> fetchPenalite() async{
-    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=cotisations&action=voir_mes_penalites");
+    final url=Uri.parse("${adress}?ressource=cotisations&action=voir_mes_penalites");
     final response = await post(url,headers: {'content-Type':'application/json'},body: jsonEncode({
       "code_participant":widget.listsession.code_participant,
       "code_tontine":widget.listsession.code_tontine
@@ -47,7 +48,7 @@ class _payer_penaliteState extends State<payer_penalite> {
   }
 
   Future<void>payerPenalite(String x, String y) async{
-    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=cotisations&action=payer_penalite");
+    final url=Uri.parse("${adress}?ressource=cotisations&action=payer_penalite");
     final reponse=await http.post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
         {
           "code_tontine":widget.listsession.code_tontine,
@@ -110,6 +111,7 @@ class _payer_penaliteState extends State<payer_penalite> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         leading: IconButton(onPressed: (){
@@ -130,7 +132,7 @@ class _payer_penaliteState extends State<payer_penalite> {
             child: Column(
               children: [
                 SizedBox(
-                  height: 15,
+                  height: 15.h,
                 ),
                 TextField(
                   controller: montant,
@@ -151,7 +153,7 @@ class _payer_penaliteState extends State<payer_penalite> {
                   ),
                 ),
                 SizedBox(
-                  height: 25.h,
+                  height: 10.h,
                 ),
                 Padding(
                   padding: EdgeInsets.only(right: 200.w),
@@ -193,9 +195,8 @@ class _payer_penaliteState extends State<payer_penalite> {
                     ))
                   ],
                 ),
-
                 SizedBox(
-                  height: 15.h,
+                  height: 10.h,
                 ),
                 Row(
                   children: [
@@ -213,7 +214,7 @@ class _payer_penaliteState extends State<payer_penalite> {
                   ],
                 ),
                 SizedBox(
-                  height:20.h,
+                  height:10.h,
                 ),
                 Padding(
                   padding: EdgeInsets.only(right: 150.w),
@@ -227,7 +228,7 @@ class _payer_penaliteState extends State<payer_penalite> {
                         height: 15.h,
                       ),
                       SizedBox(
-                        height: 450.h,
+                        height: 400.h,
                         child: Column(
                           children: [
                             Expanded(

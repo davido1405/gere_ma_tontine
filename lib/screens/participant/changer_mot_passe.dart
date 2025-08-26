@@ -21,6 +21,7 @@ class _changer_mot_passeState extends State<changer_mot_passe> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Center(child: Text("Changer mon mot de passe",style: TextStyle(
           fontSize: 20.sp,

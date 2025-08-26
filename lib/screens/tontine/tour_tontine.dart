@@ -7,6 +7,7 @@ import 'package:gerematontine/models/session.dart';
 import 'package:http/http.dart';
 
 import '../../constants/colors.dart';
+import '../../constants/server.dart';
 
 class tourTontine extends StatefulWidget {
   final Session listsession;
@@ -30,7 +31,7 @@ class _tourTontineState extends State<tourTontine> {
 
   List<Beneficiare> _listOrdre=[];
   Future<void>verifierTour()async{
-    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=participants&action=verifierTour");
+    final url=Uri.parse("${adress}?ressource=participants&action=verifierTour");
     final response=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
         {
           "code_tontine":widget.listsession.code_tontine
@@ -52,7 +53,7 @@ class _tourTontineState extends State<tourTontine> {
 
   //Liste des bénéficiares
   Future<void>listeBeneficiare() async{
-    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=tontines&action=ordre_paiement");
+    final url=Uri.parse("${adress}?ressource=tontines&action=ordre_paiement");
     final response=await post(url,headers: {'content-Type':'application/json'},body: jsonEncode(
         {
           "code_tontine":widget.listsession.code_tontine
@@ -90,7 +91,7 @@ class _tourTontineState extends State<tourTontine> {
         child: Column(
           children: [
             Card(
-              color: couleur.primaryPurple,
+              color: Color( 0xFF2596be),//couleur.primaryPurple,
               child: Padding(
                 padding: EdgeInsets.all(10.0.w),
                 child: Row(
@@ -100,7 +101,7 @@ class _tourTontineState extends State<tourTontine> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SizedBox(
-                          height: 10.h,
+                          height: 5.h,
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -113,7 +114,7 @@ class _tourTontineState extends State<tourTontine> {
                           ],
                         ),
                         SizedBox(
-                          height: 10.h,
+                          height: 5.h,
                         ),
                         Center(
                           child: Column(
@@ -147,7 +148,7 @@ class _tourTontineState extends State<tourTontine> {
                                 children: [
                                   Column(
                                     children: [
-                                      Text("Prenoms bénéficiare:",style: TextStyle(
+                                      Text("Prenoms bénéficiaire:",style: TextStyle(
                                           fontSize: 15.sp,
                                           color: Colors.white
                                       ),),
@@ -199,7 +200,7 @@ class _tourTontineState extends State<tourTontine> {
                     Column(
                       children: [
                         SizedBox(
-                          height: 25.h,
+                          height: 15.h,
                         ),
                         Padding(
                           padding: EdgeInsets.only(right: 10.0.w),
@@ -216,17 +217,17 @@ class _tourTontineState extends State<tourTontine> {
               height: 10.h,
             ),
             SizedBox(
-              height: 10.h,
+              height: 5.h,
             ),
             Text("Prochains bénéficiare",style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 15.sp
             ),),
             SizedBox(
-              height: 10.h,
+              height: 5.h,
             ),
             SizedBox(
-              height: 580.h,
+              height: 500.h,
               width: double.maxFinite.w,
               child: ListView.builder(
                 itemCount: _listOrdre.length,

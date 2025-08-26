@@ -8,6 +8,7 @@ import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
 import 'package:gerematontine/screens/tontine/creer_tontine.dart';
 import 'package:http/http.dart' as http;
 import '../../constants/colors.dart';
+import '../../constants/server.dart';
 
 class participer extends StatefulWidget {
   final Session listsession;
@@ -29,7 +30,7 @@ class _participerState extends State<participer> {
   bool _cacher=true;
 
   Future<void>participer()async{
-    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=participations&action=participer");
+    final url=Uri.parse("${adress}?ressource=participations&action=participer");
     final response=await http.post(url,headers:{"content-Type":"application/json"},body:jsonEncode({
           "code_participant":widget.listsession.code_participant,
           "code_tontine":code.text
@@ -98,7 +99,7 @@ class _participerState extends State<participer> {
             ),),
           ),
           SizedBox(height: 50.h,),
-          Center(child: Container(
+          Center(child: SizedBox(
             width: 300.w,
             height: 300.h,
             child: Center(child: Container(
@@ -108,7 +109,7 @@ class _participerState extends State<participer> {
             )),
           ),
           SizedBox(
-            height: 30,
+            height: 30.h,
           ),
           Center(child: Column(
             children: [
@@ -156,7 +157,7 @@ class _participerState extends State<participer> {
                 ),
               ),
               SizedBox(
-                height: 15,
+                height: 15.h,
               ),
               Center(
                 child: TextButton.icon(onPressed: (){

@@ -8,6 +8,7 @@ import 'package:gerematontine/models/session.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../constants/colors.dart';
+import '../../constants/server.dart';
 
 
 class payer_cotisation extends StatefulWidget {
@@ -33,7 +34,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
 
 
   Future<void>fetchCotisation() async{
-    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=cotisations&action=voir_mes_cotisations");
+    final url=Uri.parse("${adress}?ressource=cotisations&action=voir_mes_cotisations");
     final response = await http.post(url,headers: {'content-Type':'application/json'},body: convert.jsonEncode({
       "code_participant":widget.listsession.code_participant,
       "code_tontine":widget.listsession.code_tontine
@@ -48,7 +49,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
   }
 
   Future<void>payerCotisation(String x, String y) async{
-    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=cotisations&action=payer_cotisation");
+    final url=Uri.parse("${adress}?ressource=cotisations&action=payer_cotisation");
     final reponse=await http.post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
         {
           "code_tontine":widget.listsession.code_tontine,
@@ -98,6 +99,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         leading: IconButton(onPressed: (){
@@ -114,7 +116,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
         child: RefreshIndicator(
           onRefresh: fetchCotisation,
           child: Padding(
-            padding: EdgeInsets.only(left: 15.0.w,right: 15.0.w),
+            padding: EdgeInsets.only(left: 10.0.w,right: 10.0.w),
             child: Column(
               children: [
                 SizedBox(
@@ -215,10 +217,11 @@ class _payer_cotisationState extends State<payer_cotisation> {
                 ),
               ),
                 SizedBox(
-                height: 10.h,
+                height: 5.h,
               ),
               SizedBox(
-                height: 425.h,
+                height: 400.h,
+                width: double.infinity,
                 child: Column(
                   children: [
                     Expanded(
@@ -237,49 +240,63 @@ class _payer_cotisationState extends State<payer_cotisation> {
                                           ),),
                                       ),
                                       content: SizedBox(
-                                        height: 125.h,
+                                        height: 160.h,
+                                        //width: MediaQuery.of(context).size.width.w,
                                         child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Row(
                                               children: [
-                                                Text("Code transaction : ${cotisa.code_cotisation}",style: TextStyle(
-                                                  fontSize: 14.sp
-                                                ),)
+                                                Expanded(
+                                                  child: Text("Code transaction : ${cotisa.code_cotisation}",style: TextStyle(
+                                                    fontSize: 14.sp,
+                                                    overflow: TextOverflow.ellipsis
+                                                  ),),
+                                                )
                                               ],
                                             ),
                                             SizedBox(
                                               height: 5.h,
                                             ),
+                                            Expanded(
+                                              child: Row(
+                                                children: [
+                                                  Text("Montant: ${cotisa.montant} FCFA",style: TextStyle(
+                                                      fontSize: 14.sp,
+                                                      overflow: TextOverflow.ellipsis
+                                                  ),)
+                                                ],
+                                              ),
+                                            ),SizedBox(
+                                              height: 5.h,
+                                            ),
                                             Row(
                                               children: [
-                                                Text("Montant transaction : ${cotisa.montant} FCFA",style: TextStyle(
-                                                    fontSize: 14.sp
-                                                ),)
+                                                Expanded(
+                                                  child: Text("Mode de paiement : ${cotisa.mode_paiement}",style: TextStyle(
+                                                      fontSize: 14.sp,
+                                                      overflow: TextOverflow.ellipsis
+                                                  ),),
+                                                )
                                               ],
                                             ),SizedBox(
                                               height: 5.h,
                                             ),
                                             Row(
                                               children: [
-                                                Text("Mode de paiement : ${cotisa.mode_paiement}",style: TextStyle(
-                                                    fontSize: 14.sp
-                                                ),)
+                                                Expanded(
+                                                  child: Text("Date: ${cotisa.date_paiement}",style: TextStyle(
+                                                      fontSize: 14.sp,
+                                                      overflow: TextOverflow.ellipsis
+                                                  ),),
+                                                )
                                               ],
                                             ),SizedBox(
                                               height: 5.h,
                                             ),
                                             Row(
                                               children: [
-                                                Text("Date de transaction : ${cotisa.date_paiement}",style: TextStyle(
-                                                    fontSize: 14.sp
-                                                ),)
-                                              ],
-                                            ),SizedBox(
-                                              height: 5.h,
-                                            ),
-                                            Row(
-                                              children: [
-                                                Text("Satut de transaction : ${cotisa.statut_paiement}",style: TextStyle(
+                                                Text("Satut paiement: ${cotisa.statut_paiement}",style: TextStyle(
                                                     fontSize: 14.sp
                                                 ),)
                                               ],

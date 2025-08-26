@@ -12,6 +12,7 @@ class _modifier_profilState extends State<modifier_profil> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Center(child: Text("Modifier mon profile"),),
       ),

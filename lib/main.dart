@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+//import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';import 'package:gerematontine/screens/splashScreen.dart';
 import 'package:gerematontine/screens/auth/connexion_screen.dart';
 import 'package:gerematontine/constants/colors.dart';
 
 import 'constants/colors.dart'; // si tu utilises couleur.primaryPurple
 
-void main() {
+void main(){
+  //WidgetsFlutterBinding.ensureInitialized();
+  //await flutterLocalNotificationsPlugin.initialize();
   runApp(
      const MyApp(),
   );
@@ -33,6 +36,7 @@ class _MyAppState extends State<MyApp> {
             '/': (context) => const splashScreen(),
             '/screens/auth/connexion_screen': (context) => const connexion_screen(),
           },
+            home:child,
         );
       },
 

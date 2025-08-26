@@ -10,6 +10,7 @@ import 'package:gerematontine/models/wallet_tontine.dart';
 import 'package:gerematontine/screens/dashboard/Acceuil.dart';
 import 'package:http/http.dart';
 
+import '../../constants/server.dart';
 import '../../models/session.dart';
 
 class walletTontine extends StatefulWidget {
@@ -52,7 +53,7 @@ class _walletTontineState extends State<walletTontine> {
   
   //Recupérer le wallet
   Future<void>recupererWallet() async{
-    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=tontines&action=wallet_infos");
+    final url=Uri.parse("${adress}?ressource=tontines&action=wallet_infos");
     final reponse=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
         {
           "code_tontine":widget.tontine.code_tontine
@@ -72,7 +73,7 @@ class _walletTontineState extends State<walletTontine> {
 
   //Récupérer la liste des transactions
 Future<void>transacs() async{
-    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=tontines&action=transactions");
+    final url=Uri.parse("${adress}?ressource=tontines&action=transactions");
     final response=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
         {
           "code_tontine":widget.tontine.code_tontine
@@ -91,7 +92,7 @@ Future<void>transacs() async{
 }
 
 Future<void>verifierTour()async{
-    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=participants&action=verifierTour");
+    final url=Uri.parse("${adress}?ressource=participants&action=verifierTour");
     final response=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
         {
         "code_tontine":widget.tontine.code_tontine
@@ -121,7 +122,7 @@ Future<void>verifierTour()async{
 }
 
 Future<void>retirer()async{
-    final url=Uri.parse("http://10.0.2.2/Projets/tontine_plus_api/index.php?ressource=tontines&action=retirer");
+    final url=Uri.parse("${adress}?ressource=tontines&action=retirer");
     final response=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
         {
           "code_tontine":widget.listsession.code_tontine,
@@ -160,8 +161,13 @@ Future<void>retirer()async{
   @override
   Widget build(BuildContext context) {
     if(wallet==null){
-      return const Center(
-        child: CircularProgressIndicator(),
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
       );
     }
     WidgetsBinding.instance.addPostFrameCallback((_){
@@ -198,10 +204,10 @@ Future<void>retirer()async{
           padding: EdgeInsets.all(8.0.w),
           child: Column(
             children: [
-              Container(
-                height: 175.h,
+              SizedBox(
+                height: 215.h,
                 child: Card(
-                  color: couleur.primaryPurple,
+                  color: Color( 0xFF2596be),//couleur.primaryPurple,
                   child: Padding(
                     padding: EdgeInsets.all(10.0.w),
                     child: Row(
@@ -236,8 +242,8 @@ Future<void>retirer()async{
                                   ),)
                                   :TweenAnimationBuilder(tween: Tween(begin: 0,end: double.parse(wallet!.solde_tontine.toString())), duration: Duration(seconds: 2), builder: (context,value,child){
                                   return Text(
-                                      value.toStringAsFixed(2)+" FCFA",style: TextStyle(
-                                      fontSize: 30,
+                                      "${value.toStringAsFixed(2)} FCFA",style: TextStyle(
+                                      fontSize: 25,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white
                                   ));
@@ -287,7 +293,9 @@ Future<void>retirer()async{
                                           );
                                         });
                                       }
-                                    }, label: Text("Retrait"),icon: Icon(Icons.arrow_downward),style: TextButton.styleFrom(
+                                    }, label: Text("Retrait",style: TextStyle(
+                                      color: Colors.black
+                                    ),),icon: Icon(Icons.arrow_downward,color: Colors.black,),style: TextButton.styleFrom(
                                       backgroundColor: _monTour?Colors.white:Colors.grey
                                     ),),
                                   )
@@ -299,29 +307,28 @@ Future<void>retirer()async{
                         Column(
                           children: [
                             SizedBox(
-                              height: 10.h,
+                              height: 30.h,
                             ),
                             Padding(
                               padding: EdgeInsets.only(right: 10.0.w),
-                              child: Icon(_ouvert?Icons.lock_open:Icons.lock_outline,size: 80.r,color: _ouvert? Colors.red:Colors.green,),
+                              child: Icon(_ouvert?Icons.lock_open:Icons.lock_outline,size: 80.r,color: _ouvert? Colors.red:Colors.white,),
                             ),
-
                           ],
-                        ),
+                        )
                       ],
                     ),
                   ),
                 ),
               ),
               SizedBox(
-                height: 10.h,
+                height: 5.h,
               ),
               Divider(
                 height: 5.h,
                 color: Colors.grey[400],
               ),
               SizedBox(
-                height: 15.h,
+                height: 5.h,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -340,7 +347,7 @@ Future<void>retirer()async{
                 height: 10.h,
               ),
               SizedBox(
-                  height:550.h,
+                  height:435.h,
                   width: double.maxFinite,
                   child: ListView.builder(
                   itemCount: _listeTransac.length,
@@ -350,28 +357,30 @@ Future<void>retirer()async{
                   onTap: (){
                     showDialog(context: context, builder: (BuildContext context){
                       return AlertDialog(
-                        title: Center(child: Text("Détails de transaction")),
-                        content: Container(
-                          height: 175.h,
+                        title: Center(child: Text("Détails de transaction",style: TextStyle(
+                            fontSize: 15.sp
+                        ),)),
+                        content: SizedBox(
+                          height: 220.h,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("Nom :"+transac.nom,style: TextStyle(
+                              Text("Nom :${transac.nom}",style: TextStyle(
                                   fontSize: 15.sp
                               ),),
-                              Text("Prénoms :"+transac.prenoms,style: TextStyle(
+                              Text("Prénoms :${transac.prenoms}",style: TextStyle(
                                   fontSize: 15.sp
                               ),),
-                              Text("Type de transaction :"+transac.type_transaction,style: TextStyle(
+                              Text("Type de transaction :${transac.type_transaction}",style: TextStyle(
                                   fontSize: 15.sp
                               ),),
-                              Text("Montant de transaction :"+transac.montant_transaction,style: TextStyle(
+                              Text("Montant de transaction :${transac.montant_transaction}",style: TextStyle(
                                   fontSize: 15.sp
                               ),),
-                              Text("Date de transaction :"+transac.date_transaction,style: TextStyle(
+                              Text("Date de transaction :${transac.date_transaction}",style: TextStyle(
                                   fontSize: 15.sp
                               ),),
-                              Text("Mode de paiement :"+transac.mode_paiement,style: TextStyle(
+                              Text("Mode de paiement :${transac.mode_paiement}",style: TextStyle(
                                   fontSize: 15.sp
                               ),),
                               Text("Statut: ${transac.statut_paiement}",style: TextStyle(
