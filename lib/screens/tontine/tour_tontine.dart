@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -27,6 +28,10 @@ class _tourTontineState extends State<tourTontine> {
     super.initState();
     verifierTour();
     listeBeneficiare();
+    Timer.periodic(Duration(seconds: 2),(timer){
+      verifierTour();
+      listeBeneficiare();
+    });
   }
 
   List<Beneficiare> _listOrdre=[];

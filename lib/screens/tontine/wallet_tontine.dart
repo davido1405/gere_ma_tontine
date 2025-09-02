@@ -52,6 +52,8 @@ class _walletTontineState extends State<walletTontine> {
   bool _masque=true;
   late String infoTour;
 
+  bool optionAffiche=false;
+
   
   //Recupérer le wallet
   Future<void>recupererWallet() async{
@@ -165,7 +167,7 @@ Future<bool>relancer()async{
     final url=Uri.parse("${adress}?ressource=tontines&action=liste_tours");
     final response=await post(url,headers: {'content-Type':'application/json'},body: jsonEncode([
       {
-        'code_tontine': widget.listsession.code_tontine,
+        'code_tontine':widget.listsession.code_tontine,
         'relancer':'Oui'
       }
     ]));
@@ -247,7 +249,7 @@ Future<bool>relancer()async{
           child: Column(
             children: [
               SizedBox(
-                height: 215.h,
+                height: 180.h,
                 child: Card(
                   color: Color( 0xFF2596be),//couleur.primaryPurple,
                   child: Padding(
@@ -319,30 +321,41 @@ Future<bool>relancer()async{
                                               actions: [
                                                 TextButton.icon(onPressed: (){
                                                   if(widget.tontine.etat=="Terminée"){
-                                                    if(widget.listsession.type_participant=="Organisateur"){
-                                                      showDialog(context: context, builder: (BuildContext context){
-                                                        return AlertDialog(
-                                                          title: Text("Encore une tontine qui fini sans palabre",style: TextStyle(
-                                                              fontSize: 14.sp
-                                                          ),),
-                                                          content: Center(child: SizedBox(
-                                                            child: Column(
+                                                    if(widget.listsession.type_participant=="Organisateur" && optionAffiche==false){
+                                                      setState(() {
+                                                        optionAffiche=true;
+                                                      });
+                                                      if(optionAffiche){
+                                                        showDialog(context: context, builder: (BuildContext context){
+                                                          return AlertDialog(
+                                                            title: Text("Encore une tontine qui fini sans palabre",style: TextStyle(
+                                                                fontSize: 14.sp
+                                                            ),),
+                                                            content: Column(
+                                                              mainAxisSize: MainAxisSize.min,
                                                               children: [
                                                                 Text("Que voulez vous faire ?",style: TextStyle(
                                                                     fontSize: 14.sp
                                                                 ),),
+                                                                SizedBox(
+                                                                  height: 12.h,
+                                                                ),
                                                                 Row(
-                                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                                                                   children: [
                                                                     TextButton.icon(onPressed: () async{
+                                                                      Navigator.of(context).popUntil((route)=>route.isFirst);//Pour fermer les dialogues
                                                                       //Appeler fonction pour générer les nouveaux tours
                                                                       if(await relancer()){
-                                                                        Navigator.of(context).popUntil((route)=>route.isFirst);//Pour fermer les dialogues
                                                                         if(widget.listsession.type_participant!="Organisateur"){
                                                                           showDialog(context: context, builder: (BuildContext context){
                                                                             return AlertDialog(
                                                                               title: Text("Attention !"),
-                                                                              content: Text("L'organisateur a décidé de générer un nouveau cycle"),
+                                                                              content: Text("L'organisateur a décidé de lancer un nouveau cycle. Veuillez vous reconnecter pour actualiser les tours. Merci",style: TextStyle(
+                                                                                fontSize: 12.sp,
+                                                                              ),
+                                                                                maxLines: 2,
+                                                                                overflow: TextOverflow.ellipsis,),
                                                                               actions: [
                                                                                 TextButton.icon(onPressed: (){
                                                                                   Navigator.of(context).popUntil((route)=>route.isFirst);
@@ -351,7 +364,19 @@ Future<bool>relancer()async{
                                                                             );
                                                                           });
                                                                         }else{
+                                                                          Navigator.of(context).popUntil((route)=>route.isFirst);//Pour fermer les dialogues
                                                                           Navigator.of(context).popUntil((route)=>route.isFirst);
+                                                                          showDialog(context: context, builder: (BuildContext context){
+                                                                            return AlertDialog(
+                                                                              title: Text("Avertissement"),
+                                                                              content: Text("Vous serrez deconnecté automatiquement pour actualiser les tours. Merci"),
+                                                                              actions: [
+                                                                                TextButton.icon(onPressed: (){
+                                                                                  Navigator.of(context).pop();
+                                                                                }, label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.green,),)
+                                                                              ],
+                                                                            );
+                                                                          });
                                                                         }
                                                                       }
                                                                     }, label: Text("Nouveau cycle",style: TextStyle(
@@ -359,16 +384,16 @@ Future<bool>relancer()async{
                                                                     ),),icon: Icon(Icons.fiber_new_rounded,color: Colors.green,),),
                                                                     TextButton.icon(onPressed: (){
                                                                       //Fonction pour cloturer la tontine
-                                                                    }, label: Text("Cloturer la tontine",style: TextStyle(
+                                                                    }, label: Text("Cloturer",style: TextStyle(
                                                                         fontSize: 14.sp
                                                                     ),),icon: Icon(Icons.close_rounded,color: Colors.red,),),
                                                                   ],
                                                                 )
                                                               ],
                                                             ),
-                                                          ),),
-                                                        );
-                                                      });
+                                                          );
+                                                        });
+                                                      }
                                                     }else{
                                                       showDialog(
                                                           barrierDismissible: false,
@@ -382,6 +407,8 @@ Future<bool>relancer()async{
                                                         );
                                                       });
                                                     }
+                                                  }else{
+                                                    Navigator.of(context).pop();
                                                   }
                                                 }, label: Text("Merci !"),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
                                               ],

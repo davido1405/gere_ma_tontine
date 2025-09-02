@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -112,6 +113,13 @@ class _acceuilState extends State<acceuil> {
     tontineInfo();
     totalPenalite();
     monTour();
+    Timer.periodic(Duration(seconds: 5),(timer){
+      totalCotisation();
+      totalPenalite();
+      tontineInfo();
+      totalPenalite();
+      monTour();
+    });
   }
   String montantCotiser="0";
 
@@ -354,6 +362,9 @@ class _acceuilState extends State<acceuil> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          SizedBox(
+                            height: 5.h,
+                          ),
                           widget.listsession.type_participant=="Organisateur"?
                           Row(
                               children: [
