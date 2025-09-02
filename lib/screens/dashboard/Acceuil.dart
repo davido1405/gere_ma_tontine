@@ -108,18 +108,21 @@ class _acceuilState extends State<acceuil> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    totalCotisation();
-    totalPenalite();
-    tontineInfo();
-    totalPenalite();
-    monTour();
-    Timer.periodic(Duration(seconds: 5),(timer){
+    if(mounted){
       totalCotisation();
       totalPenalite();
       tontineInfo();
       totalPenalite();
       monTour();
-    });
+      Timer.periodic(Duration(seconds: 5),(timer){
+        totalCotisation();
+        totalPenalite();
+        tontineInfo();
+        totalPenalite();
+        monTour();
+      });
+    }
+
   }
   String montantCotiser="0";
 
@@ -133,13 +136,42 @@ class _acceuilState extends State<acceuil> {
 
   int statut=0;
 
+  bool messageAffich=false;
+
   @override
   build(BuildContext context) {
-    if (tontine==null) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      if(mounted){
+        if (tontine==null && messageAffich==false) {
+          showDialog(
+              context: context,
+              barrierDismissible: true,
+              builder: (BuildContext context){
+                return AlertDialog(
+                  backgroundColor: Colors.white,
+                  title:const Text("Oups !"),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16.h,),
+                      Text("Tontine incomplete. Partagez votre code tontine pour inviter."),
+                    ],
+                  ),
+                  actions: [
+                    TextButton.icon(onPressed: (){
+                      setState(() {
+                        messageAffich=true;
+                      });
+                      Navigator.of(context).pop();
+                    }, label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.green,),)
+                  ],
+                );
+              });
+        }
+      }
+    });
+
     return SafeArea(child: Column(
       children: [
         Padding(
@@ -372,7 +404,7 @@ class _acceuilState extends State<acceuil> {
                                     fontSize: 15.sp,
                                     color: Colors.white
                                 ),),
-                                Text(tontine!.code_tontine,style: TextStyle(
+                                Text(tontine?.code_tontine ?? "N/A",style: TextStyle(
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
@@ -389,7 +421,7 @@ class _acceuilState extends State<acceuil> {
                                     fontSize: 15.sp,
                                     color: Colors.white
                                 ),),
-                                Text(tontine!.nom_tontine,style: TextStyle(
+                                Text(tontine?.nom_tontine ?? "N/A",style: TextStyle(
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
@@ -406,7 +438,7 @@ class _acceuilState extends State<acceuil> {
                                     fontSize: 15.sp,
                                     color: Colors.white
                                 ),),
-                                Text(tontine!.montant_cotisation+" FCFA",style: TextStyle(
+                                Text(tontine?.montant_cotisation ??"N/A FCFA",style: TextStyle(
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
@@ -422,7 +454,7 @@ class _acceuilState extends State<acceuil> {
                                     fontSize: 15.sp,
                                     color: Colors.white
                                 ),),
-                                Text(tontine!.nombre_participant.toString(),style: TextStyle(
+                                Text(tontine?.nombre_participant.toString() ?? "N/A",style: TextStyle(
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
@@ -439,7 +471,7 @@ class _acceuilState extends State<acceuil> {
                                     fontSize: 15.sp,
                                     color: Colors.white
                                 ),),
-                                Text(tontine!.frequence,style: TextStyle(
+                                Text(tontine?.frequence?? "N/A",style: TextStyle(
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
@@ -456,7 +488,7 @@ class _acceuilState extends State<acceuil> {
                                     fontSize: 15.sp,
                                     color: Colors.white
                                 ),),
-                                Text(tontine!.frequence_paiement,style: TextStyle(
+                                Text(tontine?.frequence_paiement ?? "N/A",style: TextStyle(
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
@@ -473,7 +505,7 @@ class _acceuilState extends State<acceuil> {
                                     fontSize: 15.sp,
                                     color: Colors.white
                                 ),),
-                                Text(tontine!.type,style: TextStyle(
+                                Text(tontine?.type?? "N/A",style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
@@ -490,7 +522,7 @@ class _acceuilState extends State<acceuil> {
                                     fontSize: 15.sp,
                                     color: Colors.white
                                 ),),
-                                Text(tontine!.date_creation,style: TextStyle(
+                                Text(tontine?.date_creation?? "N/A",style: TextStyle(
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white

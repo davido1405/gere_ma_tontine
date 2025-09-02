@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/membres.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:http/http.dart' as http;
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../constants/colors.dart';
 import '../../constants/server.dart';
@@ -103,7 +104,7 @@ class _details_tontineState extends State<details_tontine> {
           children: [
               Center(child: Container(
                 height: 230.h,
-                width: 350.w,
+                width: 400.w,
                 decoration: BoxDecoration(
                     color: Color( 0xFF2596be),//couleur.primaryPurple
                     borderRadius: BorderRadius.circular(12)
@@ -113,12 +114,14 @@ class _details_tontineState extends State<details_tontine> {
                     children: [
                       if(widget.listsession.type_participant=="Organisateur")
                         Container(
-                          height: 180.h,
                           decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12)
+                            borderRadius: BorderRadius.circular(12)
                           ),
-                          child: Image.asset("assets/qrCode.png"),
+                          child: QrImageView(
+                            backgroundColor: Colors.white,
+                            data: widget.listsession.code_tontine,
+                            size: 200.w,
+                          ),
                         ),
                       if(widget.listsession.type_participant!="Organisateur")
                         Container(
@@ -132,7 +135,11 @@ class _details_tontineState extends State<details_tontine> {
                             children: [
                               ImageFiltered(
                                 imageFilter: ImageFilter.blur(sigmaX: 5.0.w, sigmaY: 5.0.h),
-                                child: Image.asset("assets/qrCode.png", height: 130),
+                                child: QrImageView(
+                                  backgroundColor: Colors.white,
+                                  data: widget.listsession.code_tontine,
+                                  size: 200.w,
+                                ),
                               ),
                               SizedBox(height: 5.h),
                               Text(
