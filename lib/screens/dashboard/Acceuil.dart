@@ -354,19 +354,20 @@ class _acceuilState extends State<acceuil> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          widget.listsession.type_participant=="Organisateur"?
                           Row(
-                            children: [
-                              Text("Code tontine: ",style: TextStyle(
-                                  fontSize: 15.sp,
-                                  color: Colors.white
-                              ),),
-                              Text(tontine!.code_tontine,style: TextStyle(
-                                  fontSize: 15.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white
-                              ),)
-                            ]
-                          ),
+                              children: [
+                                Text("Code tontine: ",style: TextStyle(
+                                    fontSize: 15.sp,
+                                    color: Colors.white
+                                ),),
+                                Text(tontine!.code_tontine,style: TextStyle(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white
+                                ),)
+                              ]
+                          ):
                           SizedBox(
                             height: 5.h,
                           ),

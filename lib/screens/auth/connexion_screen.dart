@@ -35,11 +35,11 @@ class _connexion_screenState extends State<connexion_screen> {
   //Fonction async de connexion
 
   Future<void>connexion(String email,String password)async{
-    final url=Uri.parse("${adress}?ressource=participants&action=connexion_participant");
+    final url=Uri.parse("$adress?ressource=participants&action=connexion_participant");
     final response=await http.post(url,headers: {"content-Type":"application/json"},body: jsonEncode({
       "email_participant":email,
       "password":password
-    }));
+    })).timeout(Duration(seconds: 15));
     if(response.statusCode==200){
       var data=jsonDecode(response.body) as Map<String,dynamic>;
       bool success=data['success'];

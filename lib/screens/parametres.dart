@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/models/session.dart';
 
+import '../constants/supportTech.dart';
+
 
 class parametre extends StatefulWidget {
   final Session listsession;
@@ -14,9 +16,8 @@ class parametre extends StatefulWidget {
 class _parametreState extends State<parametre> {
 
   SupportTech(){
-    final String contact="2250140373185";
     final String message=Uri.encodeComponent("Bonjour, j'ai besoin d'aide avec GereMaTontine.");
-    final String url="https://wa.me/$contact?text=$message";
+    final String url="https://wa.me/${contact}?text=$message";
     //launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
   }
   @override

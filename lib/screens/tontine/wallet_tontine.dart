@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/models/tontines.dart';
@@ -49,6 +50,7 @@ class _walletTontineState extends State<walletTontine> {
   late bool _dialogShown;
   bool _pasJourprevu=false;
   bool _masque=true;
+  late String infoTour;
 
   
   //Recupérer le wallet
@@ -121,7 +123,7 @@ Future<void>verifierTour()async{
     }
 }
 
-Future<void>retirer()async{
+Future<bool>retirer()async{
     final url=Uri.parse("${adress}?ressource=tontines&action=retirer");
     final response=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
         {
@@ -134,25 +136,61 @@ Future<void>retirer()async{
         var cheque=donnee['data'];
         print(cheque);
         if(cheque!=0){
-          showDialog(context: context, builder: (BuildContext context){
-            return AlertDialog(
-              title: Center(child: Text("Félicitation"),),
-              content: Text("Retrait éffectué avec succès !"),
-              actions: [
-                TextButton.icon(onPressed: (){
-                  Navigator.of(context).pop();
-                  initState();
-                }, label: Text("Merci !"),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
-              ],
-            );
+          setState(() {
+            widget.tontine.etat=cheque['statut_tontine'];
           });
+          return true;
         }
       }else{
-        print(donnee['message']);
+        showDialog(context: context, builder: (BuildContext context){
+          return AlertDialog(
+            title: Center(child: Text("Désolé"),),
+            content: Text(donnee['message']),
+            actions: [
+              TextButton.icon(onPressed: (){
+                Navigator.of(context).pop();
+                initState();
+              }, label: Text("Merci !"),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
+            ],
+          );
+        });
       }
     }else{
       print(response.statusCode);
     }
+    return false;
+}
+
+Future<bool>relancer()async{
+    final url=Uri.parse("${adress}?ressource=tontines&action=liste_tours");
+    final response=await post(url,headers: {'content-Type':'application/json'},body: jsonEncode([
+      {
+        'code_tontine': widget.listsession.code_tontine,
+        'relancer':'Oui'
+      }
+    ]));
+    if(response.statusCode==200){
+      final donnee=jsonDecode(response.body) as Map<String,dynamic>;
+      if(donnee['success']){
+        setState(() {
+          infoTour=donnee['message'];
+        });
+        return true;
+      }
+    }else{
+      showDialog(context: context, builder: (BuildContext context){
+        return AlertDialog(
+          title: Text("Attention"),
+          content: Text("Une erreur serveur s'est produite, veuillez reéssayer plus tard. Merci"),
+          actions: [
+            TextButton.icon(onPressed: (){
+              Navigator.of(context).pop();
+            }, label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.green,),)
+          ],
+        );
+      });
+    }
+    return false;
 }
 
 
@@ -170,23 +208,27 @@ Future<void>retirer()async{
         ),
       );
     }
-    WidgetsBinding.instance.addPostFrameCallback((_){
-      _dialogShown = true; // empêcher les doublons
-      if(widget.numeroTour=="N/A"){
-        showDialog(context: context, builder: (BuildContext context){
-          return AlertDialog(
-            title: Center(child: Text("Oups !")),
-            content: SizedBox(
-              height: 200.h,
-              child: Text("Votre tontine n'est pas encore pleine"),
-            ),
-            actions: [
-              TextButton.icon(onPressed: (){
-                Navigator.of(context).pop();
-              }, label: Text("Compris !"),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
-            ],
-          );
-        });
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+
+      if(_dialogShown==false && widget.tontine.etat=="En attente"){
+        Center(
+          child: await showDialog(context: context, builder: (BuildContext context){
+            return AlertDialog(
+              title: Text("Oups !"),
+              content: Text("En attente des autres participants. Veuillez patienter svp.",
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,),
+              actions: [
+                TextButton.icon(onPressed: (){
+                  setState(() {
+                    _dialogShown = true; // empêcher les doublons
+                  });
+                  Navigator.of(context).pop();
+                }, label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.green,),)
+              ],
+            );
+          }),
+        );
       }
     });
     return Scaffold(
@@ -265,9 +307,87 @@ Future<void>retirer()async{
                               child: Row(
                                 children: [
                                   Center(
-                                    child: TextButton.icon(onPressed: (){
+                                    child: TextButton.icon(onPressed: () async {
                                       if(_monTour){
-                                        retirer();
+                                        if(await retirer()){
+                                          showDialog(context: context, builder: (BuildContext context){
+                                            return AlertDialog(
+                                              title: Center(child: Text("Félicitation"),),
+                                              content: Text("Retrait éffectué avec succès !",style: TextStyle(
+                                                fontSize: 14.sp
+                                              ),),
+                                              actions: [
+                                                TextButton.icon(onPressed: (){
+                                                  if(widget.tontine.etat=="Terminée"){
+                                                    if(widget.listsession.type_participant=="Organisateur"){
+                                                      showDialog(context: context, builder: (BuildContext context){
+                                                        return AlertDialog(
+                                                          title: Text("Encore une tontine qui fini sans palabre",style: TextStyle(
+                                                              fontSize: 14.sp
+                                                          ),),
+                                                          content: Center(child: SizedBox(
+                                                            child: Column(
+                                                              children: [
+                                                                Text("Que voulez vous faire ?",style: TextStyle(
+                                                                    fontSize: 14.sp
+                                                                ),),
+                                                                Row(
+                                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                                  children: [
+                                                                    TextButton.icon(onPressed: () async{
+                                                                      //Appeler fonction pour générer les nouveaux tours
+                                                                      if(await relancer()){
+                                                                        Navigator.of(context).popUntil((route)=>route.isFirst);//Pour fermer les dialogues
+                                                                        if(widget.listsession.type_participant!="Organisateur"){
+                                                                          showDialog(context: context, builder: (BuildContext context){
+                                                                            return AlertDialog(
+                                                                              title: Text("Attention !"),
+                                                                              content: Text("L'organisateur a décidé de générer un nouveau cycle"),
+                                                                              actions: [
+                                                                                TextButton.icon(onPressed: (){
+                                                                                  Navigator.of(context).popUntil((route)=>route.isFirst);
+                                                                                }, label: Text("Compris !"),icon: Icon(Icons.verified,color: Colors.green,),),
+                                                                              ],
+                                                                            );
+                                                                          });
+                                                                        }else{
+                                                                          Navigator.of(context).popUntil((route)=>route.isFirst);
+                                                                        }
+                                                                      }
+                                                                    }, label: Text("Nouveau cycle",style: TextStyle(
+                                                                        fontSize: 14.sp
+                                                                    ),),icon: Icon(Icons.fiber_new_rounded,color: Colors.green,),),
+                                                                    TextButton.icon(onPressed: (){
+                                                                      //Fonction pour cloturer la tontine
+                                                                    }, label: Text("Cloturer la tontine",style: TextStyle(
+                                                                        fontSize: 14.sp
+                                                                    ),),icon: Icon(Icons.close_rounded,color: Colors.red,),),
+                                                                  ],
+                                                                )
+                                                              ],
+                                                            ),
+                                                          ),),
+                                                        );
+                                                      });
+                                                    }else{
+                                                      showDialog(
+                                                          barrierDismissible: false,
+                                                          context: context, builder: (BuildContext context){
+                                                        return AlertDialog(
+                                                          backgroundColor: Colors.white,
+                                                          elevation: 0,
+                                                          content: Center(
+                                                            child: CircularProgressIndicator(),
+                                                          ),
+                                                        );
+                                                      });
+                                                    }
+                                                  }
+                                                }, label: Text("Merci !"),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
+                                              ],
+                                            );
+                                          });
+                                        }
                                       }else if(widget.numeroTour=="N/A"){
                                         showDialog(context: context, builder: (BuildContext context){
                                           return AlertDialog(
