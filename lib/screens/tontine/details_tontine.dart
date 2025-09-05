@@ -119,7 +119,7 @@ class _details_tontineState extends State<details_tontine> {
                           ),
                           child: QrImageView(
                             backgroundColor: Colors.white,
-                            data: widget.listsession.code_tontine,
+                            data: "tontine_plus/"+widget.listsession.code_tontine,
                             size: 200.w,
                           ),
                         ),

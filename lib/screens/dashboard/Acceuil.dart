@@ -155,7 +155,7 @@ class _acceuilState extends State<acceuil> {
                     children: [
                       CircularProgressIndicator(),
                       SizedBox(height: 16.h,),
-                      Text("Tontine incomplete. Partagez votre code tontine pour inviter."),
+                      Text("Tontine incomplete. Partagez votre code tontine ou flasher votre QRCode pour inviter."),
                     ],
                   ),
                   actions: [

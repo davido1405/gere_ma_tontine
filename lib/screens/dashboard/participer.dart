@@ -7,6 +7,7 @@ import 'package:gerematontine/models/session.dart';
 import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
 import 'package:gerematontine/screens/tontine/creer_tontine.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../constants/colors.dart';
 import '../../constants/server.dart';
 
@@ -28,6 +29,7 @@ class _participerState extends State<participer> {
 
   TextEditingController code=TextEditingController();
   bool _cacher=true;
+  String? scannedCode;
 
   Future<void>participer()async{
     final url=Uri.parse("${adress}?ressource=participations&action=participer");
@@ -104,7 +106,22 @@ class _participerState extends State<participer> {
             height: 300.h,
             child: Center(child: Container(
               color: Colors.grey,
-              child: Text("Un text"),
+              child: ClipRRect(borderRadius: BorderRadiusGeometry.circular(16),
+              child: MobileScanner(
+                onDetect: (capture){
+                  final List<Barcode> barcodes=capture.barcodes;
+                  for(final barcode in barcodes){
+                    final String? qr=barcode.rawValue;
+                    if(qr!=null && qr.startsWith("tontine_plus/")){
+                      setState(() {
+                        code=qr.split('/')[1].toString() as TextEditingController;
+                      });
+                      participer();
+                      break;
+                    }
+                  }
+                },
+              ),),
               ),
             )),
           ),
