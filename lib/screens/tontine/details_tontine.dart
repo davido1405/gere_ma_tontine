@@ -103,7 +103,7 @@ class _details_tontineState extends State<details_tontine> {
         child: Column(
           children: [
               Center(child: Container(
-                height: 230.h,
+                height: 255.h,
                 width: 400.w,
                 decoration: BoxDecoration(
                     color: Color( 0xFF2596be),//couleur.primaryPurple
@@ -112,52 +112,43 @@ class _details_tontineState extends State<details_tontine> {
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      if(widget.listsession.type_participant=="Organisateur")
                         Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12)
                           ),
-                          child: QrImageView(
+                          child:widget.listsession.type_participant=="Organisateur" ?
+                          QrImageView(
                             backgroundColor: Colors.white,
                             data: "tontine_plus/"+widget.listsession.code_tontine,
                             size: 200.w,
-                          ),
-                        ),
-                      if(widget.listsession.type_participant!="Organisateur")
-                        Container(
-                          height: 225.h,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12)
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          ):Column(
                             children: [
                               ImageFiltered(
-                                imageFilter: ImageFilter.blur(sigmaX: 5.0.w, sigmaY: 5.0.h),
+                                imageFilter: ImageFilter.blur(sigmaX: 6.0.w, sigmaY: 6.0.h),
                                 child: QrImageView(
                                   backgroundColor: Colors.white,
-                                  data: widget.listsession.code_tontine,
+                                  data: widget.listsession.code_tontine+"Fake",
                                   size: 200.w,
                                 ),
                               ),
-                              SizedBox(height: 5.h),
+                              SizedBox(height: 10.h),
                               Text(
-                                "QR réservé à l’organisateur",
+                                "QRCode réservé à l’organisateur",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 12.sp,
-                                  color: Colors.black,
+                                  fontSize: 15.sp,
+                                  color: Colors.white,
                                 ),
                               ),
                             ],
-                          ),),
+                          ),
+                        )
                     ]
                 ),
               ),
               ),
             SizedBox(
-              height: 5.h,
+              height: 15.h,
             ),
             Padding(
               padding: EdgeInsets.only(left: 25.w,right: 25.w),
@@ -183,14 +174,14 @@ class _details_tontineState extends State<details_tontine> {
               child: Row(
                 children: [
                   Text("Liste des participants à cette tontine",style: TextStyle(
-                    fontSize: 14.sp,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.bold
                   ),)
                 ],
               ),
             ),
             SizedBox(
-              height: 15.h,
+              height: 5.h,
             ),
             SizedBox(
               height: 370.h,

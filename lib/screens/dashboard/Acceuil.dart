@@ -32,7 +32,7 @@ class _acceuilState extends State<acceuil> {
         {
           "code_participant":widget.listsession.code_participant,
           "code_tontine":widget.listsession.code_tontine
-        }));
+        })).timeout(Duration(seconds: 5));
 
     if(reponse.statusCode==200){
       final tour=jsonDecode(reponse.body) as Map<String,dynamic>;
@@ -55,7 +55,7 @@ class _acceuilState extends State<acceuil> {
     final reponse=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode({
       "code_participant":widget.listsession.code_participant,
       "code_tontine":widget.listsession.code_tontine
-    })).timeout(Duration(seconds: 30));
+    })).timeout(Duration(seconds: 5));
 
     if(reponse.statusCode==200){
       final total=jsonDecode(reponse.body) as Map<String,dynamic>;
@@ -73,7 +73,7 @@ class _acceuilState extends State<acceuil> {
     final reponse=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode({
       "code_participant":widget.listsession.code_participant,
       "code_tontine":widget.listsession.code_tontine
-    })).timeout(Duration(seconds: 30));
+    })).timeout(Duration(seconds: 5));
 
     if(reponse.statusCode==200){
       final total=jsonDecode(reponse.body) as Map<String,dynamic>;
@@ -93,7 +93,7 @@ class _acceuilState extends State<acceuil> {
     final url=Uri.parse("${adress}?ressource=tontines&action=details_tontine");
     final reponse=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode({
       "code_tontine":widget.listsession.code_tontine
-    })).timeout(Duration(seconds: 50));
+    })).timeout(Duration(seconds: 5));
     if(reponse.statusCode==200){
       final data=jsonDecode(reponse.body) as Map<String,dynamic>;
       if(data['success']==true){
@@ -108,41 +108,14 @@ class _acceuilState extends State<acceuil> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    totalCotisation();
+    totalPenalite();
+    tontineInfo();
+    totalPenalite();
+    monTour();
     if(mounted){
-      totalCotisation();
-      totalPenalite();
-      tontineInfo();
-      totalPenalite();
-      monTour();
-      Timer.periodic(Duration(seconds: 5),(timer){
-        totalCotisation();
-        totalPenalite();
-        tontineInfo();
-        totalPenalite();
-        monTour();
-      });
-    }
-
-  }
-  String montantCotiser="0";
-
-  String montantPenalite="0";
-
-  bool _critique=false;
-
-  Tontine? tontine;
-
-  String numeroTour="N/A";
-
-  int statut=0;
-
-  bool messageAffich=false;
-
-  @override
-  build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_){
-      if(mounted){
-        if (tontine==null && messageAffich==false) {
+      WidgetsBinding.instance.addPostFrameCallback((_){
+        if (tontine?.etat=="En attente" && messageAffich==false) {
           showDialog(
               context: context,
               barrierDismissible: true,
@@ -169,9 +142,35 @@ class _acceuilState extends State<acceuil> {
                 );
               });
         }
-      }
-    });
+      });
+      Timer.periodic(Duration(seconds: 5),(timer){
+        totalCotisation();
+        totalPenalite();
+        tontineInfo();
+        totalPenalite();
+        monTour();
+      });
+    }
 
+
+
+  }
+  String montantCotiser="0";
+
+  String montantPenalite="0";
+
+  bool _critique=false;
+
+  Tontine? tontine;
+
+  String numeroTour="N/A";
+
+  int statut=0;
+
+  bool messageAffich=false;
+
+  @override
+  build(BuildContext context) {
     return SafeArea(child: Column(
       children: [
         Padding(

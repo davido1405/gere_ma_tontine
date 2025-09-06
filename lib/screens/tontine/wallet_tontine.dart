@@ -249,7 +249,7 @@ Future<bool>relancer()async{
           child: Column(
             children: [
               SizedBox(
-                height: 180.h,
+                height: 230.h,
                 child: Card(
                   color: Color( 0xFF2596be),//couleur.primaryPurple,
                   child: Padding(

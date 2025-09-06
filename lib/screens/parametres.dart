@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/models/session.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 import '../constants/supportTech.dart';
 
 
@@ -18,7 +18,7 @@ class _parametreState extends State<parametre> {
   SupportTech(){
     final String message=Uri.encodeComponent("Bonjour, j'ai besoin d'aide avec GereMaTontine.");
     final String url="https://wa.me/${contact}?text=$message";
-    //launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
   }
   @override
   Widget build(BuildContext context) {
@@ -181,6 +181,7 @@ class _parametreState extends State<parametre> {
               Expanded(
                 child: GestureDetector(
                   onTap: (){
+                    SupportTech();
                     print("Nous contacter");
                   },
                   child: ListTile(

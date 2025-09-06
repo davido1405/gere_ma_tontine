@@ -114,7 +114,7 @@ class _participerState extends State<participer> {
                     final String? qr=barcode.rawValue;
                     if(qr!=null && qr.startsWith("tontine_plus/")){
                       setState(() {
-                        code=qr.split('/')[1].toString() as TextEditingController;
+                        code.text=qr.split('/')[1].toString();
                       });
                       participer();
                       break;
