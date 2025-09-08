@@ -87,14 +87,22 @@ class _connexion_screenState extends State<connexion_screen> {
       body: SafeArea(child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Welcome back",
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.bold,
-              color: couleur.secondaryText
-            ),),
-            Padding(padding: EdgeInsets.only(top: 25,right: 30,left: 30),
+            Center(child: Image.asset("assets/Djarra Finances V1.png",width: 150.w,height: 150.h,)),
+            SizedBox(
+              height: 10,
+            ),
+            Padding(
+              padding: EdgeInsets.only(left: 35.w),
+              child: Text("Connexion",
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.black
+              ),),
+            ),
+            Padding(padding: EdgeInsets.only(top: 10,right: 30,left: 30),
                 child: Column(
               children: [
                 TextField(

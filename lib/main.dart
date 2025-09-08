@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 //import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';import 'package:gerematontine/screens/splashScreen.dart';
 import 'package:gerematontine/screens/auth/connexion_screen.dart';
 import 'package:gerematontine/constants/colors.dart';
+import 'package:gerematontine/services/notifications_service.dart';
 
 import 'constants/colors.dart'; // si tu utilises couleur.primaryPurple
 
-void main(){
-  //WidgetsFlutterBinding.ensureInitialized();
+Future<void> main(dynamic flutterLocalNotificationsPlugin) async {
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   //await flutterLocalNotificationsPlugin.initialize();
   runApp(
      const MyApp(),
   );
+  Future.delayed(const Duration(seconds: 2), () {
+    FlutterNativeSplash.remove();
+  });
 }
 
 class MyApp extends StatefulWidget {
@@ -22,6 +28,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    NotificationService.initialize();
+  }
   @override
   Widget build(BuildContext context) {
     return  ScreenUtilInit(
@@ -39,7 +51,6 @@ class _MyAppState extends State<MyApp> {
             home:child,
         );
       },
-
     );
   }
 }

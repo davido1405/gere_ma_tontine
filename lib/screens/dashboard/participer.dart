@@ -62,8 +62,6 @@ class _participerState extends State<participer> {
               ],
             );
           });
-          print(data['message']);
-          print(widget.listsession.code_participant);
         }
         }
     }else{
@@ -117,7 +115,39 @@ class _participerState extends State<participer> {
                         code.text=qr.split('/')[1].toString();
                       });
                       participer();
-                      break;
+                      //break;
+                    }else{
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Container(
+                            color: Colors.blue,
+                            padding: EdgeInsets.all(8.w),
+                            height: 80.h,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.report_outlined,color: Colors.red,size: 40.r,),
+                                SizedBox(width: 20.w),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text("Echec"),
+                                      Spacer(),
+                                      Text("Veuillez scanner un QRCode Djarra")
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                          backgroundColor: Colors.transparent,
+                          elevation: 3,
+                        )
+                      );
                     }
                   }
                 },

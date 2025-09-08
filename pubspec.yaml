@@ -39,6 +39,8 @@ dependencies:
   mobile_scanner: ^7.0.1
   url_launcher: ^6.3.2
   shared_preferences: ^2.5.3
+  flutter_local_notifications: ^19.4.1
+  flutter_native_splash: ^2.4.6
 
 
 
@@ -72,6 +74,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
+    - assets/DjarraFinancesV1ico.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -99,3 +102,9 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_native_splash:
+  color:  "#ffffff"
+  image: assets/DjarraFinancesV1ico.png
+  android: true
+  ios: true

@@ -11,6 +11,7 @@ import 'package:gerematontine/screens/parametres.dart';
 import 'package:gerematontine/screens/penalites/payer_penalite.dart';
 import 'package:gerematontine/screens/tontine/tour_tontine.dart';
 import 'package:gerematontine/screens/tontine/wallet_tontine.dart';
+import 'package:gerematontine/services/notifications_service.dart';
 import 'package:http/http.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
@@ -113,6 +114,7 @@ class _acceuilState extends State<acceuil> {
     tontineInfo();
     totalPenalite();
     monTour();
+    NotificationService.initialize();
     if(mounted){
       WidgetsBinding.instance.addPostFrameCallback((_){
         if (tontine?.etat=="En attente" && messageAffich==false) {
@@ -149,6 +151,7 @@ class _acceuilState extends State<acceuil> {
         tontineInfo();
         totalPenalite();
         monTour();
+        NotificationService.initialize();
       });
     }
 

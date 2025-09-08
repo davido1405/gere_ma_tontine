@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/constants/colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'auth/connexion_screen.dart';
 
@@ -12,6 +13,13 @@ class splashScreen extends StatefulWidget {
 }
 
 class _splashScreenState extends State<splashScreen> {
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,12 +30,13 @@ class _splashScreenState extends State<splashScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Welcome to GereMaTontine",
-                style: TextStyle(
-                  color: couleur.secondaryText,
-                  fontSize: 25.sp,
-                  fontWeight: FontWeight.bold
-                ),),
+                Center(
+                  child: Column(
+                    children: [
+                      Image.asset("assets/Djarra Finances V1.png",width: 150.w,height: 150.h,),
+                    ],
+                  ),
+                ),
                 Padding(
                   padding: EdgeInsets.all(55.0.w),
                   child: ElevatedButton.icon(onPressed: (){

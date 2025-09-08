@@ -10,6 +10,7 @@ import 'package:gerematontine/models/notification.dart';
 import 'package:http/http.dart';
 
 import '../../constants/server.dart';
+import '../../services/notifications_service.dart';
 
 class notifications extends StatefulWidget {
   final Session listsession;
@@ -43,7 +44,7 @@ class _notificationsState extends State<notifications> {
     final reponse=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
         {
           "code_participant":widget.listsession.code_participant,
-          "filtre":filre,
+          "filtre":filre??"Non lu",
         })).timeout(Duration(seconds: 30));
     if(reponse.statusCode==200){
       final Map<String,dynamic>data=jsonDecode(reponse.body);
@@ -53,6 +54,15 @@ class _notificationsState extends State<notifications> {
         setState(() {
           _listnotification=notifs.map((notifs)=>Notifications.fromJson(notifs)).toList();
         });
+        // 🔔 Afficher une notif locale pour la plus récente
+        if (_listnotification.isNotEmpty) {
+          final notif = _listnotification.first;
+          NotificationService.showNotification(
+            id: int.parse(notif.id_notif),
+            title: notif.type_notif,
+            body: notif.contenu_notif,
+          );
+        }
       }else{
         setState(() {
           _listnotification=[];
