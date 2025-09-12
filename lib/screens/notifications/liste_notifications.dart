@@ -27,9 +27,6 @@ class _notificationsState extends State<notifications> {
     // TODO: implement initState
     super.initState();
     recupererNotif();
-    Timer.periodic(Duration(seconds: 3),(timer){
-      recupererNotif();
-    });
   }
   bool _lu=false;
   bool _nonlu=false;
@@ -44,7 +41,7 @@ class _notificationsState extends State<notifications> {
     final reponse=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
         {
           "code_participant":widget.listsession.code_participant,
-          "filtre":filre??"Non lu",
+          "filtre":filre,
         })).timeout(Duration(seconds: 30));
     if(reponse.statusCode==200){
       final Map<String,dynamic>data=jsonDecode(reponse.body);
@@ -127,7 +124,7 @@ class _notificationsState extends State<notifications> {
       ),
       body: RefreshIndicator(
         onRefresh: recupererNotif,
-        child: Padding(padding: EdgeInsets.only(left: 10.w,right: 10.w),
+        child: Padding(padding: EdgeInsets.symmetric(horizontal: 10.w),
         child: Column(
           children: [
             SizedBox(

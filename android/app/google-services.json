@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "224843671416",
+    "project_id": "djarrafinances",
+    "storage_bucket": "djarrafinances.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:224843671416:android:ae81fcf3977995eaa4ca8d",
+        "android_client_info": {
+          "package_name": "com.example.djarrafinances"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDiAjqH_LI55Mkle-AgJ3oLUGrpFMwF8Pk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

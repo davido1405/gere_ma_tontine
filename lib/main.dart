@@ -1,23 +1,33 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 //import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';import 'package:gerematontine/screens/splashScreen.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:gerematontine/screens/auth/inscription_screen.dart';import 'package:gerematontine/screens/splashScreen.dart';
 import 'package:gerematontine/screens/auth/connexion_screen.dart';
 import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/services/notifications_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 import 'constants/colors.dart'; // si tu utilises couleur.primaryPurple
 
-Future<void> main(dynamic flutterLocalNotificationsPlugin) async {
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   //await flutterLocalNotificationsPlugin.initialize();
+
+  Future.delayed(Duration(seconds: 2),(){
+    FlutterNativeSplash.remove();
+  });
+
   runApp(
      const MyApp(),
   );
-  Future.delayed(const Duration(seconds: 2), () {
-    FlutterNativeSplash.remove();
-  });
 }
 
 class MyApp extends StatefulWidget {
@@ -28,12 +38,17 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  String? nom;
+  String? prenom;
+  String? numero;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     NotificationService.initialize();
   }
+
   @override
   Widget build(BuildContext context) {
     return  ScreenUtilInit(
@@ -43,12 +58,13 @@ class _MyAppState extends State<MyApp> {
       builder: (context, child){
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          initialRoute: '/',
-          routes: {
-            '/': (context) => const splashScreen(),
-            '/screens/auth/connexion_screen': (context) => const connexion_screen(),
-          },
-            home:child,
+          //initialRoute: numero!=null?'/screens/auth/connexion_screen':'/screens/auth/inscription_screen',
+          //routes: {
+            //'/': (context) => const splashScreen(),
+            //'/screens/auth/connexion_screen': (context) => const connexion_screen(),
+            //'/screens/auth/inscription_screen':(context)=>const inscription_screen()
+          //},
+            home:const splashScreen(),
         );
       },
     );

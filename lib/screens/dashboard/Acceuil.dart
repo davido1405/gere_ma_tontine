@@ -14,6 +14,7 @@ import 'package:gerematontine/screens/tontine/wallet_tontine.dart';
 import 'package:gerematontine/services/notifications_service.dart';
 import 'package:http/http.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants/server.dart';
 
@@ -116,7 +117,7 @@ class _acceuilState extends State<acceuil> {
     monTour();
     NotificationService.initialize();
     if(mounted){
-      WidgetsBinding.instance.addPostFrameCallback((_){
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (tontine?.etat=="En attente" && messageAffich==false) {
           showDialog(
               context: context,
@@ -146,18 +147,21 @@ class _acceuilState extends State<acceuil> {
         }
       });
       Timer.periodic(Duration(seconds: 5),(timer){
-        totalCotisation();
-        totalPenalite();
-        tontineInfo();
-        totalPenalite();
-        monTour();
         NotificationService.initialize();
       });
     }
-
-
-
+    initSharedPrefs();
   }
+
+  Future<void>initSharedPrefs()async{
+    final prefs=await SharedPreferences.getInstance();
+    setState(() {
+      prefs.setString('nom',(widget.listsession.nom_participant).toString());
+      prefs.setString('prenom',(widget.listsession.prenoms_participant).toString());
+      prefs.setString('mobile',(widget.listsession.numero_participant).toString());
+    });
+  }
+
   String montantCotiser="0";
 
   String montantPenalite="0";
@@ -205,14 +209,14 @@ class _acceuilState extends State<acceuil> {
           height: 5.h,
         ),
         Padding(
-          padding: EdgeInsets.only(left: 0.0.w,right: 5.0.w),
+          padding: EdgeInsets.only(right: 5.0.w),
           child: Column(
             children: [
               Padding(
                 padding: EdgeInsets.only(left: 10.w),
                 child: Row(
                   children: [
-                    Text("Bienvenue, ${widget.listsession.nom_participant} ${widget.listsession.prenoms_participant}",
+                    Text("Dashboard, ${widget.listsession.nom_participant} ${widget.listsession.prenoms_participant}",
                     style: TextStyle(
                       fontSize: 20.sp,
                       fontWeight: FontWeight.bold
@@ -235,7 +239,7 @@ class _acceuilState extends State<acceuil> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text("Mon numéro de tour",style: TextStyle(
-                                fontSize: 20.sp,
+                                fontSize: 17.sp,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white
                             ),
@@ -248,7 +252,7 @@ class _acceuilState extends State<acceuil> {
                               children: [
                                 Text(numeroTour,
                                   style: TextStyle(
-                                      fontSize: 30.sp,
+                                      fontSize: 50.sp,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white
                                   ),
@@ -280,13 +284,13 @@ class _acceuilState extends State<acceuil> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text("Total",style: TextStyle(
-                                fontSize: 20.sp,
+                                fontSize: 17.sp,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white
                             ),
                             ),
                             Text("des cotisations",style: TextStyle(
-                                fontSize: 20.sp,
+                                fontSize: 17.sp,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white
                             ),
@@ -296,7 +300,7 @@ class _acceuilState extends State<acceuil> {
                             ),
                             TweenAnimationBuilder(tween: Tween(begin: 0,end:double.parse(montantCotiser.toString())), duration: Duration(seconds: 2), builder: (context,value,child){
                               return Text("${value.toStringAsFixed(2)} FCFA",style: TextStyle(
-                                fontSize: 20.sp,
+                                fontSize: 25.sp,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white
                               ),);
@@ -317,7 +321,7 @@ class _acceuilState extends State<acceuil> {
                     },
                     child: Card(
                       color: Colors.deepOrange,//couleur.primaryPurple,
-                      margin: EdgeInsets.only(left:10.w,right: 10.w),
+                      margin: EdgeInsets.symmetric(horizontal:10.w),
                       child: Padding(
                         padding: EdgeInsets.all(10.w),
                         child: Row(
@@ -326,7 +330,7 @@ class _acceuilState extends State<acceuil> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text("Total des pénalités",style: TextStyle(
-                                    fontSize: 20.sp,
+                                    fontSize: 17.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
                                 ),
@@ -345,9 +349,9 @@ class _acceuilState extends State<acceuil> {
                               ],
                             ),
                             SizedBox(
-                              width: 30.w,
+                              width: 125.w,
                             ),
-                            Icon(_critique?Icons.warning:Icons.trending_down,color: _critique? Colors.red:Colors.white,size: 100.r,)
+                            Icon(_critique?Icons.warning:Icons.trending_down,color: _critique? Colors.red:Colors.white,size: 80.r,)
                           ],
                         ),
                       ),
@@ -369,14 +373,14 @@ class _acceuilState extends State<acceuil> {
                 children: [
                   Text("Ma tontine",
                     style: TextStyle(
-                        fontSize: 30.sp,
+                        fontSize: 25.sp,
                         fontWeight: FontWeight.bold
                     ),
                   ),
                   TextButton.icon(onPressed: (){
                     Navigator.push(context, MaterialPageRoute(builder: (context)=>walletTontine(tontine: tontine!,listsession: widget.listsession, numeroTour: numeroTour )));
-                  }, label: Text("COFFRE",style: TextStyle(
-                    fontSize: 15.sp,
+                  }, label: Text("CAISSE",style: TextStyle(
+                    fontSize: 25.sp,
                     fontWeight: FontWeight.bold,
                   ),),icon: Icon(Icons.wallet,size: 30.r,),)
                 ],
@@ -407,7 +411,7 @@ class _acceuilState extends State<acceuil> {
                                     color: Colors.white
                                 ),),
                                 Text(tontine?.code_tontine ?? "N/A",style: TextStyle(
-                                    fontSize: 15.sp,
+                                    fontSize: 20.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
                                 ),)
@@ -424,7 +428,7 @@ class _acceuilState extends State<acceuil> {
                                     color: Colors.white
                                 ),),
                                 Text(tontine?.nom_tontine ?? "N/A",style: TextStyle(
-                                    fontSize: 15.sp,
+                                    fontSize: 20.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
                                 ),)
@@ -440,8 +444,8 @@ class _acceuilState extends State<acceuil> {
                                     fontSize: 15.sp,
                                     color: Colors.white
                                 ),),
-                                Text(tontine?.montant_cotisation ??"N/A FCFA",style: TextStyle(
-                                    fontSize: 15.sp,
+                                Text(tontine?.montant_cotisation!=null ?"${tontine?.montant_cotisation} FCFA" :"N/A",style: TextStyle(
+                                    fontSize: 20.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
                                 ),)
@@ -457,7 +461,7 @@ class _acceuilState extends State<acceuil> {
                                     color: Colors.white
                                 ),),
                                 Text(tontine?.nombre_participant.toString() ?? "N/A",style: TextStyle(
-                                    fontSize: 15.sp,
+                                    fontSize: 20.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
                                 ),)
@@ -474,7 +478,7 @@ class _acceuilState extends State<acceuil> {
                                     color: Colors.white
                                 ),),
                                 Text(tontine?.frequence?? "N/A",style: TextStyle(
-                                    fontSize: 15.sp,
+                                    fontSize: 20.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
                                 ),)
@@ -491,7 +495,7 @@ class _acceuilState extends State<acceuil> {
                                     color: Colors.white
                                 ),),
                                 Text(tontine?.frequence_paiement ?? "N/A",style: TextStyle(
-                                    fontSize: 15.sp,
+                                    fontSize: 20.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
                                 ),)
@@ -508,7 +512,7 @@ class _acceuilState extends State<acceuil> {
                                     color: Colors.white
                                 ),),
                                 Text(tontine?.type?? "N/A",style: TextStyle(
-                                    fontSize: 15,
+                                    fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
                                 ),)
@@ -525,7 +529,7 @@ class _acceuilState extends State<acceuil> {
                                     color: Colors.white
                                 ),),
                                 Text(tontine?.date_creation?? "N/A",style: TextStyle(
-                                    fontSize: 15.sp,
+                                    fontSize: 20.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
                                 ),)

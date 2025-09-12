@@ -7,6 +7,7 @@ import 'package:gerematontine/models/membres.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:http/http.dart' as http;
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../constants/colors.dart';
 import '../../constants/server.dart';
@@ -88,8 +89,15 @@ class _details_tontineState extends State<details_tontine> {
         );
       });
     }
-
   }
+
+  contacterParticipant(String numero){
+    final String message=Uri.encodeComponent("Bonjour, nous participons à la même tontine sur Djarra Finances.");
+    final String url="https://wa.me/$numero?text=$message";
+    launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,14 +115,14 @@ class _details_tontineState extends State<details_tontine> {
                 width: 400.w,
                 decoration: BoxDecoration(
                     color: Color( 0xFF2596be),//couleur.primaryPurple
-                    borderRadius: BorderRadius.circular(12)
+                    borderRadius: BorderRadius.circular(12.r)
                 ),
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                         Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12)
+                            borderRadius: BorderRadius.circular(12.r)
                           ),
                           child:widget.listsession.type_participant=="Organisateur" ?
                           QrImageView(
@@ -151,7 +159,7 @@ class _details_tontineState extends State<details_tontine> {
               height: 15.h,
             ),
             Padding(
-              padding: EdgeInsets.only(left: 25.w,right: 25.w),
+              padding: EdgeInsets.symmetric(horizontal: 25.w),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -184,7 +192,7 @@ class _details_tontineState extends State<details_tontine> {
               height: 5.h,
             ),
             SizedBox(
-              height: 370.h,
+              height: 350.h,
               child: Column(
                 children: [
                   Expanded(
@@ -202,7 +210,7 @@ class _details_tontineState extends State<details_tontine> {
                                       ),),
                                     ),
                                     content: SizedBox(
-                                      height: 145,
+                                      height: 160.h,
                                       child: Column(
                                         children: [
                                           Row(
@@ -220,15 +228,6 @@ class _details_tontineState extends State<details_tontine> {
                                               Text("Prénoms membre : ${member.prenom_membre}",style: TextStyle(
                                           fontSize: 14.sp
                                           ),)
-                                            ],
-                                          ),SizedBox(
-                                            height: 5.h,
-                                          ),
-                                          Row(
-                                            children: [
-                                              Text("Email membre : ${member.email}",style: TextStyle(
-                                              fontSize: 14.sp
-                                              ),)
                                             ],
                                           ),SizedBox(
                                             height: 5.h,
@@ -258,6 +257,21 @@ class _details_tontineState extends State<details_tontine> {
                                               ),)
                                             ],
                                           ),
+                                          SizedBox(
+                                            height: 10.h,
+                                          ),
+                                          GestureDetector(
+                                            onTap: (){
+                                              contacterParticipant(member.numero);
+                                            },
+                                            child: InkWell(child: Row(
+                                              children: [
+                                                Image.asset("assets/whatsapp.png",width: 15.w,height: 15.h,),
+                                                SizedBox(width: 5.w,),
+                                                Text("Contacter ce participant")
+                                              ],
+                                            ),),
+                                          )
                                         ],
                                       ),
                                     ),
@@ -275,7 +289,7 @@ class _details_tontineState extends State<details_tontine> {
                                 });
                               },
                               child: ListTile(
-                                title: Text(widget.listsession.email_participant==member.email?"Vous":member.nom_membre+" "+member.prenom_membre,style: TextStyle(
+                                title: Text(widget.listsession.numero_participant==member.numero?"Vous":member.nom_membre+" "+member.prenom_membre,style: TextStyle(
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.bold
                                 ),),

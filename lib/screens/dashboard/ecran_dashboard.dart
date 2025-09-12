@@ -9,7 +9,6 @@ import 'package:gerematontine/screens/cotisations/payer_cotisation.dart';
 import 'package:gerematontine/screens/dashboard/Acceuil.dart';
 import 'package:gerematontine/screens/notifications/liste_notifications.dart';
 import 'package:gerematontine/screens/parametres.dart';
-import 'package:gerematontine/screens/participant/profil_participant.dart';
 import 'package:gerematontine/screens/tontine/creer_tontine.dart';
 import 'package:gerematontine/screens/tontine/details_tontine.dart';
 import 'package:gerematontine/services/notifications_service.dart';
@@ -17,7 +16,6 @@ import 'package:http/http.dart';
 import '../../constants/server.dart';
 import '../../models/notification.dart';
 import '../participant/changer_mot_passe.dart';
-import '../participant/modifier_profil.dart';
 import '../penalites/payer_penalite.dart';
 
 class dashboard extends StatefulWidget {
@@ -86,10 +84,7 @@ class _dashboardState extends State<dashboard> {
       acceuil(listsession:widget.listsession),
       details_tontine(listsession:widget.listsession),
       notifications(listsession:widget.listsession),
-      profil_participant(listsession:widget.listsession),
-      notifications(listsession:widget.listsession),
       changer_mot_passe(listsession:widget.listsession),
-      modifier_profil(listsession:widget.listsession),
       payer_penalite(listsession:widget.listsession),
       creer_tontine(listsession:widget.listsession),
       parametre(listsession:widget.listsession)
@@ -112,8 +107,7 @@ class _dashboardState extends State<dashboard> {
           badgeContent: Text("${_listnotification.length}"),
           child: Icon(_selectedIndex==2 ? Icons.notifications_outlined:Icons.notifications),
         )),
-        BottomNavigationBarItem(label: "Profil",icon: Icon(_selectedIndex==3 ? Icons.person_outline:Icons.person))
-      ],
+        ],
         selectedItemColor: couleur.iconActive,
         showSelectedLabels: true,
         unselectedItemColor: couleur.iconInactive,

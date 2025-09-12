@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/session.dart';
+import 'package:gerematontine/screens/auth/confirmation_numero.dart';
 import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants/colors.dart';
 import '../../constants/server.dart';
@@ -21,38 +23,12 @@ class _inscription_screenState extends State<inscription_screen> {
   
   TextEditingController nom=TextEditingController();
   TextEditingController prenoms=TextEditingController();
-  TextEditingController mail=TextEditingController();
-  TextEditingController motpass=TextEditingController();
   TextEditingController numero=TextEditingController();
 
-  late Session _listsession;
-  
-  //Inscription
-  Future<void>inscription() async{
-    final url=Uri.parse("${adress}?ressource=participants&action=inscrir_participant");
-    final reponse=await http.post(url,headers: {'content-Type':"application/json"},body: jsonEncode(
-        {
-          "nom": nom.text,
-          "prenom": prenoms.text,
-          "email": mail.text,
-          "password": motpass.text,
-          "mobile": numero.text
-        }));
-    if(reponse.statusCode==200){
-      final Map<String,dynamic> user=jsonDecode(reponse.body);
-      bool success=user['success'];
-      if(success){
-        var finalUser=user['data'];
-        setState(() {
-          _listsession=Session.fromJson(finalUser);
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>participer(listsession: _listsession,)), (route)=>false);
-        });
-      }else{
-        print(user['success']);
-      }
-    }else{
-      print("Une erreur server est survenu");
-    }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
   }
 
   bool _cacher=true;
@@ -62,6 +38,7 @@ class _inscription_screenState extends State<inscription_screen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Center(child: Text("Inscription",style: TextStyle(fontSize:22.sp,fontWeight: FontWeight.bold),),),
       ),
       body: Center(
@@ -70,6 +47,7 @@ class _inscription_screenState extends State<inscription_screen> {
           padding: EdgeInsets.only(left: 20.w,right: 20.w),
           child: Column(
             children: [
+              Image.asset("assets/Djarra Finances V1.png",width: 150.w,height: 150.h,),
               SizedBox(
                 height: 40.h,
               ),
@@ -82,11 +60,11 @@ class _inscription_screenState extends State<inscription_screen> {
                   filled: true,
                   fillColor: couleur.lightGray,
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                     borderSide: BorderSide(color: couleur.lightGray)
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                     borderSide: BorderSide(color: couleur.secondaryText)
                   )
                 ),
@@ -103,66 +81,13 @@ class _inscription_screenState extends State<inscription_screen> {
                     filled: true,
                     fillColor: couleur.lightGray,
                     enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                         borderSide: BorderSide(color: couleur.lightGray)
                     ),
                     focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                         borderSide: BorderSide(color: couleur.secondaryText)
                     )
-                ),
-              ),
-              SizedBox(
-                height: 35.h,
-              ),
-              TextField(
-                controller: mail,
-                decoration: InputDecoration(
-                  label:Text("E-mail",style: TextStyle(
-                      fontSize: 16.sp
-                  ),),
-                    filled: true,
-                    fillColor: couleur.lightGray,
-                    enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: couleur.lightGray)
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: couleur.secondaryText)
-                    )
-                ),
-              ),
-              SizedBox(
-                height: 35.h,
-              ),
-              TextField(
-                controller: motpass,
-                obscureText: _cacher,
-                decoration: InputDecoration(
-
-                  label: Text("Mot de passe",style: TextStyle(
-                      fontSize: 16.sp
-                  ),),
-                    filled: true,
-                    fillColor: couleur.lightGray,
-                    enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: couleur.lightGray)
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: couleur.secondaryText)
-                    ),
-                  prefixIcon: Icon(Icons.lock),
-                  suffixIcon: GestureDetector(
-                    onTap: (){
-                      setState(() {
-                        _cacher=!_cacher;
-                      });
-                    },
-                    child: _cacher? Icon(Icons.visibility):Icon(Icons.visibility_off),
-                  )
                 ),
               ),
               SizedBox(
@@ -171,9 +96,9 @@ class _inscription_screenState extends State<inscription_screen> {
               TextField(
                 controller: numero,
                 decoration: InputDecoration(
-                  label:Text("Numéro Wave",style: TextStyle(
-                      fontSize: 16.sp
-                  ),),
+                    label:Text("Numéro de téléphone",style: TextStyle(
+                        fontSize: 16.sp
+                    ),),
                     filled: true,
                     fillColor: couleur.lightGray,
                     enabledBorder: OutlineInputBorder(
@@ -191,12 +116,16 @@ class _inscription_screenState extends State<inscription_screen> {
               ),
               Row(
                 children: [
-                  Expanded(child: ElevatedButton(onPressed: (){
-                    inscription();
+                  Expanded(child: ElevatedButton(onPressed: () async {
+                    SharedPreferences prefs=await SharedPreferences.getInstance();
+                    prefs.setString("nom", nom.text);
+                    prefs.setString("prenom", prenoms.text);
+                    prefs.setString("mobile", "+225${numero.text}");
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>ConfirmationNumero()));
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: couleur.primaryPurple
-                  ), child: Text("M'inscrire",style: TextStyle(
+                  ), child: Text("Suivant",style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 15.sp

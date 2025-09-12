@@ -8,7 +8,7 @@
 
 
     <application
-        android:label="gerematontine"
+        android:label="djarrafinances"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

@@ -23,13 +23,13 @@ class _changer_mot_passeState extends State<changer_mot_passe> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Center(child: Text("Changer mon mot de passe",style: TextStyle(
+        title: Center(child: Text("Changer mon code secret",style: TextStyle(
           fontSize: 20.sp,
           fontWeight: FontWeight.bold
         ),),),
       ),
       body: Padding(
-        padding: EdgeInsets.only(left: 10.0.w,right: 10.0.w),
+        padding: EdgeInsets.symmetric(horizontal: 10.0.w),
         child: Column(
           children: [
             SizedBox(
@@ -38,17 +38,17 @@ class _changer_mot_passeState extends State<changer_mot_passe> {
             TextField(
               obscureText: true,
               decoration: InputDecoration(
-                hint: Text("Saisissez l'ancien mot de passe",style: TextStyle(
+                hint: Text("Saisissez l'ancien code secret",style: TextStyle(
                 fontSize: 14.sp,
                 ),),
                 filled: true,
                 fillColor: couleur.lightGray,
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12)
+                  borderRadius: BorderRadius.circular(12.r)
                 ),
                 focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: couleur.primaryPurple),
-                    borderRadius: BorderRadius.circular(12)
+                    borderRadius: BorderRadius.circular(12.r)
                 ),
 
               ),
@@ -59,16 +59,16 @@ class _changer_mot_passeState extends State<changer_mot_passe> {
             TextField(
               obscureText: _cacher,
               decoration: InputDecoration(
-                hint: Text("Saisissez le nouveau mot de passe",style: TextStyle(
+                hint: Text("Saisissez le nouveau code secret",style: TextStyle(
                     fontSize: 14.sp,
                 ),),
                 filled: true,
                   fillColor: couleur.lightGray,
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12)
+                    borderRadius: BorderRadius.circular(12.r)
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                     borderSide: BorderSide(color: couleur.primaryPurple)
                   ),
                   suffixIcon: GestureDetector(
@@ -99,17 +99,17 @@ class _changer_mot_passeState extends State<changer_mot_passe> {
               child: TextField(
                 obscureText: true,
                 decoration: InputDecoration(
-                  hint: Text("Répétez le nouveau mot de passe",style: TextStyle(
+                  hint: Text("Répétez le nouveau code secret",style: TextStyle(
                     fontSize: 14.sp,
                   ),),
                   filled: true,
                   fillColor: couleur.lightGray,
                   enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)
+                      borderRadius: BorderRadius.circular(12.r)
                   ),
                   focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: couleur.primaryPurple),
-                      borderRadius: BorderRadius.circular(12)
+                      borderRadius: BorderRadius.circular(12.r)
                   ),
                 ),
               ),
@@ -119,8 +119,8 @@ class _changer_mot_passeState extends State<changer_mot_passe> {
             ),
             Center(
               child: TextButton.icon(onPressed: (){
-                print("Vous avez changé votre mot de passe");
-              }, label: Text("Changer le mot de passe",style: TextStyle(
+                print("Vous avez changé votre code secret");
+              }, label: Text("Changer mon code secret",style: TextStyle(
                 fontSize: 14.sp,
                 color: Colors.white
               ),

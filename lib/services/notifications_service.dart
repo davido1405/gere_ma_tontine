@@ -6,7 +6,7 @@ class NotificationService {
 
   static Future<void> initialize() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
-    AndroidInitializationSettings('assets/DjarraFinancesV1ico.png');
+    AndroidInitializationSettings('djarra_finances_v1ico');
 
     const InitializationSettings initializationSettings =
     InitializationSettings(android: initializationSettingsAndroid);
@@ -21,11 +21,12 @@ class NotificationService {
   }) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
     AndroidNotificationDetails(
-      'your_channel_id',
-      'your_channel_name',
-      channelDescription: 'your_channel_description',
+      'djarra_finances_channel',
+      'Djarra Finances',
+      channelDescription: 'Notifications Djarra Finances',
       importance: Importance.max,
       priority: Priority.high,
+      icon: 'djarra_finances_v1ico',
     );
 
     const NotificationDetails platformChannelSpecifics =

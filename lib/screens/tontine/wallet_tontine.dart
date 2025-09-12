@@ -287,7 +287,7 @@ Future<bool>relancer()async{
                                   :TweenAnimationBuilder(tween: Tween(begin: 0,end: double.parse(wallet!.solde_tontine.toString())), duration: Duration(seconds: 2), builder: (context,value,child){
                                   return Text(
                                       "${value.toStringAsFixed(2)} FCFA",style: TextStyle(
-                                      fontSize: 25,
+                                      fontSize: 25.sp,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white
                                   ));

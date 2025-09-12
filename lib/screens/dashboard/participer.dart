@@ -104,7 +104,7 @@ class _participerState extends State<participer> {
             height: 300.h,
             child: Center(child: Container(
               color: Colors.grey,
-              child: ClipRRect(borderRadius: BorderRadiusGeometry.circular(16),
+              child: ClipRRect(borderRadius: BorderRadiusGeometry.circular(16.r),
               child: MobileScanner(
                 onDetect: (capture){
                   final List<Barcode> barcodes=capture.barcodes;
@@ -124,7 +124,7 @@ class _participerState extends State<participer> {
                             padding: EdgeInsets.all(8.w),
                             height: 80.h,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(12.r),
                             ),
                             child: Row(
                               children: [
@@ -167,7 +167,7 @@ class _participerState extends State<participer> {
                 height: 15.h,
               ),
               Padding(
-                padding: EdgeInsets.only(left: 15.w,right: 15.w),
+                padding: EdgeInsets.symmetric(horizontal: 15.w),
                 child: TextField(
                   controller: code,
                   obscureText: _cacher,
@@ -178,12 +178,12 @@ class _participerState extends State<participer> {
                     filled: true,
                     fillColor: couleur.lightGray,
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                       borderSide: BorderSide(color: couleur.primaryPurple)
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: couleur.primaryPurple),
-                      borderRadius: BorderRadius.circular(12)
+                      borderRadius: BorderRadius.circular(12.r)
                     ),
                     prefixIcon: Icon(Icons.lock),
                     suffixIcon: GestureDetector(

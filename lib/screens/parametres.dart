@@ -20,46 +20,48 @@ class _parametreState extends State<parametre> {
     final String url="https://wa.me/${contact}?text=$message";
     launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
   }
+  Color getRandomColor( String input){
+    final hash=input.hashCode;
+    final couleurs=[Colors.deepOrange,Colors.amber,Colors.cyan,Colors.green,couleur.primaryPurple,Colors.red,Colors.blue];
+    return couleurs[hash % couleurs.length];
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(
-          child: Text("Paramètres",style: TextStyle(
-            fontWeight: FontWeight.bold
-          ),),
-        ),
+        title: Text("Paramètres",style: TextStyle(
+          fontWeight: FontWeight.bold
+        ),),
       ),
-      body: Padding(padding: EdgeInsets.only(left: 15),child: Column(
+      body: Padding(padding: EdgeInsets.only(left: 15.w),child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: 10.h,
-          ),
-          Text("Informations du compte",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
-          SizedBox(
-            height: 10.h,
-          ),
-          Row(
+          Center(child: Column(
             children: [
-              Container(
-                height: 50.h,
-                width: 50.w,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Color( 0xFF2596be),//couleur.primaryPurple
-                ),
-                child: Center(child: Icon(Icons.person_outline,color: Colors.white,),),
+              CircleAvatar(
+                radius: 40.r,
+                backgroundColor: getRandomColor(widget.listsession.nom_participant),
+                child: Text(widget.listsession.nom_participant.substring(0,1).toUpperCase()+widget.listsession.prenoms_participant.substring(0,1).toUpperCase(),style: TextStyle(
+                    fontSize: 35.sp,
+                    color: Colors.white
+                ),),
               ),
-              Expanded(
-                child: ListTile(
-                  title: Text(widget.listsession.nom_participant+" "+widget.listsession.prenoms_participant,style: TextStyle(
-                    fontWeight: FontWeight.bold
+              ListTile(
+                title: Center(
+                  child: Text("${widget.listsession.prenoms_participant} ${widget.listsession.nom_participant}",style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold
                   ),),
-                  subtitle: Text(widget.listsession.email_participant),
                 ),
-              )
+              ),
             ],
+          ),),
+          SizedBox(
+            height: 10.h,
+          ),
+          Text("Informations du compte",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20.sp),),
+          SizedBox(
+            height: 10.h,
           ),
           Row(
             children: [
@@ -67,7 +69,7 @@ class _parametreState extends State<parametre> {
                 height: 50.h,
                 width: 50.w,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(10.r),
                     color: Color( 0xFF2596be),//couleur.primaryPurple
                 ),
                 child: Center(child: Icon(Icons.phone_outlined,color: Colors.white,),),
@@ -77,7 +79,7 @@ class _parametreState extends State<parametre> {
                   title: Text("Numéro de téléphone",style: TextStyle(
                       fontWeight: FontWeight.bold
                   ),),
-                  subtitle: Text(widget.listsession.numero_participant),
+                  subtitle: Text("+${widget.listsession.numero_participant}"),
                 ),
               )
             ],
@@ -88,7 +90,7 @@ class _parametreState extends State<parametre> {
                 height: 50.h,
                 width: 50.w,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(10.r),
                     color: Color( 0xFF2596be),//couleur.primaryPurple
                 ),
                 child: Center(child: Icon(Icons.shield_outlined,color: Colors.white,),),
@@ -106,7 +108,7 @@ class _parametreState extends State<parametre> {
           SizedBox(
             height: 10.h,
           ),
-          Text("Préférences",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
+          Text("Sécurité",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20.sp),),
           SizedBox(
             height: 10.h,
           ),
@@ -116,18 +118,18 @@ class _parametreState extends State<parametre> {
                 height: 50.h,
                 width: 50.w,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(10.r),
                     color: Color( 0xFF2596be),//couleur.primaryPurple
                 ),
-                child: Center(child: Icon(Icons.notifications_outlined,color: Colors.white,),),
+                child: Center(child: Icon(Icons.lock_outline,color: Colors.white,),),
               ),
               Expanded(
                 child: GestureDetector(
                   onTap: (){
-                    print("Paramètre de notifications");
+                    print("Changer pin");
                   },
                   child: ListTile(
-                    title: Text("Notifications",style: TextStyle(
+                    title: Text("Changer mon PIN",style: TextStyle(
                         fontWeight: FontWeight.bold
                     ),),
                   ),
@@ -138,7 +140,7 @@ class _parametreState extends State<parametre> {
           SizedBox(
             height: 10.h,
           ),
-          Text("Support technique",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
+          Text("Support technique",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20.sp),),
           SizedBox(
             height: 10.h,
           ),
@@ -148,7 +150,7 @@ class _parametreState extends State<parametre> {
                 height: 50.h,
                 width: 50.w,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(10.r),
                     color: Color( 0xFF2596be),//couleur.primaryPurple
                 ),
                 child: Center(child: Icon(Icons.help_outline,color: Colors.white,),),
@@ -173,7 +175,7 @@ class _parametreState extends State<parametre> {
                 height: 50.h,
                 width: 50.w,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(10.r),
                     color: Color( 0xFF2596be),//couleur.primaryPurple
                 ),
                 child: Center(child: Icon(Icons.support_agent_outlined,color: Colors.white,),),

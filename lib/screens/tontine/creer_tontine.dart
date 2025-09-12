@@ -155,7 +155,7 @@ class _creer_tontineState extends State<creer_tontine> {
             fontSize: 20.sp,
             fontWeight: FontWeight.bold),),),
       ),
-      body: Padding(padding: EdgeInsets.only(left: 10.0.w,right: 10.0.w),
+      body: Padding(padding: EdgeInsets.symmetric(horizontal: 10.0.w),
       child: Column(
         children: [
           SizedBox(height: 20.0.h,),
@@ -168,11 +168,11 @@ class _creer_tontineState extends State<creer_tontine> {
               filled: true,
               fillColor: couleur.lightGray,
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 borderSide: BorderSide(color: couleur.primaryPurple),
               ),
               enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
 
               )
             ),
@@ -187,13 +187,13 @@ class _creer_tontineState extends State<creer_tontine> {
                 filled: true,
                 fillColor: couleur.lightGray,
                 focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                     borderSide: BorderSide(
                         color: couleur.primaryPurple
                     )
                 ),
                 enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                 )
             ),
           ),
@@ -207,13 +207,13 @@ class _creer_tontineState extends State<creer_tontine> {
                 filled: true,
                 fillColor: couleur.lightGray,
                 focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                     borderSide: BorderSide(
                         color: couleur.primaryPurple
                     )
                 ),
                 enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                 )
             ),
           ),
@@ -227,14 +227,14 @@ class _creer_tontineState extends State<creer_tontine> {
                 ),),
                 filled: true,
                 fillColor: couleur.lightGray,
-                contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                   borderSide: BorderSide(color: Color(0xFF7E57C2)),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Color(0xFF5E35B1), width: 2),
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: Color(0xFF5E35B1), width: 2.w),
                 ),
               ),
               hint:Text("Sélectionner le type de tontine",style: TextStyle(
@@ -260,11 +260,11 @@ class _creer_tontineState extends State<creer_tontine> {
                 fillColor: couleur.lightGray,
                 contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                   borderSide: BorderSide(color: Color(0xFF7E57C2)),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                   borderSide: BorderSide(color: Color(0xFF5E35B1), width: 2.w),
                 ),
               ),
@@ -290,11 +290,11 @@ class _creer_tontineState extends State<creer_tontine> {
                 fillColor: couleur.lightGray,
                 contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                   borderSide: BorderSide(color: Color(0xFF7E57C2)),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                   borderSide: BorderSide(color: Color(0xFF5E35B1), width: 2.w),
                 ),
               ),
@@ -319,13 +319,13 @@ class _creer_tontineState extends State<creer_tontine> {
                 filled: true,
                 fillColor: couleur.lightGray,
                 focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                     borderSide: BorderSide(
                         color: couleur.primaryPurple
                     )
                 ),
                 enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                     borderSide: BorderSide(
                         color: couleur.primaryPurple
                     )

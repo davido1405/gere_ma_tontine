@@ -10,6 +10,8 @@ import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
 import 'package:gerematontine/screens/dashboard/participer.dart';
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
+import 'package:pinput/pinput.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class connexion_screen extends StatefulWidget {
   const connexion_screen({super.key});
@@ -20,24 +22,38 @@ class connexion_screen extends StatefulWidget {
 
 class _connexion_screenState extends State<connexion_screen> {
 
+  String? nom;
+  String? prenom;
+  String? numero;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
+    initSharedPrefs();
   }
   bool _cacher=true;
   bool cocher=false;
-  TextEditingController email=TextEditingController();
+  TextEditingController pinController=TextEditingController();
   TextEditingController mot_pass=TextEditingController();
   late Session listsession;
 
+  Future<void>initSharedPrefs() async{
+    final prefs=await SharedPreferences.getInstance();
+    setState(() {
+      nom=prefs.getString('nom');
+      prenom=prefs.getString('prenom');
+      numero=prefs.getString('mobile');
+    });
+  }
+
+
   //Fonction async de connexion
 
-  Future<void>connexion(String email,String password)async{
+  Future<void>connexion(String numero,String password)async{
     final url=Uri.parse("$adress?ressource=participants&action=connexion_participant");
     final response=await http.post(url,headers: {"content-Type":"application/json"},body: jsonEncode({
-      "email_participant":email,
+      "numero_participant":numero,
       "password":password
     })).timeout(Duration(seconds: 15));
     if(response.statusCode==200){
@@ -83,100 +99,36 @@ class _connexion_screenState extends State<connexion_screen> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: null,
+        automaticallyImplyLeading: false,
       ),
       body: SafeArea(child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(child: Image.asset("assets/Djarra Finances V1.png",width: 150.w,height: 150.h,)),
             SizedBox(
-              height: 10,
+              height: 30.h,
             ),
-            Padding(
-              padding: EdgeInsets.only(left: 35.w),
-              child: Text("Connexion",
-              style: TextStyle(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.bold,
-                color: Colors.black
-              ),),
-            ),
+            Center(child: Text("Bon retour parmis nous, $nom $prenom!",style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold
+            ),)),
+            SizedBox(height: 15.h,),
             Padding(padding: EdgeInsets.only(top: 10,right: 30,left: 30),
                 child: Column(
               children: [
-                TextField(
-                  controller: email,
-                  decoration: InputDecoration(
-                      label: Text("Email",style: TextStyle(
-                        fontSize: 16.sp
-                      ),),
-                    filled: true,
-                    fillColor: couleur.lightGray,
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: couleur.lightGray)
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: couleur.secondaryText)
-                    ),
-                    prefixIcon: Icon(Icons.email)
-                  ),
+                Pinput(
+                  length: 5,
+                  obscureText: true,
+                  controller: pinController,
+                  onCompleted: (pin)async{
+                    final SharedPreferences prefs=await SharedPreferences.getInstance();
+                    connexion(numero!, pinController.text);
+                  },
                 ),
                 SizedBox(
                   height: 20.h,
-                ),
-
-                TextField(
-                  controller: mot_pass,
-                  obscureText: _cacher,
-                  decoration: InputDecoration(
-                    label: Text("Mot de passe",style: TextStyle(
-                      fontSize: 16.sp,
-                    ),),
-                      filled: true,
-                      fillColor: couleur.lightGray,
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: couleur.lightGray)
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: couleur.secondaryText)
-                      ),
-                    prefixIcon: Icon(Icons.lock),
-                    suffixIcon: GestureDetector(
-                      onTap: (){
-                        setState(() {
-                          _cacher=!_cacher;
-                        });
-                      },
-                      child: Icon(_cacher ? Icons.visibility_off:Icons.visibility),
-                    )
-                  ),
-                ),
-                SizedBox(
-                  height: 20.h,
-                ),
-                Row(
-                  children: [
-                    Expanded(child: ElevatedButton(onPressed: (){
-                      String mail=email.text;
-                      String motpass=mot_pass.text;
-                      //resterConnecte();
-                      connexion(mail, motpass);
-                      },style: ElevatedButton.styleFrom(
-                        backgroundColor: couleur.primaryPurple
-                      ), child: Text("Login",style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18.sp
-                      ),),)
-                    )
-                  ],
-                ),
-                SizedBox(
-                  height: 15.h,
                 ),
                 Padding(
                   padding: EdgeInsets.only(left: 5.0.w,right: 40.0.w),
@@ -189,7 +141,7 @@ class _connexion_screenState extends State<connexion_screen> {
                             Navigator.push(context,MaterialPageRoute(builder: (context)=>mot_passe_oublie()));
                           },style: ButtonStyle(
                             overlayColor: MaterialStateProperty.all(Colors.transparent) //Décactiver l'animation autour du bouton
-                          ), child: Text("Mot de passe oublié",style: TextStyle(
+                          ), child: Text("PIN oublié",style: TextStyle(
                             fontSize: 14.sp,
                               decoration: TextDecoration.underline
                           )
