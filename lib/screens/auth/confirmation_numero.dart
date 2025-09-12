@@ -60,10 +60,54 @@ class _ConfirmationNumeroState extends State<ConfirmationNumero> {
     });
     if (numero == null || numero!.isEmpty) {
       print("Erreur: Numéro de téléphone non trouvé");
-      return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            duration: Duration(seconds: 2),
+            content: Container(
+              padding: EdgeInsets.all(8.w),
+              height: 80.h,
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(12.r)
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.error_outline,color: Colors.white,size: 20.r,),
+                  SizedBox(width: 20.w,),
+                  Text("Erreur: Numéro de téléphone non trouvé")
+                ],
+              ),))
+      );
     }
 
     print("Envoi OTP vers: $numero");
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            dismissDirection: DismissDirection.horizontal,
+            duration: Duration(seconds: 3),
+            content: Container(
+              padding: EdgeInsets.all(8.w),
+              height: 80.h,
+              decoration: BoxDecoration(
+                  color: Colors.green,
+                  borderRadius: BorderRadius.circular(12.r),
+                boxShadow: null
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.pending,color: Colors.white,size: 20.r,),
+                  SizedBox(width: 20.w,),
+                  Text("Envoi OTP vers: $numero")
+                ],
+              ),))
+    );
 
     await _auth.verifyPhoneNumber(
       phoneNumber: numero, // ton numéro complet

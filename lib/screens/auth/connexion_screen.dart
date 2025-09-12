@@ -1,14 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/constants/server.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:gerematontine/screens/auth/inscription_screen.dart';
 import 'package:gerematontine/screens/auth/mot_passe_oublie.dart';
 import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
 import 'package:gerematontine/screens/dashboard/participer.dart';
-import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
 import 'package:pinput/pinput.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -98,76 +96,84 @@ class _connexion_screenState extends State<connexion_screen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: null,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [IconButton(onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>inscription_screen()));
+        }, icon: Icon(Icons.logout,size:30.r,color: Colors.black,)),],),
         automaticallyImplyLeading: false,
       ),
-      body: SafeArea(child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(child: Image.asset("assets/Djarra Finances V1.png",width: 150.w,height: 150.h,)),
-            SizedBox(
-              height: 30.h,
-            ),
-            Center(child: Text("Bon retour parmis nous, $nom $prenom!",style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.bold
-            ),)),
-            SizedBox(height: 15.h,),
-            Padding(padding: EdgeInsets.only(top: 10,right: 30,left: 30),
-                child: Column(
-              children: [
-                Pinput(
-                  length: 5,
-                  obscureText: true,
-                  controller: pinController,
-                  onCompleted: (pin)async{
-                    final SharedPreferences prefs=await SharedPreferences.getInstance();
-                    connexion(numero!, pinController.text);
-                  },
-                ),
-                SizedBox(
-                  height: 20.h,
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: 5.0.w,right: 40.0.w),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        flex: 20,
-                          child: TextButton(onPressed: (){
-                            Navigator.push(context,MaterialPageRoute(builder: (context)=>mot_passe_oublie()));
-                          },style: ButtonStyle(
-                            overlayColor: MaterialStateProperty.all(Colors.transparent) //Décactiver l'animation autour du bouton
-                          ), child: Text("PIN oublié",style: TextStyle(
-                            fontSize: 14.sp,
-                              decoration: TextDecoration.underline
-                          )
-                          )
-                          ),
-                      ),
-                      Expanded(
-                          flex: 10,
-                          child: TextButton(onPressed: (){
-                            Navigator.push(context, MaterialPageRoute(builder: (context)=>inscription_screen()));
-                          },style: ButtonStyle(
-                              overlayColor: MaterialStateProperty.all(Colors.transparent) //Décactiver l'animation autour du bouton
-                          ), child: Text("S'incrire",style: TextStyle(
-                              fontSize: 14.sp,
-                              decoration: TextDecoration.underline
-                          )
-                          )
-                          ),
-                      )
-                    ],
+      body: SafeArea(child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 30.h),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(child: Image.asset("assets/Djarra Finances V1.png",width: 150.w,height: 150.h,)),
+              SizedBox(
+                height: 30.h,
+              ),
+              Center(child: Text("Bon retour parmis nous, $nom $prenom!",style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold
+              ),)),
+              SizedBox(height: 15.h,),
+              Padding(padding: EdgeInsets.only(top: 10,right: 30,left: 30),
+                  child: Column(
+                children: [
+                  Pinput(
+                    length: 6,
+                    keyboardType: TextInputType.number,
+                    obscureText: true,
+                    controller: pinController,
+                    onCompleted: (pin)async{
+                      final SharedPreferences prefs=await SharedPreferences.getInstance();
+                      connexion(numero!, pinController.text);
+                    },
                   ),
-                )
-              ],
-            )
-            ),
-          ],
+                  SizedBox(
+                    height: 20.h,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 5.0.w,right: 40.0.w),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          flex: 20,
+                            child: TextButton(onPressed: (){
+                              Navigator.push(context,MaterialPageRoute(builder: (context)=>mot_passe_oublie()));
+                            },style: ButtonStyle(
+                              overlayColor: MaterialStateProperty.all(Colors.transparent) //Décactiver l'animation autour du bouton
+                            ), child: Text("PIN oublié",style: TextStyle(
+                              fontSize: 14.sp,
+                                decoration: TextDecoration.underline
+                            )
+                            )
+                            ),
+                        ),
+                        Expanded(
+                            flex: 10,
+                            child: TextButton(onPressed: (){
+                              Navigator.push(context, MaterialPageRoute(builder: (context)=>inscription_screen()));
+                            },style: ButtonStyle(
+                                overlayColor: MaterialStateProperty.all(Colors.transparent) //Décactiver l'animation autour du bouton
+                            ), child: Text("S'incrire",style: TextStyle(
+                                fontSize: 14.sp,
+                                decoration: TextDecoration.underline
+                            )
+                            )
+                            ),
+                        )
+                      ],
+                    ),
+                  )
+                ],
+              )
+              ),
+            ],
+          ),
         ),
       )
       )

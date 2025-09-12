@@ -76,7 +76,8 @@ class _DefinirpinState extends State<Definirpin> {
           ),
           Center(
             child: Pinput(
-              length: 5,
+              length: 6,
+              keyboardType: TextInputType.number,
               controller: secretCodeController,
               obscureText: true,
               onCompleted: (pin) async {

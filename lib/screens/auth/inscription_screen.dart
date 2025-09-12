@@ -29,16 +29,29 @@ class _inscription_screenState extends State<inscription_screen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    compteDetec();
   }
 
-  bool _cacher=true;
+  bool? _compteDetecte;
+  void compteDetec()async{
+    SharedPreferences prefs=await SharedPreferences.getInstance();
+    if(prefs.getString('nom')!=null){
+      setState(() {
+        _compteDetecte=true;
+      });
+    }else{
+      setState(() {
+        _compteDetecte=false;
+      });
+    }
+  }
   
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: _compteDetecte!,
         title: Center(child: Text("Inscription",style: TextStyle(fontSize:22.sp,fontWeight: FontWeight.bold),),),
       ),
       body: Center(
@@ -53,6 +66,7 @@ class _inscription_screenState extends State<inscription_screen> {
               ),
               TextField(
                 controller: nom,
+                keyboardType: TextInputType.text,
                 decoration: InputDecoration(
                   label: Text("Nom",style: TextStyle(
                     fontSize: 16.sp
@@ -74,6 +88,7 @@ class _inscription_screenState extends State<inscription_screen> {
               ),
               TextField(
                 controller: prenoms,
+                keyboardType: TextInputType.text,
                 decoration: InputDecoration(
                   label: Text("Prénoms",style: TextStyle(
                       fontSize: 16.sp
@@ -95,6 +110,7 @@ class _inscription_screenState extends State<inscription_screen> {
               ),
               TextField(
                 controller: numero,
+                keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                     label:Text("Numéro de téléphone",style: TextStyle(
                         fontSize: 16.sp
@@ -117,12 +133,36 @@ class _inscription_screenState extends State<inscription_screen> {
               Row(
                 children: [
                   Expanded(child: ElevatedButton(onPressed: () async {
-                    SharedPreferences prefs=await SharedPreferences.getInstance();
-                    prefs.setString("nom", nom.text);
-                    prefs.setString("prenom", prenoms.text);
-                    prefs.setString("mobile", "+225${numero.text}");
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>ConfirmationNumero()));
-                  },
+                    if(numero.text.isNotEmpty & nom.text.isNotEmpty & prenoms.text.isNotEmpty){
+                      SharedPreferences prefs=await SharedPreferences.getInstance();
+                      prefs.setString("nom", nom.text);
+                      prefs.setString("prenom", prenoms.text);
+                      prefs.setString("mobile", "+225${numero.text}");
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>ConfirmationNumero()));
+                    }else{
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: Colors.transparent,
+                              elevation: 0,
+                              duration: Duration(seconds: 2),
+                              content: Container(
+                                padding: EdgeInsets.all(8.w),
+                                height: 80.h,
+                                decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(12.r)
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.error_outline,color: Colors.white,size: 20.r,),
+                                    SizedBox(width: 20.w,),
+                                    Text("Erreur: Veuillez remplir tout les champs!")
+                                  ],
+                                ),))
+                      );
+                    }
+                    },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: couleur.primaryPurple
                   ), child: Text("Suivant",style: TextStyle(
