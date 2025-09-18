@@ -1,16 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:gerematontine/models/notification.dart';
 import 'package:http/http.dart';
 
 import '../../constants/server.dart';
-import '../../services/notifications_service.dart';
 
 class notifications extends StatefulWidget {
   final Session listsession;
@@ -32,7 +29,7 @@ class _notificationsState extends State<notifications> {
   bool _nonlu=false;
   bool _ouvert=false;
 
-  String filre="Tous";
+  String filtre="Tous";
   List<Notifications>_listnotification=[];
 
 
@@ -41,8 +38,8 @@ class _notificationsState extends State<notifications> {
     final reponse=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
         {
           "code_participant":widget.listsession.code_participant,
-          "filtre":filre,
-        })).timeout(Duration(seconds: 30));
+          "filtre":filtre,
+        })).timeout(Duration(seconds: 15));
     if(reponse.statusCode==200){
       final Map<String,dynamic>data=jsonDecode(reponse.body);
       bool success=data['success'];
@@ -51,29 +48,22 @@ class _notificationsState extends State<notifications> {
         setState(() {
           _listnotification=notifs.map((notifs)=>Notifications.fromJson(notifs)).toList();
         });
-        // 🔔 Afficher une notif locale pour la plus récente
-        if (_listnotification.isNotEmpty) {
-          final notif = _listnotification.first;
-          NotificationService.showNotification(
-            id: int.parse(notif.id_notif),
-            title: notif.type_notif,
-            body: notif.contenu_notif,
-          );
-        }
       }else{
         setState(() {
           _listnotification=[];
         });
-        print("Aucune notification");
       }
     }else{
+
       print("Erreur serveur : ${reponse.statusCode}");
     }
   }
 
   void marquerCommelu(int x) async{
+    String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=notifications&action=lire_notification");
-    final reponse=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
+    final reponse=await post(url,headers: {"content-Type":"application/json",
+      "Authorization":"Bearer $jwt"},body: jsonEncode(
         {
           "code_participant":widget.listsession.code_participant,
           "id_notification":x
@@ -93,7 +83,9 @@ class _notificationsState extends State<notifications> {
             actions: [
               Center(child: TextButton.icon(onPressed: (){
                 Navigator.of(context).pop();
-              }, label: Text("OK",style: TextStyle(
+              },style: TextButton.styleFrom(
+                  backgroundColor: Colors.blueAccent
+              ), label: Text("Compris",style: TextStyle(
                   fontSize: 14.sp
               ),),icon: Icon(Icons.verified,color: Colors.lightGreen,),),)
             ],
@@ -139,7 +131,7 @@ class _notificationsState extends State<notifications> {
                       setState(() {
                         _lu=true;
                         _nonlu=false;
-                        filre="Lu";
+                        filtre="Lu";
                       });
                       recupererNotif();
                     }, label: Text("Lu",style: TextStyle(
@@ -154,7 +146,7 @@ class _notificationsState extends State<notifications> {
                       setState(() {
                         _lu=false;
                         _nonlu=true;
-                        filre="Non lu";
+                        filtre="Non lu";
                       });
                       recupererNotif();
                     }, label: Text("Non lu",style: TextStyle(
@@ -211,7 +203,9 @@ class _notificationsState extends State<notifications> {
                                   Navigator.of(context).pop();
                                   marquerCommelu(int.parse(notifica.id_notif));
                                   recupererNotif();
-                                }, label: Text("OK",style: TextStyle(
+                                },style: TextButton.styleFrom(
+                                    backgroundColor: Colors.blueAccent
+                                ), label: Text("Compris",style: TextStyle(
                                     fontSize: 14.sp
                                 ),),icon: Icon(Icons.verified,color: Colors.lightGreen,),),)
                               ],

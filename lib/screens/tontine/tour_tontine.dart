@@ -36,8 +36,10 @@ class _tourTontineState extends State<tourTontine> {
 
   List<Beneficiare> _listOrdre=[];
   Future<void>verifierTour()async{
+    String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=participants&action=verifierTour");
-    final response=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
+    final response=await post(url,headers: {"content-Type":"application/json",
+        "Authorization":"Bearer $jwt"},body: jsonEncode(
         {
           "code_tontine":widget.listsession.code_tontine
         }));
@@ -58,8 +60,10 @@ class _tourTontineState extends State<tourTontine> {
 
   //Liste des bénéficiares
   Future<void>listeBeneficiare() async{
+    String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=tontines&action=ordre_paiement");
-    final response=await post(url,headers: {'content-Type':'application/json'},body: jsonEncode(
+    final response=await post(url,headers: {'content-Type':'application/json',
+      "Authorization":"Bearer $jwt"},body: jsonEncode(
         {
           "code_tontine":widget.listsession.code_tontine
         }));
@@ -96,7 +100,7 @@ class _tourTontineState extends State<tourTontine> {
         child: Column(
           children: [
             Card(
-              color: Color( 0xFF2596be),//couleur.primaryPurple,
+              color: Couleur.primaryBlue,//couleur.primaryPurple,
               child: Padding(
                 padding: EdgeInsets.all(10.0.w),
                 child: Row(
@@ -209,7 +213,7 @@ class _tourTontineState extends State<tourTontine> {
                         ),
                         Padding(
                           padding: EdgeInsets.only(right: 10.0.w),
-                          child: Icon(Icons.emoji_events,size: 80.r,color:Colors.amber,),
+                          child: Icon(Icons.emoji_events,size: 80.r,color:Colors.orange,),
                         ),
 
                       ],

@@ -1,5 +1,8 @@
 import 'dart:convert';
 import 'dart:convert' as convert;
+import 'package:delightful_toast/delight_toast.dart';
+import 'package:delightful_toast/toast/components/toast_card.dart';
+import 'package:delightful_toast/toast/utils/enums.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -26,33 +29,15 @@ class _payer_cotisationState extends State<payer_cotisation> {
     // TODO: implement initState
     super.initState();
     fetchCotisation();
-    montant.addListener((){
-      if (misejourEncour) return;
-      misejourEncour = true;
-      double somme=double.tryParse(montant.text) ?? 0;
-      double total=(somme+(0.1 * somme));
-      montantFraisinculs.text=total.toStringAsFixed(2);
-      misejourEncour = false;
-    });
-    montantFraisinculs.addListener((){
-      if (misejourEncour) return;
-      misejourEncour = true;
-      double somme2=double.tryParse(montant.text) ?? 0;
-      double total=(somme2-(0.1 * somme2));
-      montant.text=total.toStringAsFixed(2);
-      misejourEncour = false;
-    });
-  }
-
-  @override
-  void dispose(){
-    montant.dispose();
-    montantFraisinculs.dispose();
-    super.dispose();
   }
 
 
+
+  bool saisiMontant=false;
+  bool saisiMontantFrais=false;
   bool misejourEncour=false;
+  bool enCourtraitement=false;
+
 
   List<Cotisation>_listCotisation=[];
 
@@ -64,8 +49,10 @@ class _payer_cotisationState extends State<payer_cotisation> {
   //late bool paye;
 
   Future<void>fetchCotisation() async{
+    String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=cotisations&action=voir_mes_cotisations");
-    final response = await http.post(url,headers: {'content-Type':'application/json'},body: convert.jsonEncode({
+    final response = await http.post(url,headers: {'content-Type':'application/json',
+      "Authorization":"Bearer $jwt"},body: convert.jsonEncode({
       "code_participant":widget.listsession.code_participant,
       "code_tontine":widget.listsession.code_tontine
     }));
@@ -79,14 +66,18 @@ class _payer_cotisationState extends State<payer_cotisation> {
   }
 
   Future<void>payerCotisation(String x, String y) async{
+    String? jwt=await widget.listsession.getSecureJwt();
+    setState(() {
+      enCourtraitement=true;
+    });
     final url=Uri.parse("${adress}?ressource=cotisations&action=payer_cotisation");
-    final reponse=await http.post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
-        {
-          "code_tontine":widget.listsession.code_tontine,
-          "code_participant":widget.listsession.code_participant,
-          "montant":int.parse(x),
-          "libelle_mode_paiement":y
-        }));
+    final reponse=await http.post(url,headers: {"content-Type":"application/json",
+      "Authorization":"Bearer $jwt"},body: jsonEncode({
+      "code_tontine":widget.listsession.code_tontine,
+      "code_participant":widget.listsession.code_participant,
+      "montant":int.parse(x),
+      "libelle_mode_paiement":y
+    }));
     if(reponse.statusCode==200){
       Map<String,dynamic>data=jsonDecode(reponse.body);
       bool success=data['success'];
@@ -95,43 +86,60 @@ class _payer_cotisationState extends State<payer_cotisation> {
           return AlertDialog(
             title: Center(child: Text("Statut paiement",style: TextStyle(
                 fontSize: 15.sp
-            ),),),
-            content: Text(data['message'],style: TextStyle(
-                fontSize: 14.sp
-            ),),
-            actions: [
-              Center(
-                child: TextButton.icon(onPressed: (){
-                  Navigator.of(context).pop();
-                }, label: Text("OK",style: TextStyle(
-                    fontSize: 14.sp
-                ),),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
-              )
-            ],
-          );
-        });
+              ),),),
+              content: Text(data['message'],style: TextStyle(
+                  fontSize: 14.sp
+              ),),
+              actions: [
+                Center(
+                  child: TextButton.icon(onPressed: (){
+                    setState(() {
+                      enCourtraitement=false;
+                      _selectedOption="";
+                    });
+                    Navigator.of(context).pop();
+                  },style: TextButton.styleFrom(
+                      backgroundColor: Couleur.primaryBlue
+                  ), label: Text("Compris",style: TextStyle(
+                      fontSize: 14.sp
+                  ),),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
+                )
+              ],
+            );
+          });
+
       }else{
-        showDialog(context: context, builder: (BuildContext context){
-          return AlertDialog(
-            title: Center(child: Text("Statut paiement",style: TextStyle(
-                fontSize: 15.sp
-            ),),),
-            content: Text(data['message'],style: TextStyle(
-                fontSize: 14.sp
-            ),),
-            actions: [
-              Center(
-                child: TextButton.icon(onPressed: (){
-                  Navigator.of(context).pop();
-                }, label: Text("OK",style: TextStyle(
-                    fontSize: 14.sp
-                ),),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
-              )
-            ],
-          );
-        });
+          showDialog(context: context, builder: (BuildContext context){
+            return AlertDialog(
+              title: Center(child: Text("Statut paiement",style: TextStyle(
+                  fontSize: 15.sp
+              ),),),
+              content: Text(data['message'],style: TextStyle(
+                  fontSize: 14.sp
+              ),),
+              actions: [
+                Center(
+                  child: TextButton.icon(onPressed: (){
+                    setState(() {
+                      enCourtraitement=false;
+                      _selectedOption="";
+                    });
+                    Navigator.of(context).pop();
+                  },style: TextButton.styleFrom(
+                    backgroundColor: Couleur.primaryBlue
+                  ), label: Text("Compris",style: TextStyle(
+                    color: Colors.white,
+                      fontSize: 14.sp
+                  ),),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
+                )
+              ],
+            );
+          });
       }
     }else{
+      setState(() {
+        enCourtraitement=false;
+      });
       print("Erreur serveur : ${reponse.statusCode}");
     }
   }
@@ -165,19 +173,34 @@ class _payer_cotisationState extends State<payer_cotisation> {
                 TextField(
                   keyboardType: TextInputType.number,
                   controller: montant,
+                  onTap: (){
+                    saisiMontant=true;
+                  },
+                  onEditingComplete: (){
+                    saisiMontant=false;
+                  },
+                  onChanged: (value){
+                    if(value.isEmpty) {
+                      montantFraisinculs.clear();
+                      return;
+                    }
+                    double somme = double.tryParse(montant.text) ?? 0;
+                    double total= somme*(1+0.2);
+                    final newTotal=total.toStringAsFixed(0);
+                    montantFraisinculs.value=TextEditingValue(
+                        text: newTotal,
+                        selection: TextSelection.collapsed(offset: newTotal.length)
+                    );
+                  },
                   decoration: InputDecoration(
-                    label: Text("Montant (Exemple: 2000)",style: TextStyle(
+                    label: Text("Montant Hors Frais(Exemple: 2000)",style: TextStyle(
                       fontSize: 14.sp
                     ),),
-                    fillColor: couleur.lightGray,
+                    fillColor: Couleur.lightGray,
                     filled: true,
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                      borderSide: BorderSide(color: couleur.primaryPurple)
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                      borderSide: BorderSide(color: couleur.primaryPurple)
+
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Couleur.primaryBlue,width: 2.0.w),
                     )
                   ),
                 ),
@@ -187,24 +210,47 @@ class _payer_cotisationState extends State<payer_cotisation> {
                 TextField(
                   keyboardType: TextInputType.number,
                   controller: montantFraisinculs,
+                  onTap: (){
+                    saisiMontantFrais=true;
+                  },
+                  onEditingComplete: (){
+                    saisiMontantFrais=false;
+                  },
+                  onChanged: (value){
+                    if(value.isEmpty) {
+                      montant.clear();
+                      return;
+                    }
+
+                    double somme2=double.tryParse(montantFraisinculs.text) ?? 0;
+                    double total2=somme2/(1+0.2);
+
+                    final newTotal2=total2.toStringAsFixed(0);
+                    montant.value=TextEditingValue(
+                        text: newTotal2,
+                        selection: TextSelection.collapsed(offset: newTotal2.length)
+                    );
+                  },
                   decoration: InputDecoration(
-                      label: Text("Montant frais inclus(1%)",style: TextStyle(
+                      label: Text("Montant + Frais",style: TextStyle(
                           fontSize: 14.sp
                       ),),
-                      fillColor: couleur.lightGray,
+                      fillColor: Couleur.lightGray,
                       filled: true,
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: BorderSide(color: couleur.primaryPurple)
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: BorderSide(color: couleur.primaryPurple)
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Couleur.primaryBlue,width: 2.0.w),
                       )
                   ),
                 ),
                 SizedBox(
-                  height: 15.h,
+                  height: 5.h,
+                ),
+                Text("Frais total de transaction 2%(1% Djarra + 1% opérateurs)",style: TextStyle(
+                  fontSize: 14.sp,
+                  color: Couleur.primaryBlue
+                ),),
+                SizedBox(
+                  height: 10.h,
                 ),
                 Row(
                   children: [
@@ -221,171 +267,271 @@ class _payer_cotisationState extends State<payer_cotisation> {
                               builder: (BuildContext context, StateSetter setModalState) {
                               return Container(
                                 decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: Colors.grey.shade50,
                                     borderRadius: BorderRadius.circular(12.r)),
-                                height: 250.h,
-                                width: double.maxFinite,
+                                height: 400.h,
+                                width: double.maxFinite.w,
                                 child: Column(
                                     children: [
+                                      SizedBox(
+                                        height: 15.h,
+                                      ),
+                                      Center(
+                                        child: Text("Mode de paiement",style: TextStyle(
+                                          fontSize: 20.sp,
+                                          fontWeight: FontWeight.w500
+                                        ),),
+                                      ),SizedBox(
+                                        height: 5.h,
+                                      ),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                              child: Card(
+                                                elevation: 0,
+                                                color: Couleur.lightGray,
+                                                child: Padding(
+                                                  padding: EdgeInsets.symmetric(horizontal: 5.w),
+                                                  child: InkWell(
+                                                    splashColor: Couleur.primaryBlue.withOpacity(0.2),
+                                                    highlightColor: Colors.transparent,
+                                                    onTap: (){
+                                                      setModalState(() {
+                                                        _selectedOption="Wave";
+                                                      });
+                                                    },
+                                                    child: Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                      children: [
+                                                        Expanded(
+                                                          flex:3,
+                                                            child: Row(children: [
+                                                          ClipRRect(
+                                                            borderRadius: BorderRadius.circular(5.r),
+                                                            child: Image.asset("assets/wave.png",fit: BoxFit.cover,height: 50.h,
+                                                              width: 100.w,),
+                                                          ),
+                                                          SizedBox(width: 10.w,),
+                                                          Text("WAVE"),
+                                                        ],)),
+                                                        SizedBox(width: 60.w,),
+                                                        Expanded(
+                                                          flex:1,
+                                                          child: RadioListTile<String>(value: "Wave", groupValue: _selectedOption, onChanged: (value){
+                                                            setModalState(() {
+                                                              _selectedOption=value!;
+                                                              print(_selectedOption.toString());
+                                                            });
+                                                          }),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(
+                                        height: 2.h,
+                                      ),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                              child: Card(
+                                                elevation: 0,
+                                                color: Couleur.lightGray,
+                                                child: Padding(
+                                                  padding: EdgeInsets.symmetric(horizontal: 5.w),
+                                                  child: InkWell(
+                                                    splashColor: Colors.deepOrange.withOpacity(0.2),
+                                                    highlightColor: Colors.transparent,
+                                                    onTap: (){
+                                                      setModalState(() {
+                                                        _selectedOption="Orange Money";
+                                                      });
+                                                    },
+                                                    child: Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                      children: [
+                                                        Expanded(
+                                                            flex:3,
+                                                            child: Row(children: [
+                                                              ClipRRect(
+                                                                borderRadius: BorderRadius.circular(5.r),
+                                                                child: Image.asset("assets/orange money 2.png",fit: BoxFit.cover,height: 50.h,
+                                                                  width: 100.w,),
+                                                              ),
+                                                              SizedBox(width: 10.w,),
+                                                              Text("ORANGE"),
+                                                            ],)),
+                                                        SizedBox(width: 70.w,),
+                                                        Expanded(
+                                                          flex: 1,
+                                                          child: RadioListTile<String>(value: "Orange Money", groupValue: _selectedOption, onChanged: (value){
+                                                            setModalState(() {
+                                                              _selectedOption=value!;
+                                                              print(_selectedOption.toString());
+                                                            });
+                                                          }),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(
+                                        height: 5.h,
+                                      ),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                              child: Card(
+                                                elevation: 0,
+                                                color: Couleur.lightGray,
+                                                child: Padding(
+                                                  padding: EdgeInsets.symmetric(horizontal: 5.w),
+                                                  child: InkWell(
+                                                    splashColor: Colors.yellow.withOpacity(0.5),
+                                                    highlightColor: Colors.transparent,
+                                                    onTap: (){
+                                                      setModalState(() {
+                                                        _selectedOption="MTN Money";
+                                                      });
+                                                    },
+                                                    child: Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                      children: [
+                                                        Expanded(
+                                                            flex:3,
+                                                            child: Row(children: [
+                                                              ClipRRect(
+                                                                borderRadius: BorderRadius.circular(5.r),
+                                                                child: Image.asset("assets/MTN MONEY.png",fit: BoxFit.cover,height: 50.h,
+                                                                  width: 100.w,),
+                                                              ),
+                                                              SizedBox(width: 10.w,),
+                                                              Text("MTN"),
+                                                            ],
+                                                            )
+                                                        ),
+                                                        SizedBox(width: 70.w,),
+                                                        Expanded(
+                                                          flex: 1,
+                                                          child: RadioListTile<String>(value: "MTN Money", groupValue: _selectedOption, onChanged: (value){
+                                                            setModalState(() {
+                                                              _selectedOption=value!;
+                                                              print(_selectedOption.toString());
+                                                            });
+                                                          }),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(
+                                        height: 5.h,
+                                      ),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                              child: Card(
+                                                elevation: 0,
+                                                color: Couleur.lightGray,
+                                                child: InkWell(
+                                                  splashColor: Couleur.primaryBlue.withOpacity(0.5),
+                                                  highlightColor: Colors.transparent,
+                                                  onTap: (){
+                                                    setModalState(() {
+                                                      _selectedOption="Moov Money";
+                                                    });
+                                                  },
+                                                  child: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                    children: [
+                                                      Expanded(
+                                                          flex:3,
+                                                          child: Row(children: [
+                                                            ClipRRect(
+                                                              borderRadius: BorderRadius.circular(14.r),
+                                                              child: Image.asset("assets/moov.png",fit: BoxFit.cover,height: 50.h,
+                                                                width: 110.w,),
+                                                            ),
+                                                            SizedBox(width: 10.w,),
+                                                            Text("MOOV"),
+                                                          ],)),
+                                                      SizedBox(width: 70.w,),
+                                                      Expanded(
+                                                        flex: 1,
+                                                        child: RadioListTile<String>(value: "Moov Money", groupValue: _selectedOption, onChanged: (value){
+                                                          setModalState(() {
+                                                            _selectedOption=value!;
+                                                            print(_selectedOption.toString());
+                                                          });
+                                                        }),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              )
+                                          ),
+                                        ],
+                                      ),
                                       SizedBox(
                                         height: 20.h,
                                       ),
                                       Padding(
-                                        padding: EdgeInsets.symmetric(horizontal: 5.w),
+                                        padding: EdgeInsets.symmetric(horizontal: 100.w),
                                         child: Row(
                                           children: [
-                                            Expanded(
-                                              flex: 20,
-                                              child: Card(
-                                                  color: couleur.lightGray,
-                                                  child: Material(
-                                                    color: Colors.transparent,
-                                                    child: InkWell(
-                                                      onTap: (){
-                                                        setModalState(() {
-                                                          _selectedOption="Wave";
-                                                        });
-                                                      },
-                                                      child: Column(
-                                                        mainAxisSize: MainAxisSize.min,
-                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                        children: [
-                                                          Container(
-                                                            width: 50.w,
-                                                            child: Image.asset("assets/wave.png",fit: BoxFit.cover,),
-                                                          ),
-                                                          RadioListTile<String>(value: "Wave", groupValue: _selectedOption, onChanged: (value){
-                                                            setState(() {
-                                                              _selectedOption=value!;
-                                                            });
-                                                          })
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  )
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 20,
-                                              child: Card(
-                                                  color: couleur.lightGray,
-                                                  child: Material(
-                                                    color: Colors.transparent,
-                                                    child: InkWell(
-                                                      onTap: (){
-                                                        setModalState(() {
-                                                          _selectedOption="Orange Money";
-                                                        });
-                                                      },
-                                                      child: Column(
-                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                        children: [
-                                                          Container(
-                                                            height: 50.h,
-                                                            width: 50.w,
-                                                            child: Image.asset("assets/orange.png",fit: BoxFit.cover,),
-                                                          ),
-                                                          RadioListTile<String>(value: "Orange Money", groupValue: _selectedOption, onChanged: (value){
-                                                            setState(() {
-                                                              _selectedOption=value!;
-                                                            });
-                                                          })
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  )
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 20,
-                                              child: Card(
-                                                  color: couleur.lightGray,
-                                                  child: Material(
-                                                    color: Colors.transparent,
-                                                    child: InkWell(
-                                                      onTap: (){
-                                                        setModalState(() {
-                                                          _selectedOption="MTN Money";
-                                                        });
-                                                      },
-                                                      child: Column(
-                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                        children: [
-                                                          Container(
-                                                            height: 50.h,
-                                                            width: 60.w,
-                                                            child: Image.asset("assets/mtn.png",fit: BoxFit.cover,),
-                                                          ),
-                                                          RadioListTile<String>(value: "MTN Money", groupValue: _selectedOption, onChanged: (value){
-                                                            setState(() {
-                                                              _selectedOption=value!;
-                                                            });
-                                                          })
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  )
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 20,
-                                              child: Card(
-                                                  color: couleur.lightGray,
-                                                  child: Material(
-                                                    color: Colors.transparent,
-                                                    child: InkWell(
-                                                      onTap: (){
-                                                        setModalState(() {
-                                                          _selectedOption="Moov Money";
-                                                        });
-                                                      },
-                                                      child: Column(
-                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                        children: [
-                                                          Container(
-                                                            width: 50.w,
-                                                            height: 50.h,
-                                                            child: Image.asset("assets/moov.png",fit: BoxFit.cover,),
-                                                          ),
-                                                          RadioListTile<String>(value: "Moov Money", groupValue: _selectedOption, onChanged: (value){
-                                                            setState(() {
-                                                              _selectedOption=value!;
-                                                              print(_selectedOption.toString());
-                                                            });
-                                                          })
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  )
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 30.h,
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.symmetric(horizontal: 20.w),
-                                        child: Row(
-                                          children: [
-                                            Expanded(child: ElevatedButton.icon(onPressed: (){
+                                            Expanded(child: ElevatedButton.icon(onPressed: enCourtraitement? null: (){
                                               String montantPaiement=montant.text;
                                               String modePaie=_selectedOption.toString();
-                                              payerCotisation(montantPaiement, modePaie);
-                                            }, label: Text("Valider paiement"),icon: Icon(Icons.verified,color: Colors.green,),))
+                                              if(montantPaiement.isEmpty || modePaie.isEmpty){
+                                                DelightToastBar(
+                                                  position: DelightSnackbarPosition.top,
+                                                  autoDismiss: true,
+                                                  snackbarDuration: Duration(seconds: 2),
+                                                  builder: (BuildContext context) {
+                                                  return ToastCard(
+                                                      title: Row(
+                                                        mainAxisAlignment:MainAxisAlignment.start,
+                                                        children: [Icon(Icons.error_outline,color: Colors.white,size: 30.r,),Text("Veuillez remplir tout les champs !",style: TextStyle(
+                                                        color: Colors.white
+                                                      ),)],),
+                                                  color: Colors.red.shade700,);
+                                                },).show(context);
+                                              }else{
+                                                print(montantPaiement);
+                                                print(montant.text);
+                                                payerCotisation(montantPaiement, modePaie);
+                                              }
+                                            },style: TextButton.styleFrom(
+                                      backgroundColor: Couleur.secondaryGreen
+                                      ), label:enCourtraitement?Text("Paiement en cours...",style: TextStyle(
+                                              color: Colors.white
+                                            ),):Text("Payer",style: TextStyle(
+                                                color: Colors.white
+                                            ),),icon:enCourtraitement?SizedBox(width:20.w,height:20.h,child: CircularProgressIndicator(color: Colors.white,strokeWidth: 2,)):Icon(Icons.monetization_on,color: Colors.white,),))
                                           ],
                                         ),
                                       )
                                     ]),
                               );}
                             );
-                          });}, label: Text("Payer",style: TextStyle(
+                          });}, label: Text("Valider le paiement",style: TextStyle(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.bold,
                         color: Colors.white
-                    ),),icon: Icon(Icons.attach_money_sharp,color: Colors.white,),style: ElevatedButton.styleFrom(
-                      backgroundColor: couleur.primaryPurple,
+                    ),),style: ElevatedButton.styleFrom(
+                      backgroundColor: Couleur.primaryBlue,
                     ),))
                   ],
                 ),

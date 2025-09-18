@@ -32,8 +32,15 @@ class _participerState extends State<participer> {
   String? scannedCode;
 
   Future<void>participer()async{
+    String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=participations&action=participer");
-    final response=await http.post(url,headers:{"content-Type":"application/json"},body:jsonEncode({
+    final response=await http.post(
+        url,
+        headers:{
+          "Authorization":"Bearer $jwt",
+          "content-Type":"application/json",
+        },
+        body:jsonEncode({
           "code_participant":widget.listsession.code_participant,
           "code_tontine":code.text
         }));
@@ -41,28 +48,28 @@ class _participerState extends State<participer> {
       final Map<String,dynamic>data=jsonDecode(response.body);
       bool success=data['success'];
       if(success){
-        setState(() {
-          widget.listsession.setCodeTontine(code.text);
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>dashboard(listsession: widget.listsession)), (route)=>false);
-        });
-      }else{
-        if(data['message']=="Vous êtes déjà inscrit dans cette tontine"){
+        if(data['message']=="Vous participez désormais à cette tontine"){
           setState(() {
-            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>dashboard(listsession: widget.listsession)), (route)=>false);
+            widget.listsession.setCodeTontine(code.text);
           });
-        }else{
-          showDialog(context: context, builder: (BuildContext context){
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>dashboard(listsession: widget.listsession)), (route)=>false);
+        }else if(data['message']=="Vous êtes déjà inscrit dans cette tontine"){
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>dashboard(listsession: widget.listsession)), (route)=>false);
+        }
+      }else{
+        showDialog(context: context, builder: (BuildContext context){
             return AlertDialog(
               title: Text("Erreur"),
               content: Text(data['message']),
               actions: [
                 TextButton.icon(onPressed: (){
                   Navigator.of(context).pop();
-                }, label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
+                },style: TextButton.styleFrom(
+                    backgroundColor: Couleur.primaryBlue
+                ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
               ],
             );
           });
-        }
         }
     }else{
       showDialog(context: context, builder: (BuildContext contex){
@@ -136,7 +143,7 @@ class _participerState extends State<participer> {
                                     children: [
                                       Text("Echec"),
                                       Spacer(),
-                                      Text("Veuillez scanner un QRCode Djarra")
+                                      Text("Veuillez scanner un QRCode Djarra Finances")
                                     ],
                                   ),
                                 )
@@ -176,13 +183,13 @@ class _participerState extends State<participer> {
                         fontSize: 16.sp
                     ),),
                     filled: true,
-                    fillColor: couleur.lightGray,
+                    fillColor: Couleur.lightGray,
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
-                      borderSide: BorderSide(color: couleur.primaryPurple)
+                      borderSide: BorderSide(color: Couleur.primaryBlue)
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: couleur.primaryPurple),
+                      borderSide: BorderSide(color: Couleur.primaryBlue),
                       borderRadius: BorderRadius.circular(12.r)
                     ),
                     prefixIcon: Icon(Icons.lock),
@@ -213,17 +220,17 @@ class _participerState extends State<participer> {
                   fontSize: 14.sp,
                   color: Colors.white
                 ),),icon: Icon(Icons.rocket_launch,color: Colors.white,),style: TextButton.styleFrom(
-                  backgroundColor: couleur.primaryPurple
+                  backgroundColor: Couleur.primaryBlue
                 ),)),
               Center(
                 child: TextButton.icon(onPressed: (){
                   Navigator.push(context, MaterialPageRoute(builder: (context)=>creer_tontine(listsession: widget.listsession,)));
-                }, label: Text("Créer ma tontine",style: TextStyle(
+                },style: TextButton.styleFrom(
+                    backgroundColor: Couleur.primaryBlue
+                ), label: Text("Créer ma tontine",style: TextStyle(
                   fontSize: 14.sp,
                     color: Colors.white
-                ),),icon: Icon(Icons.rocket_launch,color: Colors.white,),style: TextButton.styleFrom(
-                    backgroundColor: couleur.primaryPurple
-                ),),
+                ),),icon: Icon(Icons.rocket_launch,color: Colors.white,)),
               )
             ],
           ),)

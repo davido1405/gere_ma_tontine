@@ -57,10 +57,11 @@ class _walletTontineState extends State<walletTontine> {
   
   //Recupérer le wallet
   Future<void>recupererWallet() async{
+    String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=tontines&action=wallet_infos");
-    final reponse=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
+    final reponse=await post(url,headers: {'Authorization':'Bearer $jwt','content-Type':'application/json'},body: jsonEncode(
         {
-          "code_tontine":widget.tontine.code_tontine
+          "code_tontine":widget.listsession.code_tontine
         }));
     if(reponse.statusCode==200){
       Map<String,dynamic>data=jsonDecode(reponse.body);
@@ -77,8 +78,10 @@ class _walletTontineState extends State<walletTontine> {
 
   //Récupérer la liste des transactions
 Future<void>transacs() async{
+  String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=tontines&action=transactions");
-    final response=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
+    final response=await post(url,headers: {"content-Type":"application/json",
+      "Authorization":"Bearer $jwt"},body: jsonEncode(
         {
           "code_tontine":widget.tontine.code_tontine
         }));
@@ -96,8 +99,10 @@ Future<void>transacs() async{
 }
 
 Future<void>verifierTour()async{
+  String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=participants&action=verifierTour");
-    final response=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
+    final response=await post(url,headers: {"content-Type":"application/json",
+      "Authorization":"Bearer $jwt"},body: jsonEncode(
         {
         "code_tontine":widget.tontine.code_tontine
         }));
@@ -126,8 +131,10 @@ Future<void>verifierTour()async{
 }
 
 Future<bool>retirer()async{
+  String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=tontines&action=retirer");
-    final response=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
+    final response=await post(url,headers: {"content-Type":"application/json",
+      "Authorization":"Bearer $jwt"},body: jsonEncode(
         {
           "code_tontine":widget.listsession.code_tontine,
           "code_participant":widget.listsession.code_participant
@@ -152,7 +159,9 @@ Future<bool>retirer()async{
               TextButton.icon(onPressed: (){
                 Navigator.of(context).pop();
                 initState();
-              }, label: Text("Merci !"),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
+              },style: TextButton.styleFrom(
+                  backgroundColor: Couleur.primaryBlue
+              ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
             ],
           );
         });
@@ -164,8 +173,10 @@ Future<bool>retirer()async{
 }
 
 Future<bool>relancer()async{
+  String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=tontines&action=liste_tours");
-    final response=await post(url,headers: {'content-Type':'application/json'},body: jsonEncode([
+    final response=await post(url,headers: {'content-Type':'application/json',
+      "Authorization":"Bearer $jwt"},body: jsonEncode([
       {
         'code_tontine':widget.listsession.code_tontine,
         'relancer':'Oui'
@@ -187,7 +198,9 @@ Future<bool>relancer()async{
           actions: [
             TextButton.icon(onPressed: (){
               Navigator.of(context).pop();
-            }, label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.green,),)
+            },style: TextButton.styleFrom(
+                backgroundColor: Couleur.primaryBlue
+            ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.green,),)
           ],
         );
       });
@@ -226,7 +239,9 @@ Future<bool>relancer()async{
                     _dialogShown = true; // empêcher les doublons
                   });
                   Navigator.of(context).pop();
-                }, label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.green,),)
+                },style: TextButton.styleFrom(
+                    backgroundColor: Couleur.primaryBlue
+                ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.green,),)
               ],
             );
           }),
@@ -248,10 +263,9 @@ Future<bool>relancer()async{
           padding: EdgeInsets.all(8.0.w),
           child: Column(
             children: [
-              SizedBox(
-                height: 230.h,
+              ClipRRect(
                 child: Card(
-                  color: Color( 0xFF2596be),//couleur.primaryPurple,
+                  color: Couleur.primaryBlue,//couleur.primaryPurple,
                   child: Padding(
                     padding: EdgeInsets.all(10.0.w),
                     child: Row(
@@ -274,7 +288,7 @@ Future<bool>relancer()async{
                               ],
                             ),
                             SizedBox(
-                              height: 10.h,
+                              height: 20.h,
                             ),
                             Row(
                               children: [
@@ -304,6 +318,8 @@ Future<bool>relancer()async{
                                   child: Icon(_masque? Icons.visibility:Icons.visibility_off,color: Colors.white,),
                                 )
                               ],
+                            ),SizedBox(
+                              height: 10.h,
                             ),
                             Center(
                               child: Row(
@@ -359,7 +375,9 @@ Future<bool>relancer()async{
                                                                               actions: [
                                                                                 TextButton.icon(onPressed: (){
                                                                                   Navigator.of(context).popUntil((route)=>route.isFirst);
-                                                                                }, label: Text("Compris !"),icon: Icon(Icons.verified,color: Colors.green,),),
+                                                                                },style: TextButton.styleFrom(
+                                                                                    backgroundColor: Couleur.secondaryGreen
+                                                                                ), label: Text("Compris !"),icon: Icon(Icons.verified,color: Colors.white,),),
                                                                               ],
                                                                             );
                                                                           });
@@ -373,20 +391,26 @@ Future<bool>relancer()async{
                                                                               actions: [
                                                                                 TextButton.icon(onPressed: (){
                                                                                   Navigator.of(context).pop();
-                                                                                }, label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.green,),)
+                                                                                },style: TextButton.styleFrom(
+                                                                                    backgroundColor: Couleur.secondaryGreen
+                                                                                ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.white,),)
                                                                               ],
                                                                             );
                                                                           });
                                                                         }
                                                                       }
-                                                                    }, label: Text("Nouveau cycle",style: TextStyle(
+                                                                    },style: TextButton.styleFrom(
+                                                                        backgroundColor: Couleur.primaryBlue
+                                                                    ), label: Text("Nouveau cycle",style: TextStyle(
                                                                         fontSize: 14.sp
-                                                                    ),),icon: Icon(Icons.fiber_new_rounded,color: Colors.green,),),
+                                                                    ),),icon: Icon(Icons.loop_rounded,color: Colors.white,size: 25.r,),),
                                                                     TextButton.icon(onPressed: (){
                                                                       //Fonction pour cloturer la tontine
-                                                                    }, label: Text("Cloturer",style: TextStyle(
+                                                                    },style: TextButton.styleFrom(
+                                                                        backgroundColor: Couleur.lightGray
+                                                                    ), label: Text("Cloturer",style: TextStyle(
                                                                         fontSize: 14.sp
-                                                                    ),),icon: Icon(Icons.close_rounded,color: Colors.red,),),
+                                                                    ),),icon: Icon(Icons.close_rounded,color: Colors.red.shade400,),),
                                                                   ],
                                                                 )
                                                               ],
@@ -410,7 +434,9 @@ Future<bool>relancer()async{
                                                   }else{
                                                     Navigator.of(context).pop();
                                                   }
-                                                }, label: Text("Merci !"),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
+                                                },style: TextButton.styleFrom(
+                                                    backgroundColor: Couleur.secondaryGreen
+                                                ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.white,),)
                                               ],
                                             );
                                           });
@@ -423,7 +449,9 @@ Future<bool>relancer()async{
                                             actions: [
                                               Center(child: TextButton.icon(onPressed: (){
                                                 Navigator.of(context).pop();
-                                              }, label: Text("Compris !"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),)
+                                              },style: TextButton.styleFrom(
+                                                  backgroundColor: Couleur.secondaryGreen
+                                              ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.white,),),)
                                             ],
                                           );
                                         });
@@ -435,15 +463,17 @@ Future<bool>relancer()async{
                                             actions: [
                                               Center(child: TextButton.icon(onPressed: (){
                                                 Navigator.of(context).pop();
-                                              }, label: Text("Compris !"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),)
+                                              },style: TextButton.styleFrom(
+                                                  backgroundColor: Couleur.secondaryGreen
+                                              ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.white,),),)
                                             ],
                                           );
                                         });
                                       }
                                     }, label: Text("Retrait",style: TextStyle(
-                                      color: Colors.black
-                                    ),),icon: Icon(Icons.arrow_downward,color: Colors.black,),style: TextButton.styleFrom(
-                                      backgroundColor: _monTour?Colors.white:Colors.grey
+                                      color: Colors.white
+                                    ),),icon: Icon(Icons.arrow_downward,color: Colors.white,),style: TextButton.styleFrom(
+                                      backgroundColor: _monTour?Couleur.secondaryGreen:Couleur.accentOrange
                                     ),),
                                   )
                                 ],
@@ -458,7 +488,7 @@ Future<bool>relancer()async{
                             ),
                             Padding(
                               padding: EdgeInsets.only(right: 10.0.w),
-                              child: Icon(_ouvert?Icons.lock_open:Icons.lock_outline,size: 80.r,color: _ouvert? Colors.red:Colors.white,),
+                              child: Icon(_ouvert?Icons.lock_open:Icons.lock_outline,size: 80.r,color: _ouvert? Colors.white:Colors.green,),
                             ),
                           ],
                         )
@@ -540,7 +570,9 @@ Future<bool>relancer()async{
                           Center(
                             child: TextButton.icon(onPressed: (){
                               Navigator.of(context).pop();
-                            }, label: Text("OK"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
+                            },style: TextButton.styleFrom(
+                                backgroundColor: Couleur.secondaryGreen
+                            ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.white,),),
                           )
                         ],
                       );
@@ -569,7 +601,7 @@ Future<bool>relancer()async{
                           children: [
                             Column(
                               children: [
-                                Text(transac.type_transaction!="Retrait" ? "+ "+transac.montant_transaction.toString():"- "+transac.montant_transaction.toString(),style: TextStyle(
+                                Text(transac.type_transaction!="Retrait" ? "+ ${transac.montant_transaction}":"- ${transac.montant_transaction}",style: TextStyle(
                                 color:(transac.type_transaction=="Retrait")?  Colors.red:Colors.green,
                                   fontWeight: FontWeight.bold
                                 ),),

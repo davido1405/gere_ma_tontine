@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:delightful_toast/delight_toast.dart';
+import 'package:delightful_toast/toast/components/toast_card.dart';
+import 'package:delightful_toast/toast/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/screens/auth/DefinirPin.dart';
@@ -60,74 +63,59 @@ class _ConfirmationNumeroState extends State<ConfirmationNumero> {
     });
     if (numero == null || numero!.isEmpty) {
       print("Erreur: Numéro de téléphone non trouvé");
-      ScaffoldMessenger.of(context).showSnackBar(
-        
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            duration: Duration(seconds: 2),
-            content: Container(
-              padding: EdgeInsets.all(8.w),
-              height: 80.h,
-              decoration: BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.circular(12.r)
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.error_outline,color: Colors.white,size: 20.r,),
-                  SizedBox(width: 20.w,),
-                  Text("Erreur: Numéro de téléphone non trouvé")
-                ],
-              ),))
-      );
+      DelightToastBar(
+        position: DelightSnackbarPosition.top,
+        autoDismiss: true,
+        snackbarDuration: Duration(seconds: 2),
+        builder: (BuildContext context) {
+          return ToastCard(
+            title: Row(
+              mainAxisAlignment:MainAxisAlignment.start,
+              children: [Icon(Icons.error_outline,color: Colors.white,size: 30.r,),Text("Erreur: Numéro de téléphone non trouvé",style: TextStyle(
+                  color: Colors.white
+              ),)],),
+            color: Colors.red.shade700,);
+        },).show(context);
     }
 
     print("Envoi OTP vers: $numero");
-    ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            dismissDirection: DismissDirection.horizontal,
-            duration: Duration(seconds: 3),
-            content: Container(
-              padding: EdgeInsets.all(8.w),
-              height: 80.h,
-              decoration: BoxDecoration(
-                  color: Colors.green,
-                  borderRadius: BorderRadius.circular(12.r),
-                boxShadow: null
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.pending,color: Colors.white,size: 20.r,),
-                  SizedBox(width: 20.w,),
-                  Text("Envoi OTP vers: $numero")
-                ],
-              ),))
-    );
+    DelightToastBar(
+      position: DelightSnackbarPosition.top,
+      autoDismiss: true,
+      snackbarDuration: Duration(seconds: 2),
+      builder: (BuildContext context) {
+        return ToastCard(
+          title: Row(
+            mainAxisAlignment:MainAxisAlignment.start,
+            children: [Icon(Icons.info,color: Colors.white,size: 30.r,),Text("OTP envoyé au ${numero}",style: TextStyle(
+                color: Colors.white
+            ),overflow: TextOverflow.ellipsis,maxLines: 2,)],),
+          color: Colors.green.shade700,);
+      },).show(context);
 
     await _auth.verifyPhoneNumber(
       phoneNumber: numero, // ton numéro complet
       verificationCompleted: (PhoneAuthCredential credential) async {
         await _auth.signInWithCredential(credential);
         //Definirpin();
+        print("$numero");
       },
       verificationFailed: (FirebaseAuthException e) {
         print("Erreur OTP: ${e.message}");
+        print("$numero");
       },
       codeSent: (String verificationId, int? resendToken) {
         setState(() {
           _verificationId = verificationId;
         });
         print("OTP envoyé ID: $_verificationId");
+        print("$numero");
       },
       codeAutoRetrievalTimeout: (String verificationId) {
         setState(() {
           _verificationId = verificationId;
         });
+        print("$numero");
       },
     );
   }
@@ -166,9 +154,26 @@ class _ConfirmationNumeroState extends State<ConfirmationNumero> {
                   Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>Definirpin()), (route)=>false);
                 } catch (e) {
                   print("OTP incorrect: $e");
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("OTP incorrect")),
-                  );
+                  final prefs=await SharedPreferences.getInstance();
+                  setState(() {
+                    prefs.remove('nom');
+                    prefs.remove('prenom');
+                    prefs.remove('mobile');
+                    prefs.remove('identifiant');
+                  });
+                  DelightToastBar(
+                    position: DelightSnackbarPosition.top,
+                    autoDismiss: true,
+                    snackbarDuration: Duration(seconds: 2),
+                    builder: (BuildContext context) {
+                      return ToastCard(
+                        title: Row(
+                          mainAxisAlignment:MainAxisAlignment.start,
+                          children: [Icon(Icons.error_outline,color: Colors.white,size: 30.r,),Text("Veuillez vérifier le code OTP ou le numéro saisi",style: TextStyle(
+                              color: Colors.white
+                          ),maxLines: 2,overflow: TextOverflow.ellipsis,)],),
+                        color: Colors.red.shade700,);
+                    },).show(context);
                 }
               },
             ),

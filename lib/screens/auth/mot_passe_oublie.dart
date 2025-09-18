@@ -46,19 +46,20 @@ class _mot_passe_oublieState extends State<mot_passe_oublie> {
                 ),
                 TextField(
                   controller: numero,
+                  maxLength: 10,
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     label: Text("Numéro de téléphone",style: TextStyle(
                         fontSize: 16.sp
                     ),),
                     filled: true,
-                    fillColor: couleur.lightGray,
+                    fillColor: Couleur.lightGray,
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
-                        borderSide: BorderSide(color: couleur.lightGray)
+                        borderSide: BorderSide(color: Couleur.lightGray)
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
-                      borderSide: BorderSide(color: couleur.secondaryText)
                     ),
                   )
                 ),
@@ -94,7 +95,9 @@ class _mot_passe_oublieState extends State<mot_passe_oublie> {
                                   actions: [
                                     Center(child: TextButton.icon(onPressed: (){
                                       Navigator.of(context).pop();
-                                    }, label: Text("Compris"),icon: Icon(Icons.verified,color:Colors.green),),)
+                                    },style: TextButton.styleFrom(
+                                        backgroundColor: Colors.blueAccent
+                                    ), label: Text("Compris"),icon: Icon(Icons.verified,color:Colors.green),),)
                                   ],
                                 );
                               });
@@ -115,7 +118,7 @@ class _mot_passe_oublieState extends State<mot_passe_oublie> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: couleur.primaryPurple
+                        backgroundColor: Couleur.primaryBlue
                       ), child: Text("Suivant",style: TextStyle(
                         color: Colors.white
                       ),),))

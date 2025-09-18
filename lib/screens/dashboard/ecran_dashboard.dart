@@ -2,16 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:badges/badges.dart' as bades;
 import 'package:flutter/material.dart';
-//import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/models/session.dart';
-import 'package:gerematontine/screens/cotisations/payer_cotisation.dart';
 import 'package:gerematontine/screens/dashboard/Acceuil.dart';
 import 'package:gerematontine/screens/notifications/liste_notifications.dart';
 import 'package:gerematontine/screens/parametres.dart';
 import 'package:gerematontine/screens/tontine/creer_tontine.dart';
 import 'package:gerematontine/screens/tontine/details_tontine.dart';
-import 'package:gerematontine/services/notifications_service.dart';
 import 'package:http/http.dart';
 import '../../constants/server.dart';
 import '../../models/notification.dart';
@@ -39,22 +36,26 @@ class _dashboardState extends State<dashboard> {
   }
 
   int _selectedIndex=0;
+  int notifCount = 0;
+  List<Notifications>_listnotification=[];
+
   void _onTap(int index){
     setState(() {
       _selectedIndex=index;
     });
   }
 
-  List<Notifications>_listnotification=[];
+
 
 
   Future<void>recupererNotif()async {
+
     final url=Uri.parse("${adress}?ressource=notifications&action=lister_notification");
     final reponse=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
         {
           "code_participant":widget.listsession.code_participant,
           "filtre":"Non lu"
-        })).timeout(Duration(seconds: 15));
+        })).timeout(Duration(seconds: 30));
     if(reponse.statusCode==200){
       final Map<String,dynamic>data=jsonDecode(reponse.body);
       bool success=data['success'];
@@ -62,21 +63,19 @@ class _dashboardState extends State<dashboard> {
         List<dynamic>notifs=data['data'];
         setState(() {
           _listnotification=notifs.map((notifs)=>Notifications.fromJson(notifs)).toList();
+          // ✅ Mets à jour ton compteur du badge
+          notifCount = _listnotification.length;
         });
-        //for(int i=0;i<_listnotification.length;i++){
-          //Notifications notifications=_listnotification[0];
-          //NotificationService.showNotification(id: int.parse(notifications.id_notif), title: notifications.type_notif, body: notifications.contenu_notif);
-        //}
       }else{
+        // ✅ Cas où il n'y a AUCUNE notif
         setState(() {
-          _listnotification=[];
+          _listnotification = [];
+          notifCount = 0; // ➝ ton badge va afficher 0
         });
-        print("Aucune notification");
       }
     }else{
-      print("Erreur serveur : ${reponse.statusCode}");
+      print("Erreur serveur : ${reponse.statusCode}");}
     }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,15 +101,18 @@ class _dashboardState extends State<dashboard> {
         BottomNavigationBarItem(label: "Détails tontine",icon: Icon(_selectedIndex==1 ? Icons.groups_outlined:Icons.groups)),
         BottomNavigationBarItem(label: "Notifications",icon: bades.Badge(
           badgeStyle: bades.BadgeStyle(
-            badgeColor: Colors.orange,
+            badgeColor: Colors.red,
           ),
-          badgeContent: Text("${_listnotification.length}"),
+          badgeContent: Text("${notifCount}",style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold
+          ),),
           child: Icon(_selectedIndex==2 ? Icons.notifications_outlined:Icons.notifications),
         )),
         ],
-        selectedItemColor: couleur.iconActive,
+        selectedItemColor: Couleur.iconActive,
         showSelectedLabels: true,
-        unselectedItemColor: couleur.iconInactive,
+        unselectedItemColor: Couleur.iconInactive,
       ),
     );
   }

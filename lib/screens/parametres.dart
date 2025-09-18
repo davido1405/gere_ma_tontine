@@ -22,7 +22,7 @@ class _parametreState extends State<parametre> {
   }
   Color getRandomColor( String input){
     final hash=input.hashCode;
-    final couleurs=[Colors.deepOrange,Colors.amber,Colors.cyan,Colors.green,couleur.primaryPurple,Colors.red,Colors.blue];
+    final couleurs=[Colors.deepOrange,Colors.amber,Colors.cyan,Colors.green,Couleur.primaryBlue,Colors.red,Colors.blue,Couleur.primaryBlue];
     return couleurs[hash % couleurs.length];
   }
   @override
@@ -70,7 +70,7 @@ class _parametreState extends State<parametre> {
                 width: 50.w,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10.r),
-                    color: Color( 0xFF2596be),//couleur.primaryPurple
+                    color: Couleur.primaryBlue,//couleur.primaryPurple
                 ),
                 child: Center(child: Icon(Icons.phone_outlined,color: Colors.white,),),
               ),
@@ -79,7 +79,7 @@ class _parametreState extends State<parametre> {
                   title: Text("Numéro de téléphone",style: TextStyle(
                       fontWeight: FontWeight.bold
                   ),),
-                  subtitle: Text("+${widget.listsession.numero_participant}"),
+                  subtitle: Text(widget.listsession.numero_participant),
                 ),
               )
             ],
@@ -91,7 +91,7 @@ class _parametreState extends State<parametre> {
                 width: 50.w,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10.r),
-                    color: Color( 0xFF2596be),//couleur.primaryPurple
+                    color: Couleur.primaryBlue,//couleur.primaryPurple
                 ),
                 child: Center(child: Icon(Icons.shield_outlined,color: Colors.white,),),
               ),
@@ -119,7 +119,7 @@ class _parametreState extends State<parametre> {
                 width: 50.w,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10.r),
-                    color: Color( 0xFF2596be),//couleur.primaryPurple
+                    color: Couleur.primaryBlue,//couleur.primaryPurple
                 ),
                 child: Center(child: Icon(Icons.lock_outline,color: Colors.white,),),
               ),
@@ -151,7 +151,7 @@ class _parametreState extends State<parametre> {
                 width: 50.w,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10.r),
-                    color: Color( 0xFF2596be),//couleur.primaryPurple
+                    color: Couleur.primaryBlue,//couleur.primaryPurple
                 ),
                 child: Center(child: Icon(Icons.help_outline,color: Colors.white,),),
               ),
@@ -176,7 +176,7 @@ class _parametreState extends State<parametre> {
                 width: 50.w,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10.r),
-                    color: Color( 0xFF2596be),//couleur.primaryPurple
+                    color: Couleur.primaryBlue,//couleur.primaryPurple
                 ),
                 child: Center(child: Icon(Icons.support_agent_outlined,color: Colors.white,),),
               ),

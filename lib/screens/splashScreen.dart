@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/screens/auth/inscription_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,13 +19,19 @@ class _splashScreenState extends State<splashScreen> {
   String? prenom;
   String? numero;
   int index=0;
+  Timer? _timer;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _redirection();
-    Timer.periodic(Duration(milliseconds: 800),(timer){
+
+    _timer=Timer.periodic(Duration(milliseconds: 800),(timer){
+      if(!mounted) {
+        timer.cancel();
+        return;
+      }
       setState(() {
         index++;
       });
@@ -41,15 +46,24 @@ class _splashScreenState extends State<splashScreen> {
 
     //Léger temps d'attente
     await Future.delayed(const Duration(seconds: 5));
-    if(mounted){
-      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>numero != null ? const connexion_screen():const inscription_screen()), (route)=>false);
-    }
+    if (!mounted) return;
+    Navigator.pushAndRemoveUntil(context,
+        MaterialPageRoute(
+            builder: (context)=>numero != null ? const connexion_screen():const inscription_screen()),
+            (route)=>false
+    );
   }
 
   Color getRandomColor( String input, int index){
     final hash=input.hashCode+index;
     final couleurs=[Colors.deepOrange,Colors.amber,Colors.cyan,Colors.green,Colors.red,Colors.blue];
     return couleurs[hash % couleurs.length];
+  }
+
+  @override
+  void dispose(){
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -85,7 +99,6 @@ class _splashScreenState extends State<splashScreen> {
                       ],
                     ),
                   ),
-
                 ],
               ),
             ),

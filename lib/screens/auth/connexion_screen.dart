@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/constants/server.dart';
@@ -23,6 +24,7 @@ class _connexion_screenState extends State<connexion_screen> {
   String? nom;
   String? prenom;
   String? numero;
+  String? idantifiant;
 
   @override
   void initState() {
@@ -32,6 +34,8 @@ class _connexion_screenState extends State<connexion_screen> {
   }
   bool _cacher=true;
   bool cocher=false;
+  bool erreurConn=false;
+  String message="";
   TextEditingController pinController=TextEditingController();
   TextEditingController mot_pass=TextEditingController();
   late Session listsession;
@@ -47,7 +51,6 @@ class _connexion_screenState extends State<connexion_screen> {
 
 
   //Fonction async de connexion
-
   Future<void>connexion(String numero,String password)async{
     final url=Uri.parse("$adress?ressource=participants&action=connexion_participant");
     final response=await http.post(url,headers: {"content-Type":"application/json"},body: jsonEncode({
@@ -59,16 +62,18 @@ class _connexion_screenState extends State<connexion_screen> {
       bool success=data['success'];
       if(success==true && data['message']=="Connexion réussie"){
         var parti=data['data'];
-        setState(() {
-          Session listsession=Session.fromJson(parti);
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>dashboard(listsession: listsession)),(route)=>false);
-        });
+        listsession=Session.fromJson(parti);
+        print(listsession);
+        //Sécuriser le JWT après reception
+        await listsession.secureJwt();
+        print(listsession.code_tontine);
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>dashboard(listsession: listsession)),(route)=>false);
       }else if(success==true && data['message']=="Connexion réussie (pas encore de tontine)"){
         var parti=data['data'];
-        setState(() {
-          Session listsession=Session.fromJson(parti);
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>participer(listsession: listsession)),(route)=>false);
-        });
+        listsession=Session.fromJson(parti);
+        //Sécuriser le JWT après reception
+        await listsession.secureJwt();
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>participer(listsession: listsession)),(route)=>false);
       }else{
         showDialog(context: context, builder: (BuildContext contex){
           return AlertDialog(
@@ -78,19 +83,21 @@ class _connexion_screenState extends State<connexion_screen> {
               Center(
                 child:TextButton(onPressed: (){
                   Navigator.of(context).pop();
-                }, child: Text("Compris")),
+                },style: TextButton.styleFrom(
+                    backgroundColor: Colors.blueAccent
+                ), child: Text("Compris")),
               )
             ],
           );
         });
       }
+    }else{
+      setState(() {
+        erreurConn=true;
+        message="Service momentanément indisponible, Veuillez réssayer dans quelques instants.";
+      });
     }
   }
-  //Future<void>resterConnecte()async{
-    //final preference=await SharedPreferences.getInstance();
-    //await preference.setBool('estConnecte', cocher);
-    //await preference.setString('utilisateur', listsession.toString());
-  //}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,7 +106,7 @@ class _connexion_screenState extends State<connexion_screen> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [IconButton(onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (_)=>inscription_screen()));
+            Navigator.push(context, MaterialPageRoute(builder: (_)=>inscription_screen()));
         }, icon: Icon(Icons.logout,size:30.r,color: Colors.black,)),],),
         automaticallyImplyLeading: false,
       ),
@@ -112,13 +119,27 @@ class _connexion_screenState extends State<connexion_screen> {
             children: [
               Center(child: Image.asset("assets/Djarra Finances V1.png",width: 150.w,height: 150.h,)),
               SizedBox(
+                height: 10.h,
+              ),
+              Center(child: Column(
+                children: [
+                  Text("C'est bon de vous revoir",style: TextStyle(
+                    fontSize: 18.sp,
+                  ),),
+                  SizedBox(height: 10.h,),
+                  Text("$nom $prenom !",style: TextStyle(
+                    fontSize: 18.sp,
+                  ))
+                ],
+              )),
+              SizedBox(
                 height: 30.h,
               ),
-              Center(child: Text("Bon retour parmis nous, $nom $prenom!",style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.bold
-              ),)),
-              SizedBox(height: 15.h,),
+              Center(
+                child: Text("Veuillez saisi votre code Djarra",style: TextStyle(
+                  fontSize: 18.sp,
+                ),),
+              ),
               Padding(padding: EdgeInsets.only(top: 10,right: 30,left: 30),
                   child: Column(
                 children: [
@@ -132,41 +153,22 @@ class _connexion_screenState extends State<connexion_screen> {
                       connexion(numero!, pinController.text);
                     },
                   ),
+                  SizedBox(height: 10.h,),
+                  Center(child: Text(message,style: TextStyle(
+                    color: erreurConn?Colors.red:Colors.transparent
+                  ),),),
                   SizedBox(
-                    height: 20.h,
+                    height: 30.h,
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 5.0.w,right: 40.0.w),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          flex: 20,
-                            child: TextButton(onPressed: (){
-                              Navigator.push(context,MaterialPageRoute(builder: (context)=>mot_passe_oublie()));
-                            },style: ButtonStyle(
-                              overlayColor: MaterialStateProperty.all(Colors.transparent) //Décactiver l'animation autour du bouton
-                            ), child: Text("PIN oublié",style: TextStyle(
-                              fontSize: 14.sp,
-                                decoration: TextDecoration.underline
-                            )
-                            )
-                            ),
-                        ),
-                        Expanded(
-                            flex: 10,
-                            child: TextButton(onPressed: (){
-                              Navigator.push(context, MaterialPageRoute(builder: (context)=>inscription_screen()));
-                            },style: ButtonStyle(
-                                overlayColor: MaterialStateProperty.all(Colors.transparent) //Décactiver l'animation autour du bouton
-                            ), child: Text("S'incrire",style: TextStyle(
-                                fontSize: 14.sp,
-                                decoration: TextDecoration.underline
-                            )
-                            )
-                            ),
-                        )
-                      ],
+                  Center(
+                    child: TextButton(onPressed: (){
+                      Navigator.push(context,MaterialPageRoute(builder: (context)=>mot_passe_oublie()));
+                    },style: ButtonStyle(
+                      overlayColor: MaterialStateProperty.all(Colors.transparent) //Décactiver l'animation autour du bouton
+                    ), child: Text("Code Djarra oublié ?",style: TextStyle(
+                      fontSize: 14.sp,
+                    )
+                    )
                     ),
                   )
                 ],

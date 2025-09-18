@@ -1,13 +1,10 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/session.dart';
-import 'package:gerematontine/screens/dashboard/Acceuil.dart';
 import 'package:http/http.dart' as http;
 import 'package:pinput/pinput.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../constants/server.dart';
 import '../dashboard/participer.dart';
 
@@ -40,11 +37,21 @@ class _DefinirpinState extends State<Definirpin> {
       bool success=user['success'];
       if(success){
         var finalUser=user['data'];
-        setState(() {
+        SharedPreferences prefs=await SharedPreferences.getInstance();
+        setState(() async{
+          prefs.setBool("inscriptionTermine", true);
           _listsession=Session.fromJson(finalUser);
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>participer(listsession: _listsession,)), (route)=>false);
         });
+        await _listsession.secureJwt();
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>participer(listsession: _listsession,)), (route)=>false);
       }else{
+        SharedPreferences prefs=await SharedPreferences.getInstance();
+        setState(() {
+          prefs.remove('nom');
+          prefs.remove('prenom');
+          prefs.remove('mobile');
+          prefs.remove('identifiant');
+        });
         print(user['success'] + user['message']);
       }
     }else{
@@ -67,7 +74,7 @@ class _DefinirpinState extends State<Definirpin> {
           SizedBox(
             height: 15.h,
           ),
-          Text(confirmation?"Veuillez confirmer votre code secret":"Veuillez saisir votre code secret"),
+          Text(confirmation?"Veuillez confirmer votre code Djarra Finances":"Veuillez saisir votre code Djarra Finances"),
           SizedBox(
             height: 15.h,
           ),

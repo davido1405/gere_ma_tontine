@@ -39,10 +39,6 @@ class _inscription_screenState extends State<inscription_screen> {
       setState(() {
         _compteDetecte=true;
       });
-    }else{
-      setState(() {
-        _compteDetecte=false;
-      });
     }
   }
   
@@ -51,7 +47,7 @@ class _inscription_screenState extends State<inscription_screen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        automaticallyImplyLeading: _compteDetecte!,
+        automaticallyImplyLeading: _compteDetecte??false,
         title: Center(child: Text("Inscription",style: TextStyle(fontSize:22.sp,fontWeight: FontWeight.bold),),),
       ),
       body: Center(
@@ -72,14 +68,14 @@ class _inscription_screenState extends State<inscription_screen> {
                     fontSize: 16.sp
                   ),),
                   filled: true,
-                  fillColor: couleur.lightGray,
+                  fillColor: Couleur.lightGray,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.r),
-                    borderSide: BorderSide(color: couleur.lightGray)
+                    borderSide: BorderSide(color: Couleur.lightGray)
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.r),
-                    borderSide: BorderSide(color: couleur.secondaryText)
+                    borderSide: BorderSide(color: Couleur.darkText)
                   )
                 ),
               ),
@@ -94,14 +90,14 @@ class _inscription_screenState extends State<inscription_screen> {
                       fontSize: 16.sp
                   ),),
                     filled: true,
-                    fillColor: couleur.lightGray,
+                    fillColor: Couleur.lightGray,
                     enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
-                        borderSide: BorderSide(color: couleur.lightGray)
+                        borderSide: BorderSide(color: Couleur.lightGray)
                     ),
                     focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
-                        borderSide: BorderSide(color: couleur.secondaryText)
+                        borderSide: BorderSide(color: Couleur.darkText)
                     )
                 ),
               ),
@@ -110,20 +106,21 @@ class _inscription_screenState extends State<inscription_screen> {
               ),
               TextField(
                 controller: numero,
+                maxLength: 10,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                     label:Text("Numéro de téléphone",style: TextStyle(
                         fontSize: 16.sp
                     ),),
                     filled: true,
-                    fillColor: couleur.lightGray,
+                    fillColor: Couleur.lightGray,
                     enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: couleur.lightGray)
+                        borderSide: BorderSide(color: Couleur.lightGray)
                     ),
                     focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: couleur.secondaryText)
+                        borderSide: BorderSide(color: Couleur.darkText)
                     )
                 ),
               ),
@@ -132,12 +129,13 @@ class _inscription_screenState extends State<inscription_screen> {
               ),
               Row(
                 children: [
-                  Expanded(child: ElevatedButton(onPressed: () async {
+                  Expanded(child: ElevatedButton.icon(onPressed: () async {
                     if(numero.text.isNotEmpty & nom.text.isNotEmpty & prenoms.text.isNotEmpty){
                       SharedPreferences prefs=await SharedPreferences.getInstance();
                       prefs.setString("nom", nom.text);
                       prefs.setString("prenom", prenoms.text);
                       prefs.setString("mobile", "+225${numero.text}");
+                      prefs.setString("identifiant","225${numero.text}");
                       Navigator.push(context, MaterialPageRoute(builder: (context)=>ConfirmationNumero()));
                     }else{
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -164,12 +162,13 @@ class _inscription_screenState extends State<inscription_screen> {
                     }
                     },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: couleur.primaryPurple
-                  ), child: Text("Suivant",style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15.sp
-                  ),),))
+                    backgroundColor: Colors.blueAccent,
+                  ), label: Text("Suivant",style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15.sp
+                    ),),
+                  icon: Icon(Icons.arrow_forward_ios,color: Colors.white,size: 25.r,),))
                 ],
               )
             ],

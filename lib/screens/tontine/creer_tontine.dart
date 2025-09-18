@@ -107,9 +107,9 @@ class _creer_tontineState extends State<creer_tontine> {
   
   
   Future<void>creerTontine() async{
+    String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=tontines&action=creer_tontine");
-    final reponse=await http.post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
-        {
+    final reponse=await http.post(url,headers: {'content-Type':'application/json','Authorization':'Bearer $jwt'},body: jsonEncode({
           "code_participant":widget.listsession.code_participant,
           "nom_tontine":nomTontine.text,
           "type_tontine":_typeChoisi,
@@ -117,8 +117,8 @@ class _creer_tontineState extends State<creer_tontine> {
           "nombre_participant":int.parse(nombreParticipant.text),
           "frequence":_frequenceChoisi,
           "frequence_paiement":_frequencePaiementChoisi,
-          "montant_penalite":int.parse(montantPenalite.text)
         }));
+    print(widget.listsession.code_participant);
     if(reponse.statusCode==200){
       final Map<String,dynamic>data=jsonDecode(reponse.body);
       if(data['success']){
@@ -144,6 +144,12 @@ class _creer_tontineState extends State<creer_tontine> {
           );
         });
       }
+    }else{
+      showDialog(context: context, builder: (BuildContext context){
+        return AlertDialog(
+          content: Text(reponse.statusCode.toString()),
+        );
+      });
     }
   }
   @override
@@ -166,10 +172,10 @@ class _creer_tontineState extends State<creer_tontine> {
                 fontSize: 16.sp
               ),),
               filled: true,
-              fillColor: couleur.lightGray,
+              fillColor: Couleur.lightGray,
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12.r),
-                borderSide: BorderSide(color: couleur.primaryPurple),
+                borderSide: BorderSide(color: Couleur.primaryBlue),
               ),
               enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
@@ -180,16 +186,17 @@ class _creer_tontineState extends State<creer_tontine> {
           SizedBox(height: 15.0.h,),
           TextField(
             controller: montantCotisation,
+            keyboardType: TextInputType.number,
             decoration: InputDecoration(
                 label: Text('Montant de cotisation',style: TextStyle(
                     fontSize: 16.sp
                 ),),
                 filled: true,
-                fillColor: couleur.lightGray,
+                fillColor: Couleur.lightGray,
                 focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.r),
                     borderSide: BorderSide(
-                        color: couleur.primaryPurple
+                        color: Couleur.primaryBlue
                     )
                 ),
                 enabledBorder: OutlineInputBorder(
@@ -200,16 +207,17 @@ class _creer_tontineState extends State<creer_tontine> {
           SizedBox(height: 10.0.h,),
           TextField(
             controller: nombreParticipant,
+            keyboardType: TextInputType.number,
             decoration: InputDecoration(
                 label: Text('Nombre de participant',style: TextStyle(
                     fontSize: 16.sp
                 ),),
                 filled: true,
-                fillColor: couleur.lightGray,
+                fillColor: Couleur.lightGray,
                 focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.r),
                     borderSide: BorderSide(
-                        color: couleur.primaryPurple
+                        color: Couleur.primaryBlue
                     )
                 ),
                 enabledBorder: OutlineInputBorder(
@@ -226,7 +234,7 @@ class _creer_tontineState extends State<creer_tontine> {
                     fontSize: 16.sp
                 ),),
                 filled: true,
-                fillColor: couleur.lightGray,
+                fillColor: Couleur.lightGray,
                 contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
@@ -257,7 +265,7 @@ class _creer_tontineState extends State<creer_tontine> {
                     fontSize: 16.sp
                 ),),
                 filled: true,
-                fillColor: couleur.lightGray,
+                fillColor: Couleur.lightGray,
                 contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
@@ -287,7 +295,7 @@ class _creer_tontineState extends State<creer_tontine> {
                     fontSize: 16.sp
                 ),),
                 filled: true,
-                fillColor: couleur.lightGray,
+                fillColor: Couleur.lightGray,
                 contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
@@ -309,36 +317,13 @@ class _creer_tontineState extends State<creer_tontine> {
               _frequencePaiementChoisi=_nouvelleValeur;
             });
           }),
-          SizedBox(height: 10.0.h,),
-          TextField(
-            controller: montantPenalite,
-            decoration: InputDecoration(
-                label: Text('Montant de pénalité',style: TextStyle(
-                    fontSize: 16.sp
-                ),),
-                filled: true,
-                fillColor: couleur.lightGray,
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                    borderSide: BorderSide(
-                        color: couleur.primaryPurple
-                    )
-                ),
-                enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                    borderSide: BorderSide(
-                        color: couleur.primaryPurple
-                    )
-                )
-            ),
-          ),
           SizedBox(height: 20.0.h,),
           Center(
-            child: TextButton(onPressed: (){
+            child: ElevatedButton(onPressed: (){
               creerTontine();
             },style: TextButton.styleFrom(
-              backgroundColor: couleur.primaryPurple
-            ), child: Text("Valider",style: TextStyle(fontSize: 15.sp,fontWeight: FontWeight.bold,color: Colors.white),),),
+              backgroundColor: Colors.blueAccent
+            ), child: Text("Terminer",style: TextStyle(fontSize: 15.sp,fontWeight: FontWeight.bold,color: Colors.white),),),
           )
 
         ],

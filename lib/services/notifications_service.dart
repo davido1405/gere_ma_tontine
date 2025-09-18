@@ -21,7 +21,7 @@ class NotificationService {
   }) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
     AndroidNotificationDetails(
-      'djarra_finances_channel',
+      'Djarra Finances',
       'Djarra Finances',
       channelDescription: 'Notifications Djarra Finances',
       importance: Importance.max,

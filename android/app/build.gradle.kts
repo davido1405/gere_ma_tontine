@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.djarrafinances"
-    compileSdk = 35//flutter.compileSdkVersion
+    compileSdk = 36//flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"//flutter.ndkVersion
 
     compileOptions {
@@ -25,8 +25,8 @@ android {
         applicationId = "com.example.djarrafinances"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion//flutter.minSdkVersion
-        targetSdk = 35//flutter.targetSdkVersion
+        minSdk = flutter.minSdkVersion//flutter.minSdkVersion//flutter.minSdkVersion
+        targetSdk = 34//flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

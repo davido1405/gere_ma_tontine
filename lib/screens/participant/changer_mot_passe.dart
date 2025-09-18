@@ -23,7 +23,7 @@ class _changer_mot_passeState extends State<changer_mot_passe> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Center(child: Text("Changer mon code secret",style: TextStyle(
+        title: Center(child: Text("Changer mon code Djarra Finances",style: TextStyle(
           fontSize: 20.sp,
           fontWeight: FontWeight.bold
         ),),),
@@ -42,12 +42,12 @@ class _changer_mot_passeState extends State<changer_mot_passe> {
                 fontSize: 14.sp,
                 ),),
                 filled: true,
-                fillColor: couleur.lightGray,
+                fillColor: Couleur.lightGray,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r)
                 ),
                 focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: couleur.primaryPurple),
+                    borderSide: BorderSide(color: Couleur.primaryBlue),
                     borderRadius: BorderRadius.circular(12.r)
                 ),
 
@@ -59,17 +59,17 @@ class _changer_mot_passeState extends State<changer_mot_passe> {
             TextField(
               obscureText: _cacher,
               decoration: InputDecoration(
-                hint: Text("Saisissez le nouveau code secret",style: TextStyle(
+                hint: Text("Saisissez votre nouveau code Djarra Finances",style: TextStyle(
                     fontSize: 14.sp,
                 ),),
                 filled: true,
-                  fillColor: couleur.lightGray,
+                  fillColor: Couleur.lightGray,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.r)
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.r),
-                    borderSide: BorderSide(color: couleur.primaryPurple)
+                    borderSide: BorderSide(color: Couleur.primaryBlue)
                   ),
                   suffixIcon: GestureDetector(
                     onTap: (){
@@ -103,12 +103,12 @@ class _changer_mot_passeState extends State<changer_mot_passe> {
                     fontSize: 14.sp,
                   ),),
                   filled: true,
-                  fillColor: couleur.lightGray,
+                  fillColor: Couleur.lightGray,
                   enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r)
                   ),
                   focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: couleur.primaryPurple),
+                      borderSide: BorderSide(color: Couleur.primaryBlue),
                       borderRadius: BorderRadius.circular(12.r)
                   ),
                 ),
@@ -126,7 +126,7 @@ class _changer_mot_passeState extends State<changer_mot_passe> {
               ),
               ),
                   icon: Icon(Icons.check_circle,color: Colors.white),style: TextButton.styleFrom(
-                  backgroundColor: couleur.primaryPurple
+                  backgroundColor: Colors.blueAccent
                 ),),
             )
           ],

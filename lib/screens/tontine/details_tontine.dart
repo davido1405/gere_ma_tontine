@@ -32,8 +32,10 @@ class _details_tontineState extends State<details_tontine> {
   late List<Membre>membres=[];
 
   Future<void>chargerMembres()async{
+    String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=tontines&action=lister_membres");
-    final reponse=await http.post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
+    final reponse=await http.post(url,headers: {"content-Type":"application/json",
+      "Authorization":"Bearer $jwt"},body: jsonEncode(
         {
           "code_tontine":widget.listsession.code_tontine
         }));
@@ -50,8 +52,10 @@ class _details_tontineState extends State<details_tontine> {
   }
 
   Future<void>envoyerRappelCotisation()async{
+    String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=notifications&action=envoyer_rappel_cotisation");
-    final reponse=await http.post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
+    final reponse=await http.post(url,headers: {"content-Type":"application/json",
+      "Authorization":"Bearer $jwt"},body: jsonEncode(
         {
           "code_tontine":widget.listsession.code_tontine,
           "type_notification":"Rappel de cotisation"
@@ -68,7 +72,9 @@ class _details_tontineState extends State<details_tontine> {
               Center(
                 child: TextButton.icon(onPressed: (){
                   Navigator.of(context).pop();
-                }, label: Text("Ok"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
+                },style: TextButton.styleFrom(
+                backgroundColor: Couleur.primaryBlue
+                ),label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
               )
             ],
           );
@@ -83,7 +89,9 @@ class _details_tontineState extends State<details_tontine> {
             Center(
               child: TextButton.icon(onPressed: (){
                 Navigator.of(context).pop();
-              }, label: Text("Ok"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
+              },style: TextButton.styleFrom(
+              backgroundColor: Couleur.primaryBlue
+              ), label: Text("Ok"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
             )
           ],
         );
@@ -111,10 +119,10 @@ class _details_tontineState extends State<details_tontine> {
         child: Column(
           children: [
               Center(child: Container(
-                height: 255.h,
+                height: 250.h,
                 width: 400.w,
                 decoration: BoxDecoration(
-                    color: Color( 0xFF2596be),//couleur.primaryPurple
+                    color: Couleur.primaryBlue,//couleur.primaryPurple
                     borderRadius: BorderRadius.circular(12.r)
                 ),
                 child: Column(
@@ -124,31 +132,34 @@ class _details_tontineState extends State<details_tontine> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12.r)
                           ),
-                          child:widget.listsession.type_participant=="Organisateur" ?
-                          QrImageView(
-                            backgroundColor: Colors.white,
-                            data: "tontine_plus/"+widget.listsession.code_tontine,
-                            size: 200.w,
-                          ):Column(
-                            children: [
-                              ImageFiltered(
-                                imageFilter: ImageFilter.blur(sigmaX: 6.0.w, sigmaY: 6.0.h),
-                                child: QrImageView(
-                                  backgroundColor: Colors.white,
-                                  data: widget.listsession.code_tontine+"Fake",
-                                  size: 200.w,
+                          child:ClipRRect(
+                            borderRadius: BorderRadius.circular(12.r),
+                            child: widget.listsession.type_participant=="Organisateur" ?
+                            QrImageView(
+                              backgroundColor: Colors.white,
+                              data: "tontine_plus/${widget.listsession.code_tontine}",
+                              size: 200.w,
+                            ):Column(
+                              children: [
+                                ImageFiltered(
+                                  imageFilter: ImageFilter.blur(sigmaX: 6.0.w, sigmaY: 6.0.h),
+                                  child: QrImageView(
+                                    backgroundColor: Colors.white,
+                                    data: "Accès refusé",
+                                    size: 200.w,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 10.h),
-                              Text(
-                                "QRCode réservé à l’organisateur",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15.sp,
-                                  color: Colors.white,
+                                SizedBox(height: 10.h),
+                                Text(
+                                  "QRCode réservé à l’organisateur",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15.sp,
+                                    color: Colors.white,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         )
                     ]
@@ -164,13 +175,13 @@ class _details_tontineState extends State<details_tontine> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   if(widget.listsession.type_participant=="Organisateur")
-                    TextButton(onPressed: (){
+                    TextButton.icon(onPressed: (){
                       envoyerRappelCotisation();
                     },style: TextButton.styleFrom(
-                      backgroundColor: couleur.lightGray
-                    ), child: Text("Envoyer rappel de cotisation",style: TextStyle(
-                      fontSize: 14.sp,
-                    ),),),
+                      backgroundColor: Couleur.secondaryGreen
+                    ), label: Text("Envoyer rappel de cotisation",style: TextStyle(
+                      fontSize: 14.sp,color: Colors.white
+                    ),),icon: Icon(Icons.notification_add,color: Colors.white,),),
                 ],
               ),
             ),
@@ -181,7 +192,7 @@ class _details_tontineState extends State<details_tontine> {
               padding: EdgeInsets.only(left: 10.w),
               child: Row(
                 children: [
-                  Text("Liste des participants à cette tontine",style: TextStyle(
+                  Text("Classement par points de confiance",style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold
                   ),)
@@ -279,9 +290,12 @@ class _details_tontineState extends State<details_tontine> {
                                       Center(
                                         child: TextButton.icon(onPressed: (){
                                           Navigator.of(context).pop();
-                                        }, label: Text("OK",style: TextStyle(
+                                        },style: TextButton.styleFrom(
+                                            backgroundColor: Couleur.secondaryGreen
+                                        ), label: Text("Compris",style: TextStyle(
+                                          color: Colors.white,
                                             fontSize: 14.sp
-                                        ),),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
+                                        ),),icon: Icon(Icons.verified,color: Colors.white,),)
                                         ,
                                       )
                                     ],
@@ -289,11 +303,29 @@ class _details_tontineState extends State<details_tontine> {
                                 });
                               },
                               child: ListTile(
-                                title: Text(widget.listsession.numero_participant==member.numero?"Vous":member.nom_membre+" "+member.prenom_membre,style: TextStyle(
-                                    fontSize: 15.sp,
-                                    fontWeight: FontWeight.bold
-                                ),),
-                                subtitle: Text("Type: "+member.type,style: TextStyle(
+                                title: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(widget.listsession.numero_participant==member.numero?"Vous":member.nom_membre+" "+member.prenom_membre,style: TextStyle(
+                                        fontSize: 15.sp,
+                                        fontWeight: FontWeight.bold
+                                    ),),
+                                    AbsorbPointer(
+                                      absorbing:widget.listsession.type_participant=="Organisateur" ? false:true,
+                                      child: ElevatedButton(onPressed: (){
+                                        print("Notifications personnalisé");
+                                      },
+                                      style: TextButton.styleFrom(
+                                        elevation: 1,
+                                        backgroundColor: Couleur.accentOrange
+                                      ), child: Text("${member.points_confiance} Pts" ,style: TextStyle(
+                                        color: Colors.white,
+                                          fontSize: 12.sp
+                                      ),),),
+                                    )
+                                  ],
+                                ),
+                                subtitle: Text("Type: ${member.type}",style: TextStyle(
                                   fontSize: 14.sp
                                 ),),
                               ),
