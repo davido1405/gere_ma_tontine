@@ -6,6 +6,7 @@ import 'package:delightful_toast/toast/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/screens/auth/DefinirPin.dart';
+import 'package:lottie/lottie.dart';
 import 'package:pinput/pinput.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -129,7 +130,7 @@ class _ConfirmationNumeroState extends State<ConfirmationNumero> {
       child: Column(
         children: [
           SizedBox(height: 10.h,),
-          Image.asset("assets/confirmation.png",width: 150.w,height: 150.h,),
+          Lottie.asset("assets/animations/Number Phone icon.json",width: 250.w,height: 250.h),
           SizedBox(
             height: 15.h,
           ),

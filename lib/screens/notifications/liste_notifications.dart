@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:gerematontine/models/notification.dart';
 import 'package:http/http.dart';
@@ -135,9 +136,10 @@ class _notificationsState extends State<notifications> {
                       });
                       recupererNotif();
                     }, label: Text("Lu",style: TextStyle(
+                      color: Colors.white,
                         fontSize: 14.sp
                     ),),style: TextButton.styleFrom(
-                        backgroundColor: _lu ? Color(0xFFB39DDB) : Color(0xFFD1C4E9)
+                        backgroundColor: _lu ? Couleur.iconActive : Couleur.iconInactive
                     ) ,),
                     SizedBox(
                       width: 10.h,
@@ -150,9 +152,10 @@ class _notificationsState extends State<notifications> {
                       });
                       recupererNotif();
                     }, label: Text("Non lu",style: TextStyle(
+                      color: Colors.white,
                         fontSize: 14.sp
                     ),),style: TextButton.styleFrom(
-                        backgroundColor: _nonlu ? Color(0xFFB39DDB) : Color(0xFFD1C4E9)
+                        backgroundColor: _nonlu ? Couleur.iconActive : Couleur.iconInactive
                     ) ,),
                   ],
                 ))

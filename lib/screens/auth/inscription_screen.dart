@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import 'package:delightful_toast/delight_toast.dart';
+import 'package:delightful_toast/toast/components/toast_card.dart';
+import 'package:delightful_toast/toast/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/session.dart';
@@ -75,7 +78,7 @@ class _inscription_screenState extends State<inscription_screen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.r),
-                    borderSide: BorderSide(color: Couleur.darkText)
+                    borderSide: BorderSide(color: Couleur.primaryBlue)
                   )
                 ),
               ),
@@ -97,7 +100,7 @@ class _inscription_screenState extends State<inscription_screen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
-                        borderSide: BorderSide(color: Couleur.darkText)
+                        borderSide: BorderSide(color: Couleur.primaryBlue)
                     )
                 ),
               ),
@@ -120,7 +123,7 @@ class _inscription_screenState extends State<inscription_screen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Couleur.darkText)
+                        borderSide: BorderSide(color: Couleur.primaryBlue)
                     )
                 ),
               ),
@@ -139,36 +142,29 @@ class _inscription_screenState extends State<inscription_screen> {
                       Navigator.push(context, MaterialPageRoute(builder: (context)=>ConfirmationNumero()));
                     }else{
                       ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              behavior: SnackBarBehavior.floating,
-                              backgroundColor: Colors.transparent,
-                              elevation: 0,
-                              duration: Duration(seconds: 2),
-                              content: Container(
-                                padding: EdgeInsets.all(8.w),
-                                height: 80.h,
-                                decoration: BoxDecoration(
-                                    color: Colors.red,
-                                    borderRadius: BorderRadius.circular(12.r)
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.error_outline,color: Colors.white,size: 20.r,),
-                                    SizedBox(width: 20.w,),
-                                    Text("Erreur: Veuillez remplir tout les champs!")
-                                  ],
-                                ),))
+                          DelightToastBar(
+                            position: DelightSnackbarPosition.top,
+                            autoDismiss: true,
+                            snackbarDuration: Duration(seconds: 2),
+                            builder: (BuildContext context) {
+                              return ToastCard(
+                                title: Row(
+                                  mainAxisAlignment:MainAxisAlignment.start,
+                                  children: [Icon(Icons.error_outline,color: Colors.white,size: 30.r,),Text("Veuillez remplir tout les champs !",style: TextStyle(
+                                      color: Colors.white
+                                  ),)],),
+                                color: Colors.red.shade700,);
+                            },).show(context) as SnackBar
                       );
                     }
                     },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
+                    backgroundColor: Couleur.primaryBlue,
                   ), label: Text("Suivant",style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 15.sp
-                    ),),
-                  icon: Icon(Icons.arrow_forward_ios,color: Colors.white,size: 25.r,),))
+                    ),),))
                 ],
               )
             ],

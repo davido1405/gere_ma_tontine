@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/beneficiare.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:http/http.dart';
+import 'package:lottie/lottie.dart';
 
 import '../../constants/colors.dart';
 import '../../constants/server.dart';
@@ -109,9 +110,6 @@ class _tourTontineState extends State<tourTontine> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(
-                          height: 5.h,
-                        ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -209,13 +207,10 @@ class _tourTontineState extends State<tourTontine> {
                     Column(
                       children: [
                         SizedBox(
-                          height: 15.h,
+                          height: 5.h,
                         ),
-                        Padding(
-                          padding: EdgeInsets.only(right: 10.0.w),
-                          child: Icon(Icons.emoji_events,size: 80.r,color:Colors.orange,),
-                        ),
-
+                        Container(child: ColorFiltered(colorFilter: ColorFilter.mode(Couleur.accentOrange, BlendMode.srcATop),
+                        child: Lottie.asset("assets/animations/lottieflow-ecommerce-14-13-000000-easey.json",width: 150.w,height: 150.h)),)
                       ],
                     ),
                   ],

@@ -1,10 +1,15 @@
 import 'dart:convert';
+import 'package:delightful_toast/delight_toast.dart';
+import 'package:delightful_toast/toast/components/toast_card.dart';
+import 'package:delightful_toast/toast/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:http/http.dart' as http;
+import 'package:lottie/lottie.dart';
 import 'package:pinput/pinput.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../constants/colors.dart';
 import '../../constants/server.dart';
 import '../dashboard/participer.dart';
 
@@ -38,8 +43,8 @@ class _DefinirpinState extends State<Definirpin> {
       if(success){
         var finalUser=user['data'];
         SharedPreferences prefs=await SharedPreferences.getInstance();
-        setState(() async{
-          prefs.setBool("inscriptionTermine", true);
+        prefs.setBool("inscriptionTermine", true);
+        setState((){
           _listsession=Session.fromJson(finalUser);
         });
         await _listsession.secureJwt();
@@ -52,10 +57,81 @@ class _DefinirpinState extends State<Definirpin> {
           prefs.remove('mobile');
           prefs.remove('identifiant');
         });
-        print(user['success'] + user['message']);
+        showDialog(context: context, builder: (BuildContext context){
+          return AlertDialog(
+            title: Center(
+              child: Text(
+                "Erreur",
+                style: TextStyle(fontSize: 16.sp),
+              ),
+            ),
+            content: SizedBox(
+              height: 200.h,
+              child: Column(
+                children: [
+                  Lottie.asset(
+                    'assets/animations/Sign for error _ Flat style.json',
+                    width: 100.w,
+                    height: 100.h,
+                  ),
+                  Center(
+                    child: Text(
+                      user['message'],
+                      style: TextStyle(fontSize: 18.sp),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              Center(
+                child: TextButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Couleur.secondaryGreen,
+                  ),
+                  icon: const Icon(Icons.verified, color: Colors.white),
+                  label: Text(
+                    "Compris",
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              )
+            ],
+          );
+        });
       }
     }else{
-      print("Une erreur server est survenu");
+      DelightToastBar(
+        position: DelightSnackbarPosition.top,
+        autoDismiss: true,
+        snackbarDuration: Duration(seconds: 2),
+        builder: (BuildContext context) {
+          return ToastCard(
+            title: Row(
+              mainAxisAlignment:MainAxisAlignment.start,
+              children: [
+                Column(
+                children: [
+                  Icon(Icons.error_outline,color: Colors.white,size: 30.r,),
+                ],
+              ),Column(
+                children: [
+                  Text("Une erreur s'est produite",style: TextStyle(
+                      color: Colors.white
+                  ),overflow: TextOverflow.ellipsis,maxLines: 2,),
+                  Text("Contactez le service technique. Merci",style: TextStyle(
+                      color: Colors.white
+                  ),overflow: TextOverflow.ellipsis,maxLines: 2,),
+                ],
+              )],),
+            color: Colors.red.shade700,);
+        },).show(context) as SnackBar;
     }
   }
 
@@ -68,9 +144,9 @@ class _DefinirpinState extends State<Definirpin> {
       body: Padding(padding: EdgeInsets.all(12),child: Column(
         children: [
           SizedBox(
-            height: 15.h,
+            height: 5.h,
           ),
-          Icon(Icons.security_outlined,size: 100.r,color: Colors.blue,),
+          Lottie.asset("assets/animations/Mobile Security.json",width: 350.w,height: 350.h),
           SizedBox(
             height: 15.h,
           ),

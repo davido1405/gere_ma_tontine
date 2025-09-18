@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/membres.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:http/http.dart' as http;
+import 'package:lottie/lottie.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -20,14 +21,23 @@ class details_tontine extends StatefulWidget {
   State<details_tontine> createState() => _details_tontineState();
 }
 
-class _details_tontineState extends State<details_tontine> {
+class _details_tontineState extends State<details_tontine> with SingleTickerProviderStateMixin{
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     chargerMembres();
+    _controllerLotti=AnimationController(duration: Duration(seconds: 2), vsync: this);
   }
+
+  @override
+  void dispose(){
+    _controllerLotti.dispose();
+    super.dispose();
+  }
+
+  late AnimationController _controllerLotti;
 
   late List<Membre>membres=[];
 
@@ -73,8 +83,42 @@ class _details_tontineState extends State<details_tontine> {
                 child: TextButton.icon(onPressed: (){
                   Navigator.of(context).pop();
                 },style: TextButton.styleFrom(
-                backgroundColor: Couleur.primaryBlue
-                ),label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
+                backgroundColor: Couleur.secondaryGreen
+                ),label: Text("Compris",style: TextStyle(
+                  color: Colors.white
+                ),),icon: Icon(Icons.verified,color: Colors.white,),),
+              )
+            ],
+          );
+        });
+      }else{
+        showDialog(context: context, builder: (BuildContext context){
+          return AlertDialog(
+            title: Center(child: Text("Information !"),),
+            content: SizedBox(
+              height: 200.h,
+              child: Column(children: [
+                Center(
+                  child: Lottie.asset('assets/animations/Sign for error _ Flat style.json',
+                      width: 150.w,
+                      height: 150.h,
+                      repeat: true,
+                      controller: _controllerLotti,
+                      onLoaded: (composition){
+                        _controllerLotti.forward();
+                      }),
+                ),
+                Text(data['message']),
+              ],),
+            ),
+            actions: [
+              Center(
+                child: TextButton.icon(onPressed: (){
+                  Navigator.of(context).pop();
+                  _controllerLotti.reset();
+                },style: TextButton.styleFrom(
+                    backgroundColor: Couleur.secondaryGreen
+                ), label: Text("Compris",style: TextStyle(color: Colors.white),),icon: Icon(Icons.verified,color: Colors.white,),),
               )
             ],
           );
@@ -186,7 +230,7 @@ class _details_tontineState extends State<details_tontine> {
               ),
             ),
             SizedBox(
-              height: 5.h,
+              height: 10.h,
             ),
             Padding(
               padding: EdgeInsets.only(left: 10.w),

@@ -99,28 +99,61 @@ class _acceuilState extends State<acceuil> {
 //}
   //}
 
-  Future<void> tontineInfo() async{
-    String? jwt=await widget.listsession.getSecureJwt();
-    print("Authorization: Bearer $jwt"); //
-    final url=Uri.parse("${adress}?ressource=tontines&action=details_tontine");
-    final reponse=await post(url,headers: {
-      "Authorization": "Bearer $jwt", // ✅ Assure l'espace
-      "Content-Type": "application/json",
+  Future<void> tontineInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Vérifier si on a déjà des données en cache
+    final cachedTontine = prefs.getString('tontine_info');
+    final lastFetchStr = prefs.getString('tontine_last_fetch');
+    DateTime? lastFetch = lastFetchStr != null ? DateTime.parse(lastFetchStr) : null;
+
+    // Si cache existe et moins de 24h, utiliser cache
+    if (cachedTontine != null && lastFetch != null && DateTime.now().difference(lastFetch).inHours < 24) {
+      setState(() {
+        tontine = Tontine.fromJson(jsonDecode(cachedTontine));
+      });
+      print("Données tontine chargées depuis le cache");
+      return;
+    }
+
+    // Sinon, appel API
+    String? jwt = await widget.listsession.getSecureJwt();
+    final url = Uri.parse("${adress}?ressource=tontines&action=details_tontine");
+    try {
+      final reponse = await post(
+        url,
+        headers: {
+          "Authorization": "Bearer $jwt",
+          "Content-Type": "application/json",
         },
         body: jsonEncode({
-      "code_tontine":widget.listsession.code_tontine
-    })).timeout(Duration(seconds: 5));
-    if(reponse.statusCode==200){
-      final data=jsonDecode(reponse.body) as Map<String,dynamic>;
-      if(data['success']==true){
-        setState(() {
-           tontine=Tontine.fromJson(data['data']);
-        });
+          "code_tontine": widget.listsession.code_tontine
+        }),
+      ).timeout(Duration(seconds: 5));
+
+      if (reponse.statusCode == 200) {
+        final data = jsonDecode(reponse.body) as Map<String, dynamic>;
+        if (data['success'] == true) {
+          final tontineData = Tontine.fromJson(data['data']);
+          setState(() {
+            tontine = tontineData;
+          });
+          // Stocker dans le cache
+          await prefs.setString('tontine_info', jsonEncode(data['data']));
+          await prefs.setString('tontine_last_fetch', DateTime.now().toIso8601String());
+          print("Données tontine chargées depuis l'API et mises en cache");
+        }
+      } else {
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => connexion_screen()),
+                (route) => false);
       }
-    }else{
-      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>connexion_screen()), (route)=>false);
+    } catch (e) {
+      print("Erreur lors de la récupération des infos tontine: $e");
     }
   }
+
 
   @override
   void initState() {
@@ -193,6 +226,8 @@ class _acceuilState extends State<acceuil> {
   Tontine? tontine;
 
   String numeroTour="N/A";
+
+  late int solvabilite = int.tryParse(widget.listsession.indice_solvabilite ?? "0") ?? 0;
 
   int statut=0;
 
@@ -329,7 +364,7 @@ class _acceuilState extends State<acceuil> {
                               SizedBox(
                                 height: 15.h,
                               ),
-                              TweenAnimationBuilder(tween: Tween(begin: 0,end:double.parse(montantCotiser.toString())), duration: Duration(seconds: 2), builder: (context,value,child){
+                              TweenAnimationBuilder(tween: Tween(begin: 0,end:double.tryParse(montantCotiser) ?? 0.0), duration: Duration(seconds: 2), builder: (context,value,child){
                                 return Text("${value.toStringAsFixed(2)} FCFA",style: TextStyle(
                                   fontSize: 20.sp,
                                   fontWeight: FontWeight.bold,
@@ -367,14 +402,20 @@ class _acceuilState extends State<acceuil> {
                                 SizedBox(
                                   height: 10.h,
                                 ),
-                                TweenAnimationBuilder(tween: Tween(begin: 0,end: double.parse(widget.listsession.indice_solvabilite)), duration: Duration(seconds: 2), builder: (context,value,child){
-                                  return Text("${value.toStringAsFixed(0)} Pts",
-                                      style: TextStyle(
-                                      fontSize: 35.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white
-                                  ),);
-                                })
+                                TweenAnimationBuilder<double>(
+                                    tween: Tween<double>(begin: 0, end: solvabilite.toDouble()),
+                                    duration: Duration(seconds: 2),
+                                    builder: (context, value, child){
+                                      return Text(
+                                        "${value.toStringAsFixed(0)} Pts",
+                                        style: TextStyle(
+                                            fontSize: 35.sp,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white
+                                        ),
+                                      );
+                                    }
+                                )
                               ],
                             ),
                             SizedBox(
@@ -382,7 +423,7 @@ class _acceuilState extends State<acceuil> {
                             ),
                             Column(
                               children: [
-                                IconButton(onPressed: int.parse(widget.listsession.indice_solvabilite)<75? null: (){
+                                IconButton(onPressed: (int.tryParse(widget.listsession.indice_solvabilite)??0)<75? null: (){
                                   showDialog(context: context, builder: (BuildContext context){
                                     return AlertDialog(
                                       title: Center(child: Text("Information"),),
@@ -397,7 +438,7 @@ class _acceuilState extends State<acceuil> {
                                     );
                                   });
                                 }, icon: Icon(Icons.add_circle,color: Colors.white,size:30.r,)),
-                                Icon(int.parse(widget.listsession.indice_solvabilite)<50?Icons.warning:Icons.verified,color:Colors.white,size: 80.r,),
+                                Icon(int.tryParse(widget.listsession.indice_solvabilite)!<50?Icons.warning:Icons.verified,color:Colors.white,size: 80.r,),
                               ],
                             )
                           ],
@@ -424,7 +465,7 @@ class _acceuilState extends State<acceuil> {
                           fontWeight: FontWeight.bold
                       ),
                     ),
-                    TextButton.icon(onPressed: (){
+                    TextButton.icon(onPressed: tontine==null? null:(){
                       Navigator.push(context, MaterialPageRoute(builder: (context)=>walletTontine(tontine: tontine!,listsession: widget.listsession, numeroTour: numeroTour )));
                     },label: Text("CAISSE",style: TextStyle(
                       fontSize: 16.sp,

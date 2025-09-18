@@ -10,6 +10,7 @@ import 'package:gerematontine/models/cotisation.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:lottie/lottie.dart';
 import '../../constants/colors.dart';
 import '../../constants/server.dart';
 
@@ -37,6 +38,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
   bool saisiMontantFrais=false;
   bool misejourEncour=false;
   bool enCourtraitement=false;
+  String lottieAffiche='';
 
 
   List<Cotisation>_listCotisation=[];
@@ -65,84 +67,145 @@ class _payer_cotisationState extends State<payer_cotisation> {
     }
   }
 
-  Future<void>payerCotisation(String x, String y) async{
-    String? jwt=await widget.listsession.getSecureJwt();
+  Future<void> payerCotisation(String x, String y) async {
+    String? jwt = await widget.listsession.getSecureJwt();
     setState(() {
-      enCourtraitement=true;
+      enCourtraitement = true;
+      lottieAffiche = 'assets/animations/Approve.json';
     });
-    final url=Uri.parse("${adress}?ressource=cotisations&action=payer_cotisation");
-    final reponse=await http.post(url,headers: {"content-Type":"application/json",
-      "Authorization":"Bearer $jwt"},body: jsonEncode({
-      "code_tontine":widget.listsession.code_tontine,
-      "code_participant":widget.listsession.code_participant,
-      "montant":int.parse(x),
-      "libelle_mode_paiement":y
-    }));
-    if(reponse.statusCode==200){
-      Map<String,dynamic>data=jsonDecode(reponse.body);
-      bool success=data['success'];
-      if(success){
-        showDialog(context: context, builder: (BuildContext context){
-          return AlertDialog(
-            title: Center(child: Text("Statut paiement",style: TextStyle(
-                fontSize: 15.sp
-              ),),),
-              content: Text(data['message'],style: TextStyle(
-                  fontSize: 14.sp
-              ),),
-              actions: [
-                Center(
-                  child: TextButton.icon(onPressed: (){
-                    setState(() {
-                      enCourtraitement=false;
-                      _selectedOption="";
-                    });
-                    Navigator.of(context).pop();
-                  },style: TextButton.styleFrom(
-                      backgroundColor: Couleur.primaryBlue
-                  ), label: Text("Compris",style: TextStyle(
-                      fontSize: 14.sp
-                  ),),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
-                )
-              ],
-            );
-          });
 
-      }else{
-          showDialog(context: context, builder: (BuildContext context){
+    // 1️⃣ Affiche le dialogue de chargement
+    showDialog(
+      context: context,
+      barrierDismissible: false, // empêche de fermer en cliquant dehors
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Center(child: Text("Statut")),
+          content: SizedBox(
+            height: 200.h,
+            child: Center(
+              child: Column(
+                children: [
+                  Lottie.asset(lottieAffiche, width: 150.w, height: 150.h),
+                  const SizedBox(height: 10),
+                  const Text("Paiement en cours...")
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    try {
+      final url = Uri.parse("${adress}?ressource=cotisations&action=payer_cotisation");
+      final reponse = await http.post(
+        url,
+        headers: {
+          "content-Type": "application/json",
+          "Authorization": "Bearer $jwt"
+        },
+        body: jsonEncode({
+          "code_tontine": widget.listsession.code_tontine,
+          "code_participant": widget.listsession.code_participant,
+          "montant": int.parse(x),
+          "libelle_mode_paiement": y
+        }),
+      );
+
+      // 2️⃣ Fermer le dialogue de chargement une fois la réponse obtenue
+      Navigator.of(context).pop();
+
+      if (reponse.statusCode == 200) {
+        Map<String, dynamic> data = jsonDecode(reponse.body);
+        bool success = data['success'];
+
+        // 3️⃣ Affiche le résultat (succès ou erreur)
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
             return AlertDialog(
-              title: Center(child: Text("Statut paiement",style: TextStyle(
-                  fontSize: 15.sp
-              ),),),
-              content: Text(data['message'],style: TextStyle(
-                  fontSize: 14.sp
-              ),),
+              title: Center(
+                child: Text(
+                  "Statut paiement",
+                  style: TextStyle(fontSize: 15.sp),
+                ),
+              ),
+              content: SizedBox(
+                height: 200.h,
+                child: Column(
+                  children: [
+                    success
+                        ? Lottie.asset(
+                      'assets/animations/Approve.json',
+                      width: 150.w,
+                      height: 150.h,
+                    )
+                        : Lottie.asset(
+                      'assets/animations/Sign for error _ Flat style.json',
+                      width: 150.w,
+                      height: 150.h,
+                    ),
+                    Text(
+                      data['message'],
+                      style: TextStyle(fontSize: 14.sp),
+                    ),
+                  ],
+                ),
+              ),
               actions: [
                 Center(
-                  child: TextButton.icon(onPressed: (){
-                    setState(() {
-                      enCourtraitement=false;
-                      _selectedOption="";
-                    });
-                    Navigator.of(context).pop();
-                  },style: TextButton.styleFrom(
-                    backgroundColor: Couleur.primaryBlue
-                  ), label: Text("Compris",style: TextStyle(
-                    color: Colors.white,
-                      fontSize: 14.sp
-                  ),),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
+                  child: TextButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        enCourtraitement = false;
+                        _selectedOption = "";
+                      });
+                      Navigator.of(context).pop();
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: Couleur.secondaryGreen,
+                    ),
+                    icon: const Icon(Icons.verified, color: Colors.white),
+                    label: Text(
+                      "Compris",
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                 )
               ],
             );
-          });
+          },
+        );
+      } else {
+        setState(() => enCourtraitement = false);
+        print("Erreur serveur : ${reponse.statusCode}");
       }
-    }else{
-      setState(() {
-        enCourtraitement=false;
-      });
-      print("Erreur serveur : ${reponse.statusCode}");
+    } catch (e) {
+      // 2bis️⃣ Fermer le dialogue de chargement si une erreur se produit
+      Navigator.of(context).pop();
+      setState(() => enCourtraitement = false);
+
+      // 3bis️⃣ Affiche un dialogue d’erreur
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text("Erreur"),
+          content: Text("Une erreur est survenue : $e"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("OK"),
+            )
+          ],
+        ),
+      );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

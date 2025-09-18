@@ -10,6 +10,7 @@ import 'package:gerematontine/models/transactions.dart';
 import 'package:gerematontine/models/wallet_tontine.dart';
 import 'package:gerematontine/screens/dashboard/Acceuil.dart';
 import 'package:http/http.dart';
+import 'package:lottie/lottie.dart';
 
 import '../../constants/server.dart';
 import '../../models/session.dart';
@@ -24,7 +25,7 @@ class walletTontine extends StatefulWidget {
   State<walletTontine> createState() => _walletTontineState();
 }
 
-class _walletTontineState extends State<walletTontine> {
+class _walletTontineState extends State<walletTontine> with SingleTickerProviderStateMixin{
 
   //Initialisation de toutes mes fonction
   @override
@@ -34,6 +35,7 @@ class _walletTontineState extends State<walletTontine> {
     recupererWallet();
     transacs();
     verifierTour();
+    _controllerAnimation=AnimationController(duration: Duration(seconds: 2),vsync: this);
     Future.delayed(Duration(seconds: 2),(){
       if(mounted){
         setState(() {
@@ -43,6 +45,7 @@ class _walletTontineState extends State<walletTontine> {
       }
     });
   }
+  late AnimationController _controllerAnimation;
   WalletTontine? wallet;
   List<Transactions>_listeTransac=[];
   bool _ouvert=true;
@@ -160,8 +163,8 @@ Future<bool>retirer()async{
                 Navigator.of(context).pop();
                 initState();
               },style: TextButton.styleFrom(
-                  backgroundColor: Couleur.primaryBlue
-              ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
+                  backgroundColor: Couleur.secondaryGreen
+              ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.white,),)
             ],
           );
         });
@@ -199,8 +202,8 @@ Future<bool>relancer()async{
             TextButton.icon(onPressed: (){
               Navigator.of(context).pop();
             },style: TextButton.styleFrom(
-                backgroundColor: Couleur.primaryBlue
-            ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.green,),)
+                backgroundColor: Couleur.secondaryGreen
+            ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.white,),)
           ],
         );
       });
@@ -229,19 +232,29 @@ Future<bool>relancer()async{
         Center(
           child: await showDialog(context: context, builder: (BuildContext context){
             return AlertDialog(
-              title: Text("Oups !"),
-              content: Text("En attente des autres participants. Veuillez patienter svp.",
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,),
+              title: Center(child: Text("Information !")),
+              content: SizedBox(
+                height: 200.h,
+                child: Column(
+                  children: [
+                    Lottie.asset('assets/animations/Sign for error _ Flat style.json',height: 150.h,width: 150.w),
+                    Text("En attente des autres participants. Veuillez patienter svp.",
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,),
+                  ],
+                ),
+              ),
               actions: [
-                TextButton.icon(onPressed: (){
-                  setState(() {
-                    _dialogShown = true; // empêcher les doublons
-                  });
-                  Navigator.of(context).pop();
-                },style: TextButton.styleFrom(
-                    backgroundColor: Couleur.primaryBlue
-                ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.green,),)
+                Center(
+                  child: TextButton.icon(onPressed: (){
+                    setState(() {
+                      _dialogShown = true; // empêcher les doublons
+                    });
+                    Navigator.of(context).pop();
+                  },style: TextButton.styleFrom(
+                      backgroundColor: Couleur.secondaryGreen
+                  ), label: Text("Compris",style: TextStyle(color: Colors.white),),icon: Icon(Icons.verified,color: Colors.white,),),
+                )
               ],
             );
           }),
@@ -331,9 +344,21 @@ Future<bool>relancer()async{
                                           showDialog(context: context, builder: (BuildContext context){
                                             return AlertDialog(
                                               title: Center(child: Text("Félicitation"),),
-                                              content: Text("Retrait éffectué avec succès !",style: TextStyle(
-                                                fontSize: 14.sp
-                                              ),),
+                                              content: SizedBox(
+                                                height: 200.h,
+                                                child: Column(
+                                                  children: [
+                                                    Lottie.asset("assets/animations/Trophy Winner.json",width: 150.w,height: 150.h,
+                                                    controller: _controllerAnimation,
+                                                    onLoaded: (composition){
+                                                      _controllerAnimation.forward();
+                                                    }),
+                                                    Text("Retrait éffectué avec succès !",style: TextStyle(
+                                                      fontSize: 14.sp
+                                                    ),),
+                                                  ],
+                                                ),
+                                              ),
                                               actions: [
                                                 TextButton.icon(onPressed: (){
                                                   if(widget.tontine.etat=="Terminée"){
@@ -377,7 +402,7 @@ Future<bool>relancer()async{
                                                                                   Navigator.of(context).popUntil((route)=>route.isFirst);
                                                                                 },style: TextButton.styleFrom(
                                                                                     backgroundColor: Couleur.secondaryGreen
-                                                                                ), label: Text("Compris !"),icon: Icon(Icons.verified,color: Colors.white,),),
+                                                                                ), label: Text("Compris !",style: TextStyle(color: Colors.white),),icon: Icon(Icons.verified,color: Colors.white,),),
                                                                               ],
                                                                             );
                                                                           });
@@ -393,14 +418,14 @@ Future<bool>relancer()async{
                                                                                   Navigator.of(context).pop();
                                                                                 },style: TextButton.styleFrom(
                                                                                     backgroundColor: Couleur.secondaryGreen
-                                                                                ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.white,),)
+                                                                                ), label: Text("Compris",style: TextStyle(color: Colors.white),),icon: Icon(Icons.verified,color: Colors.white,),)
                                                                               ],
                                                                             );
                                                                           });
                                                                         }
                                                                       }
                                                                     },style: TextButton.styleFrom(
-                                                                        backgroundColor: Couleur.primaryBlue
+                                                                        backgroundColor: Couleur.secondaryGreen
                                                                     ), label: Text("Nouveau cycle",style: TextStyle(
                                                                         fontSize: 14.sp
                                                                     ),),icon: Icon(Icons.loop_rounded,color: Colors.white,size: 25.r,),),
@@ -409,6 +434,7 @@ Future<bool>relancer()async{
                                                                     },style: TextButton.styleFrom(
                                                                         backgroundColor: Couleur.lightGray
                                                                     ), label: Text("Cloturer",style: TextStyle(
+                                                                      color: Colors.black,
                                                                         fontSize: 14.sp
                                                                     ),),icon: Icon(Icons.close_rounded,color: Colors.red.shade400,),),
                                                                   ],
@@ -436,7 +462,7 @@ Future<bool>relancer()async{
                                                   }
                                                 },style: TextButton.styleFrom(
                                                     backgroundColor: Couleur.secondaryGreen
-                                                ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.white,),)
+                                                ), label: Text("Compris",style: TextStyle(color: Colors.white),),icon: Icon(Icons.verified,color: Colors.white,),)
                                               ],
                                             );
                                           });
@@ -451,7 +477,7 @@ Future<bool>relancer()async{
                                                 Navigator.of(context).pop();
                                               },style: TextButton.styleFrom(
                                                   backgroundColor: Couleur.secondaryGreen
-                                              ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.white,),),)
+                                              ), label: Text("Compris",style: TextStyle(color: Colors.white),),icon: Icon(Icons.verified,color: Colors.white,),),)
                                             ],
                                           );
                                         });
@@ -465,7 +491,7 @@ Future<bool>relancer()async{
                                                 Navigator.of(context).pop();
                                               },style: TextButton.styleFrom(
                                                   backgroundColor: Couleur.secondaryGreen
-                                              ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.white,),),)
+                                              ), label: Text("Compris",style: TextStyle(color: Colors.white),),icon: Icon(Icons.verified,color: Colors.white,),),)
                                             ],
                                           );
                                         });
@@ -483,13 +509,9 @@ Future<bool>relancer()async{
                         ),
                         Column(
                           children: [
-                            SizedBox(
-                              height: 30.h,
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(right: 10.0.w),
-                              child: Icon(_ouvert?Icons.lock_open:Icons.lock_outline,size: 80.r,color: _ouvert? Colors.white:Colors.green,),
-                            ),
+                            Container(
+                              child: Lottie.asset('assets/animations/Good investment makes it reach the target.json',width: 180.w,height: 180.h),
+                            )
                           ],
                         )
                       ],
