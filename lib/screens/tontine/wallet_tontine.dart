@@ -32,6 +32,7 @@ class _walletTontineState extends State<walletTontine> with SingleTickerProvider
   void initState() {
     // TODO: implement initState
     super.initState();
+    _dialogShown=false;
     recupererWallet();
     transacs();
     verifierTour();
@@ -40,7 +41,6 @@ class _walletTontineState extends State<walletTontine> with SingleTickerProvider
       if(mounted){
         setState(() {
           _ouvert=false;
-          _dialogShown=false;
         });
       }
     });
@@ -50,14 +50,13 @@ class _walletTontineState extends State<walletTontine> with SingleTickerProvider
   List<Transactions>_listeTransac=[];
   bool _ouvert=true;
   bool _monTour=false;
-  late bool _dialogShown;
+  bool _dialogShown=false;
   bool _pasJourprevu=false;
   bool _masque=true;
   late String infoTour;
-
   bool optionAffiche=false;
 
-  
+
   //Recupérer le wallet
   Future<void>recupererWallet() async{
     String? jwt=await widget.listsession.getSecureJwt();
@@ -199,7 +198,7 @@ Future<bool>relancer()async{
       showDialog(context: context, builder: (BuildContext context){
         return AlertDialog(
           title: Text("Attention"),
-          content: Text("Une erreur serveur s'est produite, veuillez reéssayer plus tard. Merci"),
+          content: Expanded(child: Text("Une erreur serveur s'est produite, veuillez reéssayer plus tard. Merci",overflow: TextOverflow.ellipsis,maxLines: 2,)),
           actions: [
             TextButton.icon(onPressed: (){
               Navigator.of(context).pop();
@@ -228,37 +227,48 @@ Future<bool>relancer()async{
         ),
       );
     }
+    // CORRECTION PRINCIPALE : Dialogue conditionnel
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!_dialogShown && widget.tontine.etat == "En attente") {
+        setState(() {
+          _dialogShown = true;
+        });
 
-      if(_dialogShown==false && widget.tontine.etat=="En attente"){
-        Center(
-          child: await showDialog(context: context, builder: (BuildContext context){
-            return AlertDialog(
-              title: Center(child: Text("Information !")),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Lottie.asset('assets/animations/Sign for error _ Flat style.json',height: 150.h,width: 150.w),
-                  Text("En attente des autres participants. Veuillez patienter svp.",),
+        await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Center(child: Text("Information !")),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Lottie.asset(
+                        'assets/animations/Sign for error _ Flat style.json',
+                        height: 150.h,
+                        width: 150.w
+                    ),
+                    Text("En attente des autres participants. Veuillez patienter svp."),
+                  ],
+                ),
+                actions: [
+                  Center(
+                    child: TextButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      style: TextButton.styleFrom(backgroundColor: Couleur.secondaryGreen),
+                      label: Text("Compris", style: TextStyle(color: Colors.white)),
+                      icon: Icon(Icons.verified, color: Colors.white),
+                    ),
+                  )
                 ],
-              ),
-              actions: [
-                Center(
-                  child: TextButton.icon(onPressed: (){
-                    setState(() {
-                      _dialogShown = true; // empêcher les doublons
-                    });
-                    Navigator.of(context).pop();
-                  },style: TextButton.styleFrom(
-                      backgroundColor: Couleur.secondaryGreen
-                  ), label: Text("Compris",style: TextStyle(color: Colors.white),),icon: Icon(Icons.verified,color: Colors.white,),),
-                )
-              ],
-            );
-          }),
+              );
+            }
         );
       }
     });
+
     return Scaffold(
       appBar: AppBar(
         title: Center(

@@ -10,6 +10,7 @@ import 'package:gerematontine/screens/auth/mot_passe_oublie.dart';
 import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
 import 'package:gerematontine/screens/dashboard/participer.dart';
 import 'package:http/http.dart' as http;
+import 'package:lottie/lottie.dart';
 import 'package:pinput/pinput.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -79,7 +80,12 @@ class _connexion_screenState extends State<connexion_screen> {
         showDialog(context: context, builder: (BuildContext contex){
           return AlertDialog(
             title: Center(child: Text('Erreur'),),
-            content: Text(data['message']),
+            content: Column(
+              children: [
+                Center(child: Lottie.asset("assets/animations/lottieflow-404-12-10-000000-easey.json",width: 150.w,height: 150.h),),
+                Text("Une erreur s'est produite veuillez réessayer ou contacter le service technique si l'erreur persiste. Merci",overflow: TextOverflow.ellipsis,maxLines: 2,),
+              ],
+            ),
             actions: [
               Center(
                 child:TextButton.icon(onPressed: (){

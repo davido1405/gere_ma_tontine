@@ -28,7 +28,7 @@ class acceuil extends StatefulWidget {
 }
 
 class _acceuilState extends State<acceuil> {
-  
+
   Future<void> monTour() async{
     String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=participants&action=mon_tour");
@@ -77,27 +77,6 @@ class _acceuilState extends State<acceuil> {
       }
     }
   }
-
-  //Future <void> totalPenalite() async{
-    //final url=Uri.parse("${adress}?ressource=cotisations&action=total_penalite");
-    //final reponse=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode({
-      //"code_participant":widget.listsession.code_participant,
-      //"code_tontine":widget.listsession.code_tontine
-    //})).timeout(Duration(seconds: 5));
-
-    //if(reponse.statusCode==200){
-    //  final total=jsonDecode(reponse.body) as Map<String,dynamic>;
-    //  bool success=total['success'];
-    //  if(success==true){
-  //    setState(() {
-  //      montantPenalite=total['data'].toString();
-  //      if(double.parse(montantPenalite)>5000.00){
-//        _critique=true;
-//}
-//});
-//}
-//}
-  //}
 
   Future<void> tontineInfo() async {
     final prefs = await SharedPreferences.getInstance();
@@ -154,10 +133,8 @@ class _acceuilState extends State<acceuil> {
     }
   }
 
-
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     totalCotisation();
     tontineInfo();
@@ -191,7 +168,7 @@ class _acceuilState extends State<acceuil> {
                     },style: TextButton.styleFrom(
                         backgroundColor: Colors.blueAccent
                     ), label: Text("Compris",style: TextStyle(
-                      color: Colors.white
+                        color: Colors.white
                     ),),icon: Icon(Icons.verified,color: Colors.green,),)
                   ],
                 );
@@ -217,279 +194,264 @@ class _acceuilState extends State<acceuil> {
     await FCMService.sendFCMTokenToServer(prefs.getString('fcm_token').toString(), widget.listsession.code_participant.toString());
   }
 
-  bool?tokenEnvoyer;
-
+  bool? tokenEnvoyer;
   String montantCotiser="0";
-
   String montantPenalite="0";
-
   Tontine? tontine;
-
   String numeroTour="N/A";
-
   late int solvabilite = int.tryParse(widget.listsession.indice_solvabilite ?? "0") ?? 0;
-
   int statut=0;
-
   bool messageAffich=false;
 
   @override
   build(BuildContext context) {
     return VerificateurInactivite(
-      tempsMaxInactivite: Duration(minutes: 5),
-      delaisDepasse: () { Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>connexion_screen()), (route)=>false); },
-      child: SafeArea(child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.only(left: 145.w,right: 10.w),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        tempsMaxInactivite: Duration(minutes: 5),
+        delaisDepasse: () {
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>connexion_screen()), (route)=>false);
+        },
+        child: SafeArea(child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.only(left: 145.w,right: 10.w),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Center(
+                      child: Text("Accueil",style: TextStyle(
+                          fontSize: 25.sp,
+                          fontWeight: FontWeight.bold
+                      ),),
+                    ),
+                    Row(
+                      children: [
+                        IconButton(onPressed: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>parametre(listsession: widget.listsession,)));
+                        }, icon: Icon(Icons.settings_outlined),color: Colors.black,
+                        ),
+                        IconButton(onPressed: (){
+                          final secureStorage=FlutterSecureStorage();
+                          setState(() {
+                            secureStorage.delete(key: 'jwt_token');
+                          });
+                          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>connexion_screen()), (route)=>false);
+                        }, icon: Icon(Icons.logout,color: Colors.black,))
+                      ],
+                    )
+                  ]
+              ),
+            ),
+            SizedBox(height: 5.h),
+            Padding(
+              padding: EdgeInsets.only(right: 5.0.w),
+              child: Column(
                 children: [
-                  Center(
-                    child: Text("Accueil",style: TextStyle(
-                        fontSize: 25.sp,
-                        fontWeight: FontWeight.bold
-                    ),),
+                  Padding(
+                    padding: EdgeInsets.only(left: 10.w),
+                    child: Row(
+                      children: [
+                        Text("Bienvenue, ${widget.listsession.nom_participant} ${widget.listsession.prenoms_participant}",
+                          style: TextStyle(
+                              fontSize: 20.sp,
+                              fontWeight: FontWeight.bold
+                          ),)
+                      ],
+                    ),
                   ),
                   Row(
                     children: [
-                      IconButton(onPressed: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>parametre(listsession: widget.listsession,)));
-                      }, icon: Icon(Icons.settings_outlined),color: Colors.black,
-                      ),
-                      IconButton(onPressed: (){
-                        final secureStorage=FlutterSecureStorage();
-                        setState(() {
-                          secureStorage.delete(key: 'jwt_token');
-                        });
-                        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>connexion_screen()), (route)=>false);
-                      }, icon: Icon(Icons.logout,color: Colors.black,))
-                    ],
-                  )
-                ]
-            ),
-          ),
-          SizedBox(
-            height: 5.h,
-          ),
-          Padding(
-            padding: EdgeInsets.only(right: 5.0.w),
-            child: Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(left: 10.w),
-                  child: Row(
-                    children: [
-                      Text("Bienvenue, ${widget.listsession.nom_participant} ${widget.listsession.prenoms_participant}",
-                      style: TextStyle(
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.bold
-                      ),)
-                    ],
-                  ),
-                ),
-                Row(
-                  children: [
-                    Expanded(child: GestureDetector(
-                      onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (_)=>tourTontine(listsession: widget.listsession,  monTour: numeroTour, statut: statut,)));
-                      },
-                      child: Card(
-                        elevation: 2,
-                        color: Couleur.primaryBlue,
-                        margin: EdgeInsets.all(10.w),
-                        child: Padding(
-                          padding: EdgeInsets.all(10.0.w),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Mon numéro",style: TextStyle(
-                                  fontSize: 17.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white
-                              ),
-                              ),
-                              SizedBox(
-                                height: 5.h,
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(numeroTour,
-                                    style: TextStyle(
-                                        fontSize: 35.sp,
+                      Expanded(child: GestureDetector(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (_)=>tourTontine(listsession: widget.listsession, monTour: numeroTour, statut: statut,)));
+                        },
+                        child: Card(
+                          elevation: 2,
+                          color: Couleur.primaryBlue,
+                          margin: EdgeInsets.all(10.w),
+                          child: Padding(
+                            padding: EdgeInsets.all(10.0.w),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Mon numéro",style: TextStyle(
+                                    fontSize: 17.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white
+                                ),),
+                                SizedBox(height: 5.h),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(numeroTour,
+                                      style: TextStyle(
+                                          fontSize: 35.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white
+                                      ),
+                                    ),
+                                    Icon(statut==0?Icons.monetization_on_outlined:Icons.monetization_on,color: statut==0? Colors.red:Colors.green,size: 40.r,)
+                                  ],
+                                ),
+                                SizedBox(height: 5.h)
+                              ],
+                            ),
+                          ),
+                        ),
+                      )),
+                      Expanded(child: GestureDetector(
+                        onTap: (){
+                          setState(() {
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=>payer_cotisation(listsession: widget.listsession,)));
+                          });
+                        },
+                        child: Card(
+                          elevation: 2,
+                          color: Couleur.primaryBlue,
+                          margin: EdgeInsets.all(5.w),
+                          child: Padding(
+                            padding: EdgeInsets.all(15.w),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Mes cotisations",style: TextStyle(
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white
+                                ),),
+                                SizedBox(height: 20.h),
+                                TweenAnimationBuilder(tween: Tween(begin: 0,end:double.tryParse(montantCotiser) ?? 0.0), duration: Duration(seconds: 2), builder: (context,value,child){
+                                  return FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text("${value.toStringAsFixed(2)} FCFA",style: TextStyle(
+                                        fontSize: 20.sp,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white
-                                    ),
-                                  ),
-                                  Icon(statut==0?Icons.monetization_on_outlined:Icons.monetization_on,color: statut==0? Colors.red:Colors.green,size: 40.r,)
+                                    ),),
+                                  );
+                                })
+                              ],
+                            ),
+                          ),
+                        ),
+                      ))
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(child: Card(
+                        elevation: 2,
+                        color: Couleur.secondaryGreen,
+                        margin: EdgeInsets.symmetric(horizontal:5.w),
+                        child: Padding(
+                          padding: EdgeInsets.all(10.w),
+                          child: Row(
+                            children: [
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Points de confiance",style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white
+                                  ),),
+                                  SizedBox(height: 10.h),
+                                  TweenAnimationBuilder<double>(
+                                      tween: Tween<double>(begin: 0, end: solvabilite.toDouble()),
+                                      duration: Duration(seconds: 2),
+                                      builder: (context, value, child){
+                                        return Text(
+                                          "${value.toStringAsFixed(0)} Pts",
+                                          style: TextStyle(
+                                              fontSize: 35.sp,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white
+                                          ),
+                                        );
+                                      }
+                                  )
                                 ],
                               ),
-                              SizedBox(
-                                height: 5.h,
+                              SizedBox(width: 125.w),
+                              Column(
+                                children: [
+                                  IconButton(
+                                      onPressed: (int.tryParse(widget.listsession.indice_solvabilite ?? "0") ?? 0) < 75 ? null : (){
+                                        showDialog(context: context, builder: (BuildContext context){
+                                          return AlertDialog(
+                                            title: Center(child: Text("Information"),),
+                                            content: Text("Cette option sera bientôt disponible. Continuez à utiliser Djarra Finances"),
+                                            actions: [
+                                              Center(
+                                                child: TextButton.icon(onPressed: (){
+                                                  Navigator.of(context).pop();
+                                                },style: TextButton.styleFrom(
+                                                    backgroundColor: Couleur.secondaryGreen
+                                                ), label: Text("Compris",style: TextStyle(
+                                                    color: Colors.white
+                                                ),),icon: Icon(Icons.verified,color: Colors.white,),),
+                                              )
+                                            ],
+                                          );
+                                        });
+                                      },
+                                      icon: Icon(Icons.add_circle,color: Colors.white,size:30.r,)
+                                  ),
+                                  // CORRECTION PRINCIPALE ICI - ligne 442
+                                  Icon(
+                                    (int.tryParse(widget.listsession.indice_solvabilite ?? "0") ?? 0) < 50
+                                        ? Icons.warning
+                                        : Icons.verified,
+                                    color: Colors.white,
+                                    size: 80.r,
+                                  ),
+                                ],
                               )
                             ],
                           ),
                         ),
-                      ),
-                    )
-                    ),
-                    Expanded(child: GestureDetector(
-                      onTap: (){
-                        setState(() {
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=>payer_cotisation(listsession: widget.listsession,)));
-                        });
-                      },
-                      child: Card(
-                        elevation: 2,
-                        color: Couleur.primaryBlue,
-                        margin: EdgeInsets.all(5.w),
-                        child: Padding(
-                          padding: EdgeInsets.all(15.w),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Mes cotisations",style: TextStyle(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white
-                              ),
-                              ),
-                              SizedBox(
-                                height: 20.h,
-                              ),
-                              TweenAnimationBuilder(tween: Tween(begin: 0,end:double.tryParse(montantCotiser) ?? 0.0), duration: Duration(seconds: 2), builder: (context,value,child){
-                                return FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Text("${value.toStringAsFixed(2)} FCFA",style: TextStyle(
-                                    fontSize: 20.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white
-                                  ),),
-                                );
-                              })
-                            ],
-                          ),
+                      ))
+                    ],
+                  )
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal:10.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Ma tontine",
+                        style: TextStyle(
+                            fontSize: 25.sp,
+                            fontWeight: FontWeight.bold
                         ),
                       ),
-                    )
-                    )
-                  ],
-                ),
-                Row(
-                  children: [
-                    Expanded(child: Card(
-                      elevation: 2,
-                      color: Couleur.secondaryGreen,
-                      margin: EdgeInsets.symmetric(horizontal:5.w),
-                      child: Padding(
-                        padding: EdgeInsets.all(10.w),
-                        child: Row(
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Points de confiance",style: TextStyle(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white
-                                ),
-                                ),
-                                SizedBox(
-                                  height: 10.h,
-                                ),
-                                TweenAnimationBuilder<double>(
-                                    tween: Tween<double>(begin: 0, end: solvabilite.toDouble()),
-                                    duration: Duration(seconds: 2),
-                                    builder: (context, value, child){
-                                      return Text(
-                                        "${value.toStringAsFixed(0)} Pts",
-                                        style: TextStyle(
-                                            fontSize: 35.sp,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white
-                                        ),
-                                      );
-                                    }
-                                )
-                              ],
-                            ),
-                            SizedBox(
-                              width: 125.w,
-                            ),
-                            Column(
-                              children: [
-                                IconButton(onPressed: (int.tryParse(widget.listsession.indice_solvabilite)??0)<75? null: (){
-                                  showDialog(context: context, builder: (BuildContext context){
-                                    return AlertDialog(
-                                      title: Center(child: Text("Information"),),
-                                      content: Text("Cette option sera bientôt disponible. Continuez à utiliser Djarra Finances"),
-                                      actions: [
-                                        Center(
-                                          child: TextButton.icon(onPressed: (){
-                                            Navigator.of(context).pop();
-                                          },style: TextButton.styleFrom(
-                                              backgroundColor: Couleur.secondaryGreen
-                                          ), label: Text("Compris",style: TextStyle(
-                                            color: Colors.white
-                                          ),),icon: Icon(Icons.verified,color: Colors.white,),),
-                                        )
-                                      ],
-                                    );
-                                  });
-                                }, icon: Icon(Icons.add_circle,color: Colors.white,size:30.r,)),
-                                Icon(int.tryParse(widget.listsession.indice_solvabilite)!<50?Icons.warning:Icons.verified,color:Colors.white,size: 80.r,),
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                    )
-                    )
-                  ],
-                )
-              ],
+                      TextButton.icon(
+                        onPressed: tontine != null ? (){
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>walletTontine(tontine: tontine!, listsession: widget.listsession, numeroTour: numeroTour)));
+                        } : null,
+                        label: Text("CAISSE",style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                        ),),
+                        icon: Icon(Icons.wallet,color: Couleur.primaryBlue,size: 30.r,),
+                      )
+                    ],
+                  )
+                ],
+              ),
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal:10.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Ma tontine",
-                      style: TextStyle(
-                          fontSize: 25.sp,
-                          fontWeight: FontWeight.bold
-                      ),
-                    ),
-                    TextButton.icon(onPressed: tontine!= null
-                        ? (){
-                      final tontineData=tontine;
-                      if(tontineData==null) {
-                        return ;
-                      }
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>walletTontine(tontine: tontine!,listsession: widget.listsession, numeroTour: numeroTour )));
-                    }:null,label: Text("CAISSE",style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                    ),),icon: Icon(Icons.wallet,color:Couleur.primaryBlue,size: 30.r,),)
-                  ],
-                )
-              ],
-            ),
-          ),
-
             Expanded(
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
                 child: Center(
                   child: Card(
                     elevation: 2,
-                    color:Couleur.primaryBlue,//Color(0xFF3D0C94), // une nuance plus foncée du même violet,
+                    color: Couleur.primaryBlue,
                     margin: EdgeInsets.all(5.w),
                     child: Padding(
                         padding: EdgeInsets.all(10.0.w),
@@ -499,139 +461,104 @@ class _acceuilState extends State<acceuil> {
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              SizedBox(
-                                height: 5.h,
-                              ),
-                              widget.listsession.type_participant=="Organisateur"?
-                              Row(
-                                  children: [
-                                    Text("Code tontine: ",style: TextStyle(
-                                        fontSize: 15.sp,
-                                        color: Colors.white
-                                    ),),
-                                    Text(tontine?.code_tontine ?? "N/A",style: TextStyle(
-                                        fontSize: 20.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white
-                                    ),)
-                                  ]
-                              ):
-                              SizedBox(
-                                height: 5.h,
-                              ),
-                              Row(
-
-                                  children: [
-                                    Text("Nom tontine: ",style: TextStyle(
-                                        fontSize: 15.sp,
-                                        color: Colors.white
-                                    ),),
-                                    Text(tontine?.nom_tontine ?? "N/A",style: TextStyle(
-                                        fontSize: 20.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white
-                                    ),)
-                                  ]
-                              ),
-                              SizedBox(
-                                height: 5.h,
-                              ),
-                              Row(
-
-                                  children: [
-                                    Text("Montant cotisation: ",style: TextStyle(
-                                        fontSize: 15.sp,
-                                        color: Colors.white
-                                    ),),
-                                    Text(tontine?.montant_cotisation!=null ?"${tontine?.montant_cotisation} FCFA" :"N/A",style: TextStyle(
-                                        fontSize: 20.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white
-                                    ),)
-                                  ]
-                              ),
-                              SizedBox(
-                                height: 5.h,
-                              ),
-                              Row(
-                                  children: [
-                                    Text("Nombre participants: ",style: TextStyle(
-                                        fontSize: 15.sp,
-                                        color: Colors.white
-                                    ),),
-                                    Text(tontine?.nombre_participant.toString() ?? "N/A",style: TextStyle(
-                                        fontSize: 20.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white
-                                    ),)
-                                  ]
-                              ),
-                              SizedBox(
-                                height: 5.h,
-                              ),
-                              Row(
-
-                                  children: [
-                                    Text("Fréquence cotisation: ",style: TextStyle(
-                                        fontSize: 15.sp,
-                                        color: Colors.white
-                                    ),),
-                                    Text(tontine?.frequence?? "N/A",style: TextStyle(
-                                        fontSize: 20.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white
-                                    ),)
-                                  ]
-                              ),
-                              SizedBox(
-                                height: 5.h,
-                              ),
-                              Row(
-
-                                  children: [
-                                    Text("Fréquence paiement: ",style: TextStyle(
-                                        fontSize: 15.sp,
-                                        color: Colors.white
-                                    ),),
-                                    Text(tontine?.frequence_paiement ?? "N/A",style: TextStyle(
-                                        fontSize: 20.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white
-                                    ),)
-                                  ]
-                              ),
-                              SizedBox(
-                                height: 5.h,
-                              ),
-                              Row(
-                                  children: [
-                                    Text("Type de tontine: ",style: TextStyle(
-                                        fontSize: 15.sp,
-                                        color: Colors.white
-                                    ),),
-                                    Text(tontine?.type?? "N/A",style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white
-                                    ),)
-                                  ]
-                              ),
-                              SizedBox(
-                                height: 5.h,
-                              ),
-                              Row(
-                                  children: [
-                                    Text("Date de création: ",style: TextStyle(
-                                        fontSize: 15.sp,
-                                        color: Colors.white
-                                    ),),
-                                    Text(tontine?.date_creation?? "N/A",style: TextStyle(
-                                        fontSize: 20.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white
-                                    ),)
-                                  ]
-                              ),
+                              SizedBox(height: 5.h),
+                              if(widget.listsession.type_participant == "Organisateur")
+                                Row(children: [
+                                  Text("Code tontine: ",style: TextStyle(
+                                      fontSize: 15.sp,
+                                      color: Colors.white
+                                  ),),
+                                  Text(tontine?.code_tontine ?? "N/A",style: TextStyle(
+                                      fontSize: 20.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white
+                                  ),)
+                                ])
+                              else
+                                SizedBox(height: 5.h),
+                              Row(children: [
+                                Text("Nom tontine: ",style: TextStyle(
+                                    fontSize: 15.sp,
+                                    color: Colors.white
+                                ),),
+                                Text(tontine?.nom_tontine ?? "N/A",style: TextStyle(
+                                    fontSize: 20.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white
+                                ),)
+                              ]),
+                              SizedBox(height: 5.h),
+                              Row(children: [
+                                Text("Montant cotisation: ",style: TextStyle(
+                                    fontSize: 15.sp,
+                                    color: Colors.white
+                                ),),
+                                Text(tontine?.montant_cotisation != null ? "${tontine!.montant_cotisation} FCFA" : "N/A",style: TextStyle(
+                                    fontSize: 20.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white
+                                ),)
+                              ]),
+                              SizedBox(height: 5.h),
+                              Row(children: [
+                                Text("Nombre participants: ",style: TextStyle(
+                                    fontSize: 15.sp,
+                                    color: Colors.white
+                                ),),
+                                Text(tontine?.nombre_participant?.toString() ?? "N/A",style: TextStyle(
+                                    fontSize: 20.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white
+                                ),)
+                              ]),
+                              SizedBox(height: 5.h),
+                              Row(children: [
+                                Text("Fréquence cotisation: ",style: TextStyle(
+                                    fontSize: 15.sp,
+                                    color: Colors.white
+                                ),),
+                                Text(tontine?.frequence ?? "N/A",style: TextStyle(
+                                    fontSize: 20.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white
+                                ),)
+                              ]),
+                              SizedBox(height: 5.h),
+                              Row(children: [
+                                Text("Fréquence paiement: ",style: TextStyle(
+                                    fontSize: 15.sp,
+                                    color: Colors.white
+                                ),),
+                                Text(tontine?.frequence_paiement ?? "N/A",style: TextStyle(
+                                    fontSize: 20.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white
+                                ),)
+                              ]),
+                              SizedBox(height: 5.h),
+                              Row(children: [
+                                Text("Type de tontine: ",style: TextStyle(
+                                    fontSize: 15.sp,
+                                    color: Colors.white
+                                ),),
+                                Text(tontine?.type ?? "N/A",style: TextStyle(
+                                    fontSize: 20.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white
+                                ),)
+                              ]),
+                              SizedBox(height: 5.h),
+                              Row(children: [
+                                Text("Date de création: ",style: TextStyle(
+                                    fontSize: 15.sp,
+                                    color: Colors.white
+                                ),),
+                                Text(tontine?.date_creation ?? "N/A",style: TextStyle(
+                                    fontSize: 20.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white
+                                ),)
+                              ]),
                             ],
                           ),
                         )
@@ -640,9 +567,8 @@ class _acceuilState extends State<acceuil> {
                 ),
               ),
             ),
-        ],
-      )
-      ),
+          ],
+        ))
     );
   }
 }

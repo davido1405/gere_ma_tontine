@@ -132,77 +132,72 @@ class _ConfirmationNumeroState extends State<ConfirmationNumero> {
         title: Text("Confirmer votre numéro"),
       ),
       body: Padding(padding: EdgeInsets.all(12.w),
-      child: Column(
-        children: [
-          SizedBox(height: 10.h,),
-          Lottie.asset("assets/animations/Number Phone icon.json",width: 250.w,height: 250.h),
-          SizedBox(
-            height: 15.h,
-          ),
-          Text("Veuillez saisir le code OTP reçu par SMS"),
-          SizedBox(
-            height: 20.h,
-          ),
-          Center(
-            child: Pinput(
-              length: 6,
-              controller: pinController,
-              obscureText: true,
-              keyboardType: TextInputType.number,
-              onCompleted: (pin) async {
-                try {
-                  final credential = PhoneAuthProvider.credential(
-                    verificationId: _verificationId,
-                    smsCode: pin,
-                  );
-                  await _auth.signInWithCredential(credential);
-                  // OTP correct → passer à écran définir code secret
-                  Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>Definirpin()), (route)=>false);
-                } catch (e) {
-                  print("OTP incorrect: $e");
-                  final prefs=await SharedPreferences.getInstance();
-                  setState(() {
-                    prefs.remove('nom');
-                    prefs.remove('prenom');
-                    prefs.remove('mobile');
-                    prefs.remove('identifiant');
-                  });
-                  DelightToastBar(
-                    position: DelightSnackbarPosition.top,
-                    autoDismiss: true,
-                    snackbarDuration: Duration(seconds: 2),
-                    builder: (BuildContext context) {
-                      return ToastCard(
-                        title: Row(
-                          mainAxisAlignment:MainAxisAlignment.start,
-                          children: [Icon(Icons.error_outline,color: Colors.white,size: 30.r,),SizedBox(width: 8.w,),Expanded(
-                            child: Text("Veuillez vérifier le code OTP ou le numéro saisi",style: TextStyle(
-                                color: Colors.white
-                            ),maxLines: 2,overflow: TextOverflow.ellipsis,),
-                          )],),
-                        color: Colors.red.shade700,);
-                    },).show(context);
-                }
-              },
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(height: 10.h,),
+            Lottie.asset("assets/animations/Number Phone icon.json",width: 250.w,height: 250.h),
+            SizedBox(
+              height: 15.h,
             ),
-          ),
-          SizedBox(
-            height: 15.h,
-          ),
-          second > 0
-              ? Text("Renvoyer un autre code dans ${second}s")
-              : GestureDetector(
-            onTap: () {
-              timer?.cancel();
-              setState(() {
-                second = 30; // réinitialiser le timer
-              });
-              sendOtp();
-              startTimer();
-            },
-            child: Text("Renvoyer"),
-          )
-        ],
+            Text("Veuillez saisir le code OTP reçu par SMS"),
+            SizedBox(
+              height: 20.h,
+            ),
+            Center(
+              child: Pinput(
+                length: 6,
+                controller: pinController,
+                obscureText: false,
+                keyboardType: TextInputType.number,
+                onCompleted: (pin) async {
+                  try {
+                    final credential = PhoneAuthProvider.credential(
+                      verificationId: _verificationId,
+                      smsCode: pin,
+                    );
+                    await _auth.signInWithCredential(credential);
+                    // OTP correct → passer à écran définir code secret
+                    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>Definirpin()), (route)=>false);
+                  } catch (e) {
+                    DelightToastBar(
+                      position: DelightSnackbarPosition.top,
+                      autoDismiss: true,
+                      snackbarDuration: Duration(seconds: 2),
+                      builder: (BuildContext context) {
+                        return ToastCard(
+                          title: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment:MainAxisAlignment.start,
+                            children: [Icon(Icons.error_outline,color: Colors.white,size: 30.r,),SizedBox(width: 8.w,),Expanded(
+                              child: Text("Veuillez vérifier le code OTP ou le numéro saisi",style: TextStyle(
+                                  color: Colors.white
+                              ),maxLines: 2,overflow: TextOverflow.ellipsis,),
+                            )],),
+                          color: Colors.red.shade700,);
+                      },).show(context);
+                  }
+                },
+              ),
+            ),
+            SizedBox(
+              height: 15.h,
+            ),
+            second > 0
+                ? Text("Renvoyer un autre code dans ${second}s")
+                : GestureDetector(
+              onTap: () {
+                timer?.cancel();
+                setState(() {
+                  second = 30; // réinitialiser le timer
+                });
+                sendOtp();
+                startTimer();
+              },
+              child: Text("Renvoyer"),
+            )
+          ],
+        ),
       ),),
     );
   }
