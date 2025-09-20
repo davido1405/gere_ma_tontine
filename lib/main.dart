@@ -5,11 +5,13 @@ import 'package:firebase_messaging/firebase_messaging.dart' show RemoteMessage, 
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/screens/splashScreen.dart';
 import 'package:gerematontine/services/fcm_service.dart';
 import 'package:gerematontine/services/notifications_service.dart';
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
+import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart' show Workmanager;
 import 'constants/server.dart';
@@ -174,11 +176,11 @@ class _MyAppState extends State<MyApp> {
   Future<void>recupererNotif()async {
     final prefs=await SharedPreferences.getInstance();
     final url=Uri.parse("${adress}?ressource=notifications&action=lister_notification");
-    final reponse=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
+    final reponse=await post(url,headers: {"Content-Type":"application/json"},body: jsonEncode(
         {
-          "code_participant":prefs.getString('code_participant'),
+          "code_participant":prefs.getString('code_participant')??"Null",
           "filtre":"Non lu"
-        })).timeout(Duration(seconds: 30));
+        })).timeout(Duration(seconds: 10));
     if(reponse.statusCode==200){
       final Map<String,dynamic>data=jsonDecode(reponse.body);
       bool success=data['success'];
@@ -187,13 +189,6 @@ class _MyAppState extends State<MyApp> {
         setState(() {
           _listnotification=notifs.map((notifs)=>Notifications.fromJson(notifs)).toList();
         });
-        for(int i=0;i<_listnotification.length;i++){
-          Notifications notifications=_listnotification[1];
-          NotificationService.showNotification(
-              id: int.parse(notifications.id_notif),
-              title: notifications.type_notif,
-              body: notifications.contenu_notif);
-        }
       }
     }else{
       print("Erreur serveur : ${reponse.statusCode}");
@@ -210,19 +205,26 @@ class _MyAppState extends State<MyApp> {
       builder: (context, child){
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-            home:erreur==true? Center(
-              child: Column(
-                children: [
-                  Image.asset('assets/6.png',width: 100.w,height: 100.h,),
-                  SizedBox(height: 20.h,),
-                  Text("Veuillez vérifier votre connexion internet. Merci"),
-                  SizedBox(
-                    height: 100.h,
-                  ),
-                  TextButton(onPressed: (){
-                    initialiserFirebase();
-                  }, child: Text("Réessayer"))
-                ],
+            home:erreur==true? Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ColorFiltered(colorFilter: ColorFilter.mode(Couleur.primaryBlue, BlendMode.srcATop),child: Lottie.asset("assets/animations/login.json",width: 150.w,height: 150.h),),
+                    SizedBox(height: 20.h,),
+                    Text("Veuillez vérifier votre connexion internet. Merci"),
+                    SizedBox(
+                      height: 40.h,
+                    ),
+                    ElevatedButton(onPressed: (){
+                      initialiserFirebase();
+                    },style: ElevatedButton.styleFrom(
+                      backgroundColor: Couleur.primaryBlue
+                    ), child: Text("Réessayer",style: TextStyle(
+                      color: Colors.white
+                    ),))
+                  ],
+                ),
               ),
             ):
             const splashScreen(),

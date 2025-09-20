@@ -7,6 +7,7 @@ import 'package:gerematontine/models/session.dart';
 import 'package:gerematontine/screens/dashboard/Acceuil.dart';
 import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
 import 'package:http/http.dart' as http;
+import 'package:lottie/lottie.dart';
 
 import '../../constants/server.dart';
 
@@ -108,6 +109,23 @@ class _creer_tontineState extends State<creer_tontine> {
   
   Future<void>creerTontine() async{
     String? jwt=await widget.listsession.getSecureJwt();
+
+    //Afficher dialogue pendent chargement
+    showDialog(context: context, builder: (BuildContext context){
+      return AlertDialog(
+        content: SizedBox(
+          height: 200.h,
+          child: Center(
+            child: Column(
+              children: [
+                Lottie.asset("assets/animations/lottieflow-scrolling-01-2-000000-easey.json",width: 150.w,height: 150.h),
+                Text("Traitement en cours...")
+              ],
+            ),
+          ),
+        ),
+      );
+    });
     final url=Uri.parse("${adress}?ressource=tontines&action=creer_tontine");
     final reponse=await http.post(url,headers: {'content-Type':'application/json','Authorization':'Bearer $jwt'},body: jsonEncode({
           "code_participant":widget.listsession.code_participant,
@@ -118,27 +136,44 @@ class _creer_tontineState extends State<creer_tontine> {
           "frequence":_frequenceChoisi,
           "frequence_paiement":_frequencePaiementChoisi,
         }));
-    print(widget.listsession.code_participant);
+
+    //Fermer le dialogue de chargement
+    Navigator.of(context).pop();
+
+    //print(widget.listsession.code_participant);
     if(reponse.statusCode==200){
       final Map<String,dynamic>data=jsonDecode(reponse.body);
       if(data['success']){
         final Map<String,dynamic>donnee=data['data'];
-        print(donnee['code_tontine']);
+        //print(donnee['code_tontine']);
         setState(() {
           widget.listsession.setCodeTontine(donnee['code_tontine']);
           Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>dashboard(listsession: widget.listsession,)), (route)=>false);
         });
-        print(widget.listsession.code_tontine);
+        //print(widget.listsession.code_tontine);
       }else{
         showDialog(context: context, builder: (BuildContext context){
           return AlertDialog(
             title: Center(child: Text("Erreur"),),
-            content: Text(data['message']),
+            content: SizedBox(
+              height: 200.h,
+                child: Center(
+                  child: Column(
+                    children: [
+                      Lottie.asset("assets/animations/Sign for error _ Flat style.json",width: 150.w,height: 150.h),
+                      Text(data['message']),
+                    ],
+                  ),
+                )),
             actions: [
               Center(
                 child: TextButton.icon(onPressed: (){
                   Navigator.of(context).pop();
-                }, label: Text("Ok"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
+                }, label: Text("Compris",style: TextStyle(
+                  color: Colors.white
+                ),),icon: Icon(Icons.verified,color: Colors.white,),style: TextButton.styleFrom(
+                  backgroundColor: Couleur.secondaryGreen
+                ),),
               )
             ],
           );
@@ -147,7 +182,28 @@ class _creer_tontineState extends State<creer_tontine> {
     }else{
       showDialog(context: context, builder: (BuildContext context){
         return AlertDialog(
-          content: Text(reponse.statusCode.toString()),
+          title: Center(child: Text("Erreur"),),
+          content: SizedBox(
+              height: 200.h,
+              child: Center(
+                child: Column(
+                  children: [
+                    Lottie.asset("assets/animations/Sign for error _ Flat style.json",width: 150.w,height: 150.h),
+                    Text("Une erreur s'est produite,veuillez réessayer plus tard ou contacter le service technique",overflow: TextOverflow.ellipsis,maxLines: 2,),
+                  ],
+                ),
+              )),
+          actions: [
+            Center(
+              child: TextButton.icon(onPressed: (){
+                Navigator.of(context).pop();
+              }, label: Text("Compris",style: TextStyle(
+                  color: Colors.white
+              ),),icon: Icon(Icons.verified,color: Colors.white,),style: TextButton.styleFrom(
+                  backgroundColor: Couleur.secondaryGreen
+              ),),
+            )
+          ],
         );
       });
     }
@@ -238,11 +294,11 @@ class _creer_tontineState extends State<creer_tontine> {
                 contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: Color(0xFF7E57C2)),
+                  borderSide: BorderSide(color: Couleur.primaryBlue),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: Color(0xFF5E35B1), width: 2.w),
+                  borderSide: BorderSide(color: Couleur.primaryBlue, width: 2.w),
                 ),
               ),
               hint:Text("Sélectionner le type de tontine",style: TextStyle(
@@ -269,11 +325,11 @@ class _creer_tontineState extends State<creer_tontine> {
                 contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: Color(0xFF7E57C2)),
+                  borderSide: BorderSide(color: Couleur.primaryBlue),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: Color(0xFF5E35B1), width: 2.w),
+                  borderSide: BorderSide(color: Couleur.primaryBlue, width: 2.w),
                 ),
               ),
               hint:Text("Sélectionner la fréquence des cotisations",style: TextStyle(
@@ -299,11 +355,11 @@ class _creer_tontineState extends State<creer_tontine> {
                 contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: Color(0xFF7E57C2)),
+                  borderSide: BorderSide(color: Couleur.primaryBlue),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: Color(0xFF5E35B1), width: 2.w),
+                  borderSide: BorderSide(color: Couleur.primaryBlue, width: 2.w),
                 ),
               ),
               hint:Text("Sélectionner la fréquence des paiements",style: TextStyle(
@@ -322,7 +378,7 @@ class _creer_tontineState extends State<creer_tontine> {
             child: ElevatedButton(onPressed: (){
               creerTontine();
             },style: TextButton.styleFrom(
-              backgroundColor: Colors.blueAccent
+              backgroundColor: Couleur.primaryBlue
             ), child: Text("Terminer",style: TextStyle(fontSize: 15.sp,fontWeight: FontWeight.bold,color: Colors.white),),),
           )
 

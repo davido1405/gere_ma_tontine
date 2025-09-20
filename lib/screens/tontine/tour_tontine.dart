@@ -105,6 +105,7 @@ class _tourTontineState extends State<tourTontine> {
               child: Padding(
                 padding: EdgeInsets.all(10.0.w),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
@@ -124,79 +125,27 @@ class _tourTontineState extends State<tourTontine> {
                           height: 5.h,
                         ),
                         Center(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Row(
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Column(
-                                    children: [
-                                      Text("Nom bénéficiare:",style: TextStyle(
-                                          fontSize: 15.sp,
-                                          color: Colors.white
-                                      ),),
-                                    ],
-                                  ),
+                                  Text("Nom bénéficiare: ${nomBeneficiare?? "N/A"}",style: TextStyle(
+                                      fontSize: 15.sp,
+                                      color: Colors.white
+                                  ),),
                                   SizedBox(
                                     width: 10.h,
                                   ),
-                                  Column(
-                                    children: [
-                                      Text(nomBeneficiare,style: TextStyle(
-                                          fontSize: 18.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white
-                                      ),)
-                                    ],
-                                  )
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Column(
-                                    children: [
-                                      Text("Prenoms bénéficiaire:",style: TextStyle(
-                                          fontSize: 15.sp,
-                                          color: Colors.white
-                                      ),),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    width: 10.h,
-                                  ),
-                                  Column(
-                                    children: [
-                                      Text(prenomsBeneficiare,style: TextStyle(
-                                          fontSize: 18.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white
-                                      ),)
-                                    ],
-                                  )
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Column(
-                                    children: [
-                                      Text("Position:",style: TextStyle(
-                                          fontSize: 15.sp,
-                                          color: Colors.white
-                                      ),),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    width: 10.h,
-                                  ),
-                                  Column(
-                                    children: [
-                                      Text(positionBeneficiare.toString(),style: TextStyle(
-                                          fontSize: 18.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white
-                                      ),)
-                                    ],
-                                  )
+                                  Text("Prenoms ${prenomsBeneficiare?? "N/A"}",style: TextStyle(
+                                      fontSize: 15.sp,
+                                      color: Colors.white
+                                  ),),
+                                  Text("Position: ${positionBeneficiare.toString() ?? "N/A"}",style: TextStyle(
+                                      fontSize: 15.sp,
+                                      color: Colors.white
+                                  ),),
                                 ],
                               ),
                             ],
@@ -205,12 +154,13 @@ class _tourTontineState extends State<tourTontine> {
                       ],
                     ),
                     Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SizedBox(
                           height: 5.h,
                         ),
                         Container(child: ColorFiltered(colorFilter: ColorFilter.mode(Couleur.accentOrange, BlendMode.srcATop),
-                        child: Lottie.asset("assets/animations/lottieflow-ecommerce-14-13-000000-easey.json",width: 150.w,height: 150.h)),)
+                        child: Lottie.asset("assets/animations/lottieflow-ecommerce-14-13-000000-easey.json",width: 140.w,height: 140.h)),)
                       ],
                     ),
                   ],

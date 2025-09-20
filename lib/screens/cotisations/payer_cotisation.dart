@@ -71,7 +71,6 @@ class _payer_cotisationState extends State<payer_cotisation> {
     String? jwt = await widget.listsession.getSecureJwt();
     setState(() {
       enCourtraitement = true;
-      lottieAffiche = 'assets/animations/Approve.json';
     });
 
     // 1️⃣ Affiche le dialogue de chargement
@@ -86,7 +85,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
             child: Center(
               child: Column(
                 children: [
-                  Lottie.asset(lottieAffiche, width: 150.w, height: 150.h),
+                  Lottie.asset("assets/animations/Card swiping.json", width: 150.w, height: 150.h),
                   const SizedBox(height: 10),
                   const Text("Paiement en cours...")
                 ],
@@ -108,13 +107,13 @@ class _payer_cotisationState extends State<payer_cotisation> {
         body: jsonEncode({
           "code_tontine": widget.listsession.code_tontine,
           "code_participant": widget.listsession.code_participant,
-          "montant": int.parse(x),
+          "montant": int.tryParse(x) ?? 0,
           "libelle_mode_paiement": y
         }),
       );
 
       // 2️⃣ Fermer le dialogue de chargement une fois la réponse obtenue
-      Navigator.of(context).pop();
+      if (Navigator.canPop(context)) Navigator.pop(context);
 
       if (reponse.statusCode == 200) {
         Map<String, dynamic> data = jsonDecode(reponse.body);
@@ -131,27 +130,25 @@ class _payer_cotisationState extends State<payer_cotisation> {
                   style: TextStyle(fontSize: 15.sp),
                 ),
               ),
-              content: SizedBox(
-                height: 200.h,
-                child: Column(
-                  children: [
-                    success
-                        ? Lottie.asset(
-                      'assets/animations/Approve.json',
-                      width: 150.w,
-                      height: 150.h,
-                    )
-                        : Lottie.asset(
-                      'assets/animations/Sign for error _ Flat style.json',
-                      width: 150.w,
-                      height: 150.h,
-                    ),
-                    Text(
-                      data['message'],
-                      style: TextStyle(fontSize: 14.sp),
-                    ),
-                  ],
-                ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  success
+                      ? Lottie.asset(
+                    'assets/animations/Approve.json',
+                    width: 150.w,
+                    height: 150.h,
+                  )
+                      : Lottie.asset(
+                    'assets/animations/Sign for error _ Flat style.json',
+                    width: 150.w,
+                    height: 150.h,
+                  ),
+                  Text(
+                    data['message'],
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ],
               ),
               actions: [
                 Center(
@@ -322,6 +319,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
                           backgroundColor: Colors.grey[300],
                           elevation: 3,
                           isDismissible: true,
+                          isScrollControlled: true,
                           //transitionAnimationController: AnimationController(vsync: ),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(30.r))),
                           context: context,
@@ -332,208 +330,54 @@ class _payer_cotisationState extends State<payer_cotisation> {
                                 decoration: BoxDecoration(
                                     color: Colors.grey.shade50,
                                     borderRadius: BorderRadius.circular(12.r)),
-                                height: 400.h,
-                                width: double.maxFinite.w,
-                                child: Column(
-                                    children: [
-                                      SizedBox(
-                                        height: 15.h,
-                                      ),
-                                      Center(
-                                        child: Text("Mode de paiement",style: TextStyle(
+                                constraints: BoxConstraints(
+                                  maxHeight: MediaQuery.of(context).size.height*0.8,
+                                ),
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(
+                                    height: 10.h,
+                                  ),
+                                        Text("Mode de paiement",style: TextStyle(
                                           fontSize: 20.sp,
                                           fontWeight: FontWeight.w500
-                                        ),),
-                                      ),SizedBox(
-                                        height: 5.h,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                              child: Card(
-                                                elevation: 0,
-                                                color: Couleur.lightGray,
+                                        ),),SizedBox(
+                                          height: 10.h,
+                                        ),
+                                            Card(
+                                              elevation: 0,
+                                              color: Couleur.lightGray,
+                                              child: InkWell(
+                                                splashColor: Couleur.primaryBlue.withOpacity(0.2),
+                                                highlightColor: Colors.transparent,
+                                                onTap: (){
+                                                  setModalState(() {
+                                                    _selectedOption="Wave";
+                                                  });
+                                                },
                                                 child: Padding(
-                                                  padding: EdgeInsets.symmetric(horizontal: 5.w),
-                                                  child: InkWell(
-                                                    splashColor: Couleur.primaryBlue.withOpacity(0.2),
-                                                    highlightColor: Colors.transparent,
-                                                    onTap: (){
-                                                      setModalState(() {
-                                                        _selectedOption="Wave";
-                                                      });
-                                                    },
-                                                    child: Row(
-                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                      children: [
-                                                        Expanded(
-                                                          flex:3,
-                                                            child: Row(children: [
-                                                          ClipRRect(
-                                                            borderRadius: BorderRadius.circular(5.r),
-                                                            child: Image.asset("assets/wave.png",fit: BoxFit.cover,height: 50.h,
-                                                              width: 100.w,),
-                                                          ),
-                                                          SizedBox(width: 10.w,),
-                                                          Text("WAVE"),
-                                                        ],)),
-                                                        SizedBox(width: 60.w,),
-                                                        Expanded(
-                                                          flex:1,
-                                                          child: RadioListTile<String>(value: "Wave", groupValue: _selectedOption, onChanged: (value){
-                                                            setModalState(() {
-                                                              _selectedOption=value!;
-                                                              print(_selectedOption.toString());
-                                                            });
-                                                          }),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              )
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 2.h,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                              child: Card(
-                                                elevation: 0,
-                                                color: Couleur.lightGray,
-                                                child: Padding(
-                                                  padding: EdgeInsets.symmetric(horizontal: 5.w),
-                                                  child: InkWell(
-                                                    splashColor: Colors.deepOrange.withOpacity(0.2),
-                                                    highlightColor: Colors.transparent,
-                                                    onTap: (){
-                                                      setModalState(() {
-                                                        _selectedOption="Orange Money";
-                                                      });
-                                                    },
-                                                    child: Row(
-                                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                      children: [
-                                                        Expanded(
-                                                            flex:3,
-                                                            child: Row(children: [
-                                                              ClipRRect(
-                                                                borderRadius: BorderRadius.circular(5.r),
-                                                                child: Image.asset("assets/orange money 2.png",fit: BoxFit.cover,height: 50.h,
-                                                                  width: 100.w,),
-                                                              ),
-                                                              SizedBox(width: 10.w,),
-                                                              Text("ORANGE"),
-                                                            ],)),
-                                                        SizedBox(width: 70.w,),
-                                                        Expanded(
-                                                          flex: 1,
-                                                          child: RadioListTile<String>(value: "Orange Money", groupValue: _selectedOption, onChanged: (value){
-                                                            setModalState(() {
-                                                              _selectedOption=value!;
-                                                              print(_selectedOption.toString());
-                                                            });
-                                                          }),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              )
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 5.h,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                              child: Card(
-                                                elevation: 0,
-                                                color: Couleur.lightGray,
-                                                child: Padding(
-                                                  padding: EdgeInsets.symmetric(horizontal: 5.w),
-                                                  child: InkWell(
-                                                    splashColor: Colors.yellow.withOpacity(0.5),
-                                                    highlightColor: Colors.transparent,
-                                                    onTap: (){
-                                                      setModalState(() {
-                                                        _selectedOption="MTN Money";
-                                                      });
-                                                    },
-                                                    child: Row(
-                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                      children: [
-                                                        Expanded(
-                                                            flex:3,
-                                                            child: Row(children: [
-                                                              ClipRRect(
-                                                                borderRadius: BorderRadius.circular(5.r),
-                                                                child: Image.asset("assets/MTN MONEY.png",fit: BoxFit.cover,height: 50.h,
-                                                                  width: 100.w,),
-                                                              ),
-                                                              SizedBox(width: 10.w,),
-                                                              Text("MTN"),
-                                                            ],
-                                                            )
-                                                        ),
-                                                        SizedBox(width: 70.w,),
-                                                        Expanded(
-                                                          flex: 1,
-                                                          child: RadioListTile<String>(value: "MTN Money", groupValue: _selectedOption, onChanged: (value){
-                                                            setModalState(() {
-                                                              _selectedOption=value!;
-                                                              print(_selectedOption.toString());
-                                                            });
-                                                          }),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              )
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 5.h,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                              child: Card(
-                                                elevation: 0,
-                                                color: Couleur.lightGray,
-                                                child: InkWell(
-                                                  splashColor: Couleur.primaryBlue.withOpacity(0.5),
-                                                  highlightColor: Colors.transparent,
-                                                  onTap: (){
-                                                    setModalState(() {
-                                                      _selectedOption="Moov Money";
-                                                    });
-                                                  },
+                                                  padding: EdgeInsets.all(8.0.w),
                                                   child: Row(
                                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                     children: [
-                                                      Expanded(
-                                                          flex:3,
-                                                          child: Row(children: [
-                                                            ClipRRect(
-                                                              borderRadius: BorderRadius.circular(14.r),
-                                                              child: Image.asset("assets/moov.png",fit: BoxFit.cover,height: 50.h,
-                                                                width: 110.w,),
-                                                            ),
-                                                            SizedBox(width: 10.w,),
-                                                            Text("MOOV"),
-                                                          ],)),
-                                                      SizedBox(width: 70.w,),
-                                                      Expanded(
-                                                        flex: 1,
-                                                        child: RadioListTile<String>(value: "Moov Money", groupValue: _selectedOption, onChanged: (value){
+                                                      Flexible(
+                                                        flex:3,
+                                                          child: Row(
+                                                            mainAxisSize: MainAxisSize.min,
+                                                            children: [
+                                                        ClipRRect(
+                                                          borderRadius: BorderRadius.circular(5.r),
+                                                          child: Image.asset("assets/wave.png",fit: BoxFit.cover,height: 50.h,
+                                                            width: 100.w,),
+                                                        ),
+                                                        SizedBox(width: 10.w,),
+                                                        Text("WAVE"),
+                                                      ],)),
+                                                      Flexible(
+                                                        flex:1,
+                                                        child: RadioListTile<String>(value: "Wave", groupValue: _selectedOption, onChanged: (value){
                                                           setModalState(() {
                                                             _selectedOption=value!;
                                                             print(_selectedOption.toString());
@@ -543,50 +387,184 @@ class _payer_cotisationState extends State<payer_cotisation> {
                                                     ],
                                                   ),
                                                 ),
-                                              )
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 20.h,
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.symmetric(horizontal: 100.w),
-                                        child: Row(
-                                          children: [
-                                            Expanded(child: ElevatedButton.icon(onPressed: enCourtraitement? null: (){
-                                              String montantPaiement=montant.text;
-                                              String modePaie=_selectedOption.toString();
-                                              if(montantPaiement.isEmpty || modePaie.isEmpty){
-                                                DelightToastBar(
-                                                  position: DelightSnackbarPosition.top,
-                                                  autoDismiss: true,
-                                                  snackbarDuration: Duration(seconds: 2),
-                                                  builder: (BuildContext context) {
-                                                  return ToastCard(
-                                                      title: Row(
-                                                        mainAxisAlignment:MainAxisAlignment.start,
-                                                        children: [Icon(Icons.error_outline,color: Colors.white,size: 30.r,),Text("Veuillez remplir tout les champs !",style: TextStyle(
-                                                        color: Colors.white
-                                                      ),)],),
-                                                  color: Colors.red.shade700,);
-                                                },).show(context);
-                                              }else{
-                                                print(montantPaiement);
-                                                print(montant.text);
-                                                payerCotisation(montantPaiement, modePaie);
-                                              }
-                                            },style: TextButton.styleFrom(
-                                      backgroundColor: Couleur.secondaryGreen
-                                      ), label:enCourtraitement?Text("Paiement en cours...",style: TextStyle(
-                                              color: Colors.white
-                                            ),):Text("Payer",style: TextStyle(
-                                                color: Colors.white
-                                            ),),icon:enCourtraitement?SizedBox(width:20.w,height:20.h,child: CircularProgressIndicator(color: Colors.white,strokeWidth: 2,)):Icon(Icons.monetization_on,color: Colors.white,),))
-                                          ],
+                                              ),
+                                            ),
+                                        SizedBox(
+                                          height: 2.h,
                                         ),
-                                      )
-                                    ]),
+                                        Card(
+                                          elevation: 0,
+                                          color: Couleur.lightGray,
+                                          child: InkWell(
+                                            splashColor: Couleur.primaryBlue.withOpacity(0.2),
+                                            highlightColor: Colors.transparent,
+                                            onTap: (){
+                                              setModalState(() {
+                                                _selectedOption="Orange Money";
+                                              });
+                                            },
+                                            child: Padding(
+                                              padding: EdgeInsets.all(8.0.w),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Flexible(
+                                                      flex:3,
+                                                      child: Row(
+                                                        mainAxisSize: MainAxisSize.min,
+                                                        children: [
+                                                          ClipRRect(
+                                                            borderRadius: BorderRadius.circular(5.r),
+                                                            child: Image.asset("assets/orange money 2.png",fit: BoxFit.cover,height: 50.h,
+                                                              width: 100.w,),
+                                                          ),
+                                                          SizedBox(width: 10.w,),
+                                                          Text("Orange"),
+                                                        ],)),
+                                                  Flexible(
+                                                    flex:1,
+                                                    child: RadioListTile<String>(value: "Orange Money", groupValue: _selectedOption, onChanged: (value){
+                                                      setModalState(() {
+                                                        _selectedOption=value!;
+                                                        print(_selectedOption.toString());
+                                                      });
+                                                    }),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 5.h,
+                                        ),
+                                        Card(
+                                          elevation: 0,
+                                          color: Couleur.lightGray,
+                                          child: InkWell(
+                                            splashColor: Couleur.primaryBlue.withOpacity(0.2),
+                                            highlightColor: Colors.transparent,
+                                            onTap: (){
+                                              setModalState(() {
+                                                _selectedOption="MTN Money";
+                                              });
+                                            },
+                                            child: Padding(
+                                              padding: EdgeInsets.all(8.0.w),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Flexible(
+                                                      flex:3,
+                                                      child: Row(
+                                                        mainAxisSize: MainAxisSize.min,
+                                                        children: [
+                                                          ClipRRect(
+                                                            borderRadius: BorderRadius.circular(5.r),
+                                                            child: Image.asset("assets/MTN MONEY.png",fit: BoxFit.cover,height: 50.h,
+                                                              width: 100.w,),
+                                                          ),
+                                                          SizedBox(width: 10.w,),
+                                                          Text("MTN"),
+                                                        ],)),
+                                                  Flexible(
+                                                    flex:1,
+                                                    child: RadioListTile<String>(value: "MTN Money", groupValue: _selectedOption, onChanged: (value){
+                                                      setModalState(() {
+                                                        _selectedOption=value!;
+                                                        print(_selectedOption.toString());
+                                                      });
+                                                    }),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 5.h,
+                                        ),
+                                        Card(
+                                          elevation: 0,
+                                          color: Couleur.lightGray,
+                                          child: InkWell(
+                                            splashColor: Couleur.primaryBlue.withOpacity(0.2),
+                                            highlightColor: Colors.transparent,
+                                            onTap: (){
+                                              setModalState(() {
+                                                _selectedOption="Moov Money";
+                                              });
+                                            },
+                                            child: Padding(
+                                              padding: EdgeInsets.all(8.0.w),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Flexible(
+                                                      flex:3,
+                                                      child: Row(
+                                                        mainAxisSize: MainAxisSize.min,
+                                                        children: [
+                                                          ClipRRect(
+                                                            borderRadius: BorderRadius.circular(10.r),
+                                                            child: Image.asset("assets/moov.png",fit: BoxFit.cover,height: 50.h,
+                                                              width: 100.w,),
+                                                          ),
+                                                          SizedBox(width: 10.w,),
+                                                          Text("MOOV"),
+                                                        ],)),
+                                                  Flexible(
+                                                    flex:1,
+                                                    child: RadioListTile<String>(value: "Moov Money", groupValue: _selectedOption, onChanged: (value){
+                                                      setModalState(() {
+                                                        _selectedOption=value!;
+                                                        print(_selectedOption.toString());
+                                                      });
+                                                    }),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 20.h,
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 20.w),
+                                          child: ElevatedButton.icon(onPressed: enCourtraitement? null: (){
+                                            String montantPaiement=montant.text;
+                                            String modePaie=_selectedOption.toString();
+                                            if(montantPaiement.isEmpty || modePaie.isEmpty){
+                                              DelightToastBar(
+                                                position: DelightSnackbarPosition.top,
+                                                autoDismiss: true,
+                                                snackbarDuration: Duration(seconds: 2),
+                                                builder: (BuildContext context) {
+                                                return ToastCard(
+                                                    title: Row(
+                                                      mainAxisAlignment:MainAxisAlignment.start,
+                                                      children: [Icon(Icons.error_outline,color: Colors.white,size: 30.r,),SizedBox(width: 8.w,),Expanded(
+                                                        child: Text("Veuillez remplir tout les champs !",style: TextStyle(
+                                                        color: Colors.white),maxLines: 2,overflow: TextOverflow.ellipsis,),
+                                                      )],),
+                                                color: Colors.red.shade700,);
+                                              },).show(context);
+                                            }else{
+                                              print(montantPaiement);
+                                              print(montant.text);
+                                              payerCotisation(montantPaiement, modePaie);
+                                            }
+                                          },style: TextButton.styleFrom(
+                                              backgroundColor: Couleur.secondaryGreen
+                                          ), label:enCourtraitement?Text("Paiement en cours...",style: TextStyle(
+                                            color: Colors.white
+                                          ),):Text("Payer",style: TextStyle(
+                                              color: Colors.white
+                                          ),),icon:enCourtraitement?SizedBox(width:20.w,height:20.h,child: CircularProgressIndicator(color: Colors.white,strokeWidth: 2,)):Icon(Icons.monetization_on,color: Colors.white,),),
+                                        )
+                                      ]),
+                                ),
                               );}
                             );
                           });}, label: Text("Valider le paiement",style: TextStyle(

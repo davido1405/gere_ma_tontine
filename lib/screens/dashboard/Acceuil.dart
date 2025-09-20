@@ -303,7 +303,7 @@ class _acceuilState extends State<acceuil> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("Mon numéro de tour",style: TextStyle(
+                              Text("Mon numéro",style: TextStyle(
                                   fontSize: 17.sp,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white
@@ -317,7 +317,7 @@ class _acceuilState extends State<acceuil> {
                                 children: [
                                   Text(numeroTour,
                                     style: TextStyle(
-                                        fontSize: 45.sp,
+                                        fontSize: 35.sp,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white
                                     ),
@@ -349,27 +349,24 @@ class _acceuilState extends State<acceuil> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("Total",style: TextStyle(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white
-                              ),
-                              ),
-                              Text("des cotisations",style: TextStyle(
-                                  fontSize: 16.sp,
+                              Text("Mes cotisations",style: TextStyle(
+                                  fontSize: 18.sp,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white
                               ),
                               ),
                               SizedBox(
-                                height: 15.h,
+                                height: 20.h,
                               ),
                               TweenAnimationBuilder(tween: Tween(begin: 0,end:double.tryParse(montantCotiser) ?? 0.0), duration: Duration(seconds: 2), builder: (context,value,child){
-                                return Text("${value.toStringAsFixed(2)} FCFA",style: TextStyle(
-                                  fontSize: 20.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white
-                                ),);
+                                return FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text("${value.toStringAsFixed(2)} FCFA",style: TextStyle(
+                                    fontSize: 20.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white
+                                  ),),
+                                );
                               })
                             ],
                           ),
@@ -384,7 +381,7 @@ class _acceuilState extends State<acceuil> {
                     Expanded(child: Card(
                       elevation: 2,
                       color: Couleur.secondaryGreen,
-                      margin: EdgeInsets.symmetric(horizontal:10.w),
+                      margin: EdgeInsets.symmetric(horizontal:5.w),
                       child: Padding(
                         padding: EdgeInsets.all(10.w),
                         child: Row(
@@ -394,7 +391,7 @@ class _acceuilState extends State<acceuil> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text("Points de confiance",style: TextStyle(
-                                    fontSize: 17.sp,
+                                    fontSize: 14.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
                                 ),
@@ -429,11 +426,15 @@ class _acceuilState extends State<acceuil> {
                                       title: Center(child: Text("Information"),),
                                       content: Text("Cette option sera bientôt disponible. Continuez à utiliser Djarra Finances"),
                                       actions: [
-                                        TextButton(onPressed: (){
-                                          Navigator.of(context).pop();
-                                        },style: TextButton.styleFrom(
-                                            backgroundColor: Colors.blueAccent
-                                        ), child: Text("Compris"),)
+                                        Center(
+                                          child: TextButton.icon(onPressed: (){
+                                            Navigator.of(context).pop();
+                                          },style: TextButton.styleFrom(
+                                              backgroundColor: Couleur.secondaryGreen
+                                          ), label: Text("Compris",style: TextStyle(
+                                            color: Colors.white
+                                          ),),icon: Icon(Icons.verified,color: Colors.white,),),
+                                        )
                                       ],
                                     );
                                   });
@@ -452,7 +453,7 @@ class _acceuilState extends State<acceuil> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.only(left:10.w,right: 30.w),
+            padding: EdgeInsets.symmetric(horizontal:10.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -465,9 +466,14 @@ class _acceuilState extends State<acceuil> {
                           fontWeight: FontWeight.bold
                       ),
                     ),
-                    TextButton.icon(onPressed: tontine==null? null:(){
+                    TextButton.icon(onPressed: tontine!= null
+                        ? (){
+                      final tontineData=tontine;
+                      if(tontineData==null) {
+                        return ;
+                      }
                       Navigator.push(context, MaterialPageRoute(builder: (context)=>walletTontine(tontine: tontine!,listsession: widget.listsession, numeroTour: numeroTour )));
-                    },label: Text("CAISSE",style: TextStyle(
+                    }:null,label: Text("CAISSE",style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
                     ),),icon: Icon(Icons.wallet,color:Couleur.primaryBlue,size: 30.r,),)
@@ -476,163 +482,164 @@ class _acceuilState extends State<acceuil> {
               ],
             ),
           ),
-          Row(
-            children: [
-              Expanded(child: Card(
-                elevation: 2,
-                color:Couleur.primaryBlue,//Color(0xFF3D0C94), // une nuance plus foncée du même violet,
-                margin: EdgeInsets.all(5.w),
-                child: Padding(
-                    padding: EdgeInsets.all(10.0.w),
-                    child: Row(
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              height: 5.h,
-                            ),
-                            widget.listsession.type_participant=="Organisateur"?
-                            Row(
-                                children: [
-                                  Text("Code tontine: ",style: TextStyle(
-                                      fontSize: 15.sp,
-                                      color: Colors.white
-                                  ),),
-                                  Text(tontine?.code_tontine ?? "N/A",style: TextStyle(
-                                      fontSize: 20.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white
-                                  ),)
-                                ]
-                            ):
-                            SizedBox(
-                              height: 5.h,
-                            ),
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Nom tontine: ",style: TextStyle(
-                                      fontSize: 15.sp,
-                                      color: Colors.white
-                                  ),),
-                                  Text(tontine?.nom_tontine ?? "N/A",style: TextStyle(
-                                      fontSize: 20.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white
-                                  ),)
-                                ]
-                            ),
-                            SizedBox(
-                              height: 5.h,
-                            ),
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Montant cotisation: ",style: TextStyle(
-                                      fontSize: 15.sp,
-                                      color: Colors.white
-                                  ),),
-                                  Text(tontine?.montant_cotisation!=null ?"${tontine?.montant_cotisation} FCFA" :"N/A",style: TextStyle(
-                                      fontSize: 20.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white
-                                  ),)
-                                ]
-                            ),
-                            SizedBox(
-                              height: 5.h,
-                            ),
-                            Row(
-                                children: [
-                                  Text("Nombre participants: ",style: TextStyle(
-                                      fontSize: 15.sp,
-                                      color: Colors.white
-                                  ),),
-                                  Text(tontine?.nombre_participant.toString() ?? "N/A",style: TextStyle(
-                                      fontSize: 20.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white
-                                  ),)
-                                ]
-                            ),
-                            SizedBox(
-                              height: 5.h,
-                            ),
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Fréquence cotisation: ",style: TextStyle(
-                                      fontSize: 15.sp,
-                                      color: Colors.white
-                                  ),),
-                                  Text(tontine?.frequence?? "N/A",style: TextStyle(
-                                      fontSize: 20.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white
-                                  ),)
-                                ]
-                            ),
-                            SizedBox(
-                              height: 5.h,
-                            ),
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Fréquence paiement: ",style: TextStyle(
-                                      fontSize: 15.sp,
-                                      color: Colors.white
-                                  ),),
-                                  Text(tontine?.frequence_paiement ?? "N/A",style: TextStyle(
-                                      fontSize: 20.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white
-                                  ),)
-                                ]
-                            ),
-                            SizedBox(
-                              height: 5.h,
-                            ),
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Type de tontine: ",style: TextStyle(
-                                      fontSize: 15.sp,
-                                      color: Colors.white
-                                  ),),
-                                  Text(tontine?.type?? "N/A",style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white
-                                  ),)
-                                ]
-                            ),
-                            SizedBox(
-                              height: 5.h,
-                            ),
-                            Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Date de création: ",style: TextStyle(
-                                      fontSize: 15.sp,
-                                      color: Colors.white
-                                  ),),
-                                  Text(tontine?.date_creation?? "N/A",style: TextStyle(
-                                      fontSize: 20.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white
-                                  ),)
-                                ]
-                            ),
-                          ],
-                        ),
-                      ],
-                    )
+
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Center(
+                  child: Card(
+                    elevation: 2,
+                    color:Couleur.primaryBlue,//Color(0xFF3D0C94), // une nuance plus foncée du même violet,
+                    margin: EdgeInsets.all(5.w),
+                    child: Padding(
+                        padding: EdgeInsets.all(10.0.w),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                height: 5.h,
+                              ),
+                              widget.listsession.type_participant=="Organisateur"?
+                              Row(
+                                  children: [
+                                    Text("Code tontine: ",style: TextStyle(
+                                        fontSize: 15.sp,
+                                        color: Colors.white
+                                    ),),
+                                    Text(tontine?.code_tontine ?? "N/A",style: TextStyle(
+                                        fontSize: 20.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white
+                                    ),)
+                                  ]
+                              ):
+                              SizedBox(
+                                height: 5.h,
+                              ),
+                              Row(
+
+                                  children: [
+                                    Text("Nom tontine: ",style: TextStyle(
+                                        fontSize: 15.sp,
+                                        color: Colors.white
+                                    ),),
+                                    Text(tontine?.nom_tontine ?? "N/A",style: TextStyle(
+                                        fontSize: 20.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white
+                                    ),)
+                                  ]
+                              ),
+                              SizedBox(
+                                height: 5.h,
+                              ),
+                              Row(
+
+                                  children: [
+                                    Text("Montant cotisation: ",style: TextStyle(
+                                        fontSize: 15.sp,
+                                        color: Colors.white
+                                    ),),
+                                    Text(tontine?.montant_cotisation!=null ?"${tontine?.montant_cotisation} FCFA" :"N/A",style: TextStyle(
+                                        fontSize: 20.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white
+                                    ),)
+                                  ]
+                              ),
+                              SizedBox(
+                                height: 5.h,
+                              ),
+                              Row(
+                                  children: [
+                                    Text("Nombre participants: ",style: TextStyle(
+                                        fontSize: 15.sp,
+                                        color: Colors.white
+                                    ),),
+                                    Text(tontine?.nombre_participant.toString() ?? "N/A",style: TextStyle(
+                                        fontSize: 20.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white
+                                    ),)
+                                  ]
+                              ),
+                              SizedBox(
+                                height: 5.h,
+                              ),
+                              Row(
+
+                                  children: [
+                                    Text("Fréquence cotisation: ",style: TextStyle(
+                                        fontSize: 15.sp,
+                                        color: Colors.white
+                                    ),),
+                                    Text(tontine?.frequence?? "N/A",style: TextStyle(
+                                        fontSize: 20.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white
+                                    ),)
+                                  ]
+                              ),
+                              SizedBox(
+                                height: 5.h,
+                              ),
+                              Row(
+
+                                  children: [
+                                    Text("Fréquence paiement: ",style: TextStyle(
+                                        fontSize: 15.sp,
+                                        color: Colors.white
+                                    ),),
+                                    Text(tontine?.frequence_paiement ?? "N/A",style: TextStyle(
+                                        fontSize: 20.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white
+                                    ),)
+                                  ]
+                              ),
+                              SizedBox(
+                                height: 5.h,
+                              ),
+                              Row(
+                                  children: [
+                                    Text("Type de tontine: ",style: TextStyle(
+                                        fontSize: 15.sp,
+                                        color: Colors.white
+                                    ),),
+                                    Text(tontine?.type?? "N/A",style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white
+                                    ),)
+                                  ]
+                              ),
+                              SizedBox(
+                                height: 5.h,
+                              ),
+                              Row(
+                                  children: [
+                                    Text("Date de création: ",style: TextStyle(
+                                        fontSize: 15.sp,
+                                        color: Colors.white
+                                    ),),
+                                    Text(tontine?.date_creation?? "N/A",style: TextStyle(
+                                        fontSize: 20.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white
+                                    ),)
+                                  ]
+                              ),
+                            ],
+                          ),
+                        )
+                    ),
+                  ),
                 ),
-              )
-              )
-            ],
-          )
+              ),
+            ),
         ],
       )
       ),

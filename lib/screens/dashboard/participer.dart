@@ -65,8 +65,8 @@ class _participerState extends State<participer> {
                 TextButton.icon(onPressed: (){
                   Navigator.of(context).pop();
                 },style: TextButton.styleFrom(
-                    backgroundColor: Couleur.primaryBlue
-                ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
+                    backgroundColor: Couleur.secondaryGreen
+                ), label: Text("Compris",style: TextStyle(color: Colors.white),),icon: Icon(Icons.verified,color: Colors.white,),)
               ],
             );
           });
@@ -79,7 +79,9 @@ class _participerState extends State<participer> {
           actions: [
             Center(child: TextButton.icon(onPressed: (){
               Navigator.of(context).pop();
-            }, label: Text("D'accord"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),)
+            },style: TextButton.styleFrom(
+              backgroundColor: Couleur.secondaryGreen
+            ), label: Text("Compris",style: TextStyle(color: Colors.white),),icon: Icon(Icons.verified,color: Colors.white,),),)
           ],
         );
       });

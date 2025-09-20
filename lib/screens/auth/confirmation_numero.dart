@@ -5,6 +5,7 @@ import 'package:delightful_toast/toast/components/toast_card.dart';
 import 'package:delightful_toast/toast/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/screens/auth/DefinirPin.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pinput/pinput.dart';
@@ -72,9 +73,11 @@ class _ConfirmationNumeroState extends State<ConfirmationNumero> {
           return ToastCard(
             title: Row(
               mainAxisAlignment:MainAxisAlignment.start,
-              children: [Icon(Icons.error_outline,color: Colors.white,size: 30.r,),Text("Erreur: Numéro de téléphone non trouvé",style: TextStyle(
-                  color: Colors.white
-              ),)],),
+              children: [Icon(Icons.error_outline,color: Colors.white,size: 30.r,),SizedBox(width: 8.w,),Expanded(
+                child: Text("Erreur: Numéro de téléphone non trouvé",style: TextStyle(
+                    color: Colors.white
+                ),overflow: TextOverflow.ellipsis,maxLines: 2,),
+              )],),
             color: Colors.red.shade700,);
         },).show(context);
     }
@@ -88,10 +91,12 @@ class _ConfirmationNumeroState extends State<ConfirmationNumero> {
         return ToastCard(
           title: Row(
             mainAxisAlignment:MainAxisAlignment.start,
-            children: [Icon(Icons.info,color: Colors.white,size: 30.r,),Text("OTP envoyé au ${numero}",style: TextStyle(
-                color: Colors.white
-            ),overflow: TextOverflow.ellipsis,maxLines: 2,)],),
-          color: Colors.green.shade700,);
+            children: [Icon(Icons.info,color: Colors.white,size: 30.r,),SizedBox(width: 8.w,),Expanded(
+              child: Text("OTP envoyé au ${numero}",style: TextStyle(
+                  color: Colors.white
+              ),overflow: TextOverflow.ellipsis,maxLines: 2,),
+            )],),
+          color: Couleur.secondaryGreen,);
       },).show(context);
 
     await _auth.verifyPhoneNumber(
@@ -170,9 +175,11 @@ class _ConfirmationNumeroState extends State<ConfirmationNumero> {
                       return ToastCard(
                         title: Row(
                           mainAxisAlignment:MainAxisAlignment.start,
-                          children: [Icon(Icons.error_outline,color: Colors.white,size: 30.r,),Text("Veuillez vérifier le code OTP ou le numéro saisi",style: TextStyle(
-                              color: Colors.white
-                          ),maxLines: 2,overflow: TextOverflow.ellipsis,)],),
+                          children: [Icon(Icons.error_outline,color: Colors.white,size: 30.r,),SizedBox(width: 8.w,),Expanded(
+                            child: Text("Veuillez vérifier le code OTP ou le numéro saisi",style: TextStyle(
+                                color: Colors.white
+                            ),maxLines: 2,overflow: TextOverflow.ellipsis,),
+                          )],),
                         color: Colors.red.shade700,);
                     },).show(context);
                 }

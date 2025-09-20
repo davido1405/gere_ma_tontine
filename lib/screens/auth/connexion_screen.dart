@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/constants/server.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:gerematontine/screens/auth/inscription_screen.dart';
@@ -81,11 +82,11 @@ class _connexion_screenState extends State<connexion_screen> {
             content: Text(data['message']),
             actions: [
               Center(
-                child:TextButton(onPressed: (){
+                child:TextButton.icon(onPressed: (){
                   Navigator.of(context).pop();
                 },style: TextButton.styleFrom(
-                    backgroundColor: Colors.blueAccent
-                ), child: Text("Compris")),
+                    backgroundColor: Couleur.secondaryGreen
+                ),icon: Icon(Icons.verified,color: Colors.white,), label: Text("Compris",style: TextStyle(color: Colors.white),)),
               )
             ],
           );

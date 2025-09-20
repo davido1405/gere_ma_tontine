@@ -95,22 +95,21 @@ class _details_tontineState extends State<details_tontine> with SingleTickerProv
         showDialog(context: context, builder: (BuildContext context){
           return AlertDialog(
             title: Center(child: Text("Information !"),),
-            content: SizedBox(
-              height: 200.h,
-              child: Column(children: [
-                Center(
-                  child: Lottie.asset('assets/animations/Sign for error _ Flat style.json',
-                      width: 150.w,
-                      height: 150.h,
-                      repeat: true,
-                      controller: _controllerLotti,
-                      onLoaded: (composition){
-                        _controllerLotti.forward();
-                      }),
-                ),
-                Text(data['message']),
-              ],),
-            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+              Center(
+                child: Lottie.asset('assets/animations/Sign for error _ Flat style.json',
+                    width: 150.w,
+                    height: 150.h,
+                    repeat: true,
+                    controller: _controllerLotti,
+                    onLoaded: (composition){
+                      _controllerLotti.forward();
+                    }),
+              ),
+              Text(data['message']),
+            ],),
             actions: [
               Center(
                 child: TextButton.icon(onPressed: (){
@@ -134,8 +133,8 @@ class _details_tontineState extends State<details_tontine> with SingleTickerProv
               child: TextButton.icon(onPressed: (){
                 Navigator.of(context).pop();
               },style: TextButton.styleFrom(
-              backgroundColor: Couleur.primaryBlue
-              ), label: Text("Ok"),icon: Icon(Icons.verified,color: Colors.lightGreen,),),
+              backgroundColor: Couleur.secondaryGreen
+              ), label: Text("Compris",style: TextStyle(color: Colors.white),),icon: Icon(Icons.verified,color: Colors.white,),),
             )
           ],
         );
@@ -170,6 +169,7 @@ class _details_tontineState extends State<details_tontine> with SingleTickerProv
                     borderRadius: BorderRadius.circular(12.r)
                 ),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                         Container(
@@ -190,7 +190,7 @@ class _details_tontineState extends State<details_tontine> with SingleTickerProv
                                   child: QrImageView(
                                     backgroundColor: Colors.white,
                                     data: "Accès refusé",
-                                    size: 200.w,
+                                    size: 180.w,
                                   ),
                                 ),
                                 SizedBox(height: 10.h),
@@ -246,139 +246,117 @@ class _details_tontineState extends State<details_tontine> with SingleTickerProv
             SizedBox(
               height: 5.h,
             ),
-            SizedBox(
-              height: 350.h,
-              child: Column(
-                children: [
-                  Expanded(
-                      child: ListView.builder(
-                          itemCount: membres.length,
-                          itemBuilder: (context,index){
-                            final Membre member=membres[index];
-                            return GestureDetector(
-                              onTap: (){
-                                showDialog(context: context, builder: (BuildContext context){
-                                  return AlertDialog(
-                                    title: Center(
-                                      child: Text("Détails membre",style: TextStyle(
-                                        fontSize: 18.sp
-                                      ),),
-                                    ),
-                                    content: SizedBox(
-                                      height: 160.h,
-                                      child: Column(
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Text("Nom membre: ${member.nom_membre}",style: TextStyle(
-                                                  fontSize: 14.sp
-                                              ),)
-                                            ],
-                                          ),
-                                          SizedBox(
-                                            height: 5.h,
-                                          ),
-                                          Row(
-                                            children: [
-                                              Text("Prénoms membre : ${member.prenom_membre}",style: TextStyle(
-                                          fontSize: 14.sp
-                                          ),)
-                                            ],
-                                          ),SizedBox(
-                                            height: 5.h,
-                                          ),
-                                          Row(
-                                            children: [
-                                              Text("Numéro membre : ${member.numero}",style: TextStyle(
-                                                  fontSize: 14.sp
-                                              ),)
-                                            ],
-                                          ),SizedBox(
-                                            height: 5.h,
-                                          ),
-                                          Row(
-                                            children: [
-                                              Text("Date d'intégration : ${member.date_participation}",style: TextStyle(
-                                                  fontSize: 14.sp
-                                              ),)
-                                            ],
-                                          ),SizedBox(
-                                            height: 5.h,
-                                          ),
-                                          Row(
-                                            children: [
-                                              Text("Type: ${member.type}",style: TextStyle(
-                                                  fontSize: 14.sp
-                                              ),)
-                                            ],
-                                          ),
-                                          SizedBox(
-                                            height: 10.h,
-                                          ),
-                                          GestureDetector(
-                                            onTap: (){
-                                              contacterParticipant(member.numero);
-                                            },
-                                            child: InkWell(child: Row(
-                                              children: [
-                                                Image.asset("assets/whatsapp.png",width: 15.w,height: 15.h,),
-                                                SizedBox(width: 5.w,),
-                                                Text("Contacter ce participant")
-                                              ],
-                                            ),),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    actions: [
-                                      Center(
-                                        child: TextButton.icon(onPressed: (){
-                                          Navigator.of(context).pop();
-                                        },style: TextButton.styleFrom(
-                                            backgroundColor: Couleur.secondaryGreen
-                                        ), label: Text("Compris",style: TextStyle(
-                                          color: Colors.white,
-                                            fontSize: 14.sp
-                                        ),),icon: Icon(Icons.verified,color: Colors.white,),)
-                                        ,
-                                      )
-                                    ],
-                                  );
-                                });
-                              },
-                              child: ListTile(
-                                title: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(widget.listsession.numero_participant==member.numero?"Vous":member.nom_membre+" "+member.prenom_membre,style: TextStyle(
-                                        fontSize: 15.sp,
-                                        fontWeight: FontWeight.bold
-                                    ),),
-                                    AbsorbPointer(
-                                      absorbing:widget.listsession.type_participant=="Organisateur" ? false:true,
-                                      child: ElevatedButton(onPressed: (){
-                                        print("Notifications personnalisé");
-                                      },
-                                      style: TextButton.styleFrom(
-                                        elevation: 1,
-                                        backgroundColor: Couleur.accentOrange
-                                      ), child: Text("${member.points_confiance} Pts" ,style: TextStyle(
-                                        color: Colors.white,
-                                          fontSize: 12.sp
-                                      ),),),
-                                    )
-                                  ],
-                                ),
-                                subtitle: Text("Type: ${member.type}",style: TextStyle(
+            ListView.builder(
+              shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: membres.length,
+                itemBuilder: (context,index){
+                  final Membre member=membres[index];
+                  return GestureDetector(
+                    onTap: (){
+                      showDialog(context: context, builder: (BuildContext context){
+                        return AlertDialog(
+                          title: Center(
+                            child: Text("Détails membre",style: TextStyle(
+                              fontSize: 18.sp
+                            ),),
+                          ),
+                          content: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text("Nom membre: ${member.nom_membre}",style: TextStyle(
                                   fontSize: 14.sp
-                                ),),
+                              ),),
+                              SizedBox(
+                                height: 5.h,
                               ),
-                            );
-                          })
-                  ),
-                ],
-              ),
-            )
+
+                                  Text("Prénoms membre : ${member.prenom_membre}",style: TextStyle(
+                              fontSize: 14.sp
+                              ),),
+                              SizedBox(
+                                height: 5.h,
+                              ),
+                              Text("Numéro membre : ${member.numero}",style: TextStyle(
+                                      fontSize: 14.sp
+                                  )
+                              ),SizedBox(
+                                height: 5.h,
+                              ),
+                                  Text("Date d'intégration : ${member.date_participation.split(" ")[0]}",style: TextStyle(
+                                      fontSize: 14.sp
+                                  ),)
+                                ,SizedBox(
+                                height: 5.h,
+                              ),
+
+                                  Text("Type: ${member.type}",style: TextStyle(
+                                      fontSize: 14.sp
+                                  ),)
+                                ,
+                              SizedBox(
+                                height: 10.h,
+                              ),
+                              GestureDetector(
+                                onTap: (){
+                                  contacterParticipant(member.numero);
+                                },
+                                child: InkWell(child: Row(
+                                  children: [
+                                    Image.asset("assets/whatsapp.png",width: 15.w,height: 15.h,),
+                                    SizedBox(width: 5.w,),
+                                    Text("Contacter ce participant")
+                                  ],
+                                ),),
+                              )
+                            ],
+                          ),
+                          actions: [
+                            Center(
+                              child: TextButton.icon(onPressed: (){
+                                Navigator.of(context).pop();
+                              },style: TextButton.styleFrom(
+                                  backgroundColor: Couleur.secondaryGreen
+                              ), label: Text("Compris",style: TextStyle(
+                                color: Colors.white,
+                                  fontSize: 14.sp
+                              ),),icon: Icon(Icons.verified,color: Colors.white,),)
+                              ,
+                            )
+                          ],
+                        );
+                      });
+                    },
+                    child: ListTile(
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(widget.listsession.numero_participant==member.numero?"Vous":member.nom_membre+" "+member.prenom_membre,style: TextStyle(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.bold
+                          ),),
+                          AbsorbPointer(
+                            absorbing:widget.listsession.type_participant=="Organisateur" ? false:true,
+                            child: ElevatedButton(onPressed: (){
+                              print("Notifications personnalisé");
+                            },
+                            style: TextButton.styleFrom(
+                              elevation: 1,
+                              backgroundColor: Couleur.accentOrange
+                            ), child: Text("${member.points_confiance} Pts" ,style: TextStyle(
+                              color: Colors.white,
+                                fontSize: 12.sp
+                            ),),),
+                          )
+                        ],
+                      ),
+                      subtitle: Text("Type: ${member.type}",style: TextStyle(
+                        fontSize: 14.sp
+                      ),),
+                    ),
+                  );
+                })
           ],
         ),
       )
