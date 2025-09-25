@@ -1,0 +1,17 @@
+workflows:
+  ios-workflow:
+    name: iOS Workflow  
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Install dependencies
+        script: flutter packages pub get
+      - name: Build for simulator (Appetize)
+        script: |
+          flutter build ios --simulator --debug
+          cd build/ios/iphonesimulator
+          zip -r Runner.app.zip Runner.app
+    artifacts:
+      - build/ios/iphonesimulator/Runner.app.zip
