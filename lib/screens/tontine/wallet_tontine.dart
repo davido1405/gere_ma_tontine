@@ -420,7 +420,7 @@ Future<bool>relancer()async{
                                                                                 return AlertDialog(
                                                                                   title: Text("Attention !"),
                                                                                   content: Text("L'organisateur a décidé de lancer un nouveau cycle. Veuillez vous reconnecter pour actualiser les tours. Merci",style: TextStyle(
-                                                                                    fontSize: 12.sp,
+                                                                                    fontSize: 12.sp
                                                                                   ),
                                                                                     maxLines: 2,
                                                                                     overflow: TextOverflow.ellipsis,),
@@ -463,7 +463,7 @@ Future<bool>relancer()async{
                                                                         ), label: Text("Cloturer",style: TextStyle(
                                                                             color: Colors.black,
                                                                             fontSize: 14.sp
-                                                                        ),),icon: Icon(Icons.close_rounded,color: Colors.red.shade400,),),
+                                                                        ),),icon: Icon(Icons.close_rounded,color: Colors.redAccent,),),
                                                                       ],
                                                                     )
                                                                   ],

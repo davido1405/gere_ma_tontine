@@ -210,7 +210,7 @@ class _MyAppState extends State<MyApp> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ColorFiltered(colorFilter: ColorFilter.mode(Couleur.primaryBlue, BlendMode.srcATop),child: Lottie.asset("assets/animations/login.json",width: 150.w,height: 150.h),),
+                    ColorFiltered(colorFilter: ColorFilter.mode(Couleur.primaryBlue, BlendMode.srcATop),child: Lottie.asset("assets/animations/lottieflow-404-12-10-000000-easey.json",width: 150.w,height: 150.h),),
                     SizedBox(height: 20.h,),
                     Text("Veuillez vérifier votre connexion internet. Merci"),
                     SizedBox(
