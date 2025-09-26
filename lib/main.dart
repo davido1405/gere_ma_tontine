@@ -206,24 +206,27 @@ class _MyAppState extends State<MyApp> {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
             home:erreur==true? Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ColorFiltered(colorFilter: ColorFilter.mode(Couleur.primaryBlue, BlendMode.srcATop),child: Lottie.asset("assets/animations/lottieflow-404-12-10-000000-easey.json",width: 150.w,height: 150.h),),
-                    SizedBox(height: 20.h,),
-                    Text("Veuillez vérifier votre connexion internet. Merci"),
-                    SizedBox(
-                      height: 40.h,
-                    ),
-                    ElevatedButton(onPressed: (){
-                      initialiserFirebase();
-                    },style: ElevatedButton.styleFrom(
-                      backgroundColor: Couleur.primaryBlue
-                    ), child: Text("Réessayer",style: TextStyle(
-                      color: Colors.white
-                    ),))
-                  ],
+              body: SafeArea(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ColorFiltered(colorFilter: ColorFilter.mode(Couleur.primaryBlue, BlendMode.srcATop),child: Lottie.asset("assets/animations/lottieflow-404-12-10-000000-easey.json",width: 150.w,height: 150.h),),
+                      SizedBox(height: 20.h,),
+                      Text("Veuillez vérifier votre connexion internet. Merci"),
+                      SizedBox(
+                        height: 40.h,
+                      ),
+                      ElevatedButton(onPressed: (){
+                        initialiserFirebase();
+                      },style: ElevatedButton.styleFrom(
+                        backgroundColor: Couleur.primaryBlue
+                      ), child: Text("Réessayer",style: TextStyle(
+                        color: Colors.white
+                      ),))
+                    ],
+                  ),
                 ),
               ),
             ):
