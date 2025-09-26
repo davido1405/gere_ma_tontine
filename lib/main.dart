@@ -92,7 +92,7 @@ Future<void> main() async {
     frequency: const Duration(minutes: 15),
   );
 
-  Future.delayed(Duration(seconds: 2),(){
+  Future.delayed(Duration(seconds: 1),(){
     FlutterNativeSplash.remove();
   });
 
