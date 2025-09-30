@@ -245,7 +245,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
                       return;
                     }
                     double somme = double.tryParse(montant.text) ?? 0;
-                    double total= somme*(1+0.2);
+                    double total= somme*(1+0.02);
                     final newTotal=total.toStringAsFixed(0);
                     montantFraisinculs.value=TextEditingValue(
                         text: newTotal,
@@ -283,7 +283,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
                     }
 
                     double somme2=double.tryParse(montantFraisinculs.text) ?? 0;
-                    double total2=somme2/(1+0.2);
+                    double total2=somme2/(1+0.02);
 
                     final newTotal2=total2.toStringAsFixed(0);
                     montant.value=TextEditingValue(
@@ -533,7 +533,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
                                         Padding(
                                           padding: EdgeInsets.symmetric(horizontal: 20.w),
                                           child: ElevatedButton.icon(onPressed: enCourtraitement? null: (){
-                                            String montantPaiement=montant.text;
+                                            String montantPaiement=montantFraisinculs.text;
                                             String modePaie=_selectedOption.toString();
                                             if(montantPaiement.isEmpty || modePaie.isEmpty){
                                               DelightToastBar(
