@@ -75,22 +75,17 @@ class _participerState extends State<participer> {
         final Map<String, dynamic> data = jsonDecode(response.body);
         bool success = data['success'];
         if (success) {
-          if (data['message'] == "Vous participez désormais à cette tontine") {
             setState(() {
               widget.listsession.setCodeTontine(code.text);
             });
-            Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => dashboard(listsession: widget.listsession)),
-                    (route) => false);
-          } else if (data['message'] == "Vous êtes déjà inscrit dans cette tontine") {
-            Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => dashboard(listsession: widget.listsession)),
-                    (route) => false);
-          }
+            Future.delayed(Duration(milliseconds: 300),(){
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => dashboard(listsession: widget.listsession)),
+                      (route) => false);
+            });
         } else {
-          _showErrorDialog("Erreur", data['message']);
+          _showErrorDialog("Erreur", "Une erreur s'est produite veuillez réesayer plus tard ou contacter le service technique.");
         }
       } else {
         _showErrorDialog("Erreur serveur", "Une erreur s'est produite côté serveur. Veuillez réessayer plus tard");
@@ -162,7 +157,7 @@ class _participerState extends State<participer> {
                         borderRadius: BorderRadius.circular(16.r), // CORRECTION 2: Méthode correcte
                         child: MobileScanner(
                           controller: scannerController, // AJOUT 10: Utilisation du contrôleur
-                          onDetect: (capture) {
+                          onDetect: (capture) async {
                             // CORRECTION 3: Vérifier si le scanner est actif
                             if (!_scannerActive || _isLoading) return;
 
@@ -179,8 +174,9 @@ class _participerState extends State<participer> {
                                   setState(() {
                                     code.text = extractedCode;
                                     _scannerActive = false; // AJOUT 12: Désactiver le scanner
+                                    _isLoading=true;
                                   });
-                                  participer();
+                                  await participer();
                                   foundValidCode = true;
                                   break; // CORRECTION 5: Ajouter le break manquant
                                 }
@@ -279,42 +275,41 @@ class _participerState extends State<participer> {
                   SizedBox(height: 15.h),
 
                   // CORRECTION 8: Bouton avec loading state
-                  Center(
-                    child: TextButton.icon(
-                        onPressed: _isLoading ? null : () {
-                          participer();
-                        },
-                        label: _isLoading
-                            ? Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(
-                              width: 16.w,
-                              height: 16.h,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  Row(
+                    children: [
+                      TextButton.icon(
+                          onPressed: _isLoading ? null : () {
+                            participer();
+                          },
+                          label: _isLoading
+                              ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                width: 16.w,
+                                height: 16.h,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
                               ),
-                            ),
-                            SizedBox(width: 8.w),
-                            Text("Participation...", style: TextStyle(fontSize: 14.sp, color: Colors.white)),
-                          ],
-                        )
-                            : Text("Participer", style: TextStyle(fontSize: 14.sp, color: Colors.white)),
-                        icon: _isLoading ? SizedBox.shrink() : Icon(Icons.rocket_launch, color: Colors.white),
-                        style: _buttonStyle), // CORRECTION 9: Utilisation du style factorisé
+                              SizedBox(width: 8.w),
+                              Text("Participation...", style: TextStyle(fontSize: 14.sp, color: Colors.white)),
+                            ],
+                          )
+                              : Text("Participer", style: TextStyle(fontSize: 14.sp, color: Colors.white)),
+                          icon: _isLoading ? SizedBox.shrink() : Icon(Icons.rocket_launch, color: Colors.white),
+                          style: _buttonStyle),
+                      TextButton.icon(
+                          onPressed: _isLoading ? null : () {
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) => creer_tontine(listsession: widget.listsession)));
+                          },
+                          style: _buttonStyle, // CORRECTION 10: Style factorisé
+                          label: Text("Créer ma tontine", style: TextStyle(fontSize: 14.sp, color: Colors.white)),
+                          icon: Icon(Icons.rocket_launch, color: Colors.white))
+                    ],
                   ),
-
-                  Center(
-                    child: TextButton.icon(
-                        onPressed: _isLoading ? null : () {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) => creer_tontine(listsession: widget.listsession)));
-                        },
-                        style: _buttonStyle, // CORRECTION 10: Style factorisé
-                        label: Text("Créer ma tontine", style: TextStyle(fontSize: 14.sp, color: Colors.white)),
-                        icon: Icon(Icons.rocket_launch, color: Colors.white)),
-                  )
                 ],
               ))
         ],
