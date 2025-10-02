@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -15,6 +16,7 @@ import 'package:gerematontine/screens/tontine/wallet_tontine.dart';
 import 'package:gerematontine/services/fcm_service.dart';
 import 'package:gerematontine/services/notifications_service.dart';
 import 'package:http/http.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants/server.dart';
@@ -202,6 +204,8 @@ class _acceuilState extends State<acceuil> {
   late int solvabilite = int.tryParse(widget.listsession.indice_solvabilite ?? "0") ?? 0;
   int statut=0;
   bool messageAffich=false;
+
+  TextEditingController lienPartage=TextEditingController();
 
   @override
   build(BuildContext context) {
@@ -559,6 +563,19 @@ class _acceuilState extends State<acceuil> {
                                     color: Colors.white
                                 ),)
                               ]),
+                              SizedBox(
+                                height: 10.h,
+                              ),
+                              if (widget.listsession.type_participant=="Organisateur")
+                                Center(child: TextButton.icon(onPressed: (){
+                                  final lienInvitation="https://djarrafinances/invite?code_tontine=${widget.listsession.code_tontine}";
+                                  Share.share("Rejoins ma tontine sur Djarra Finances 🚀: $lienInvitation",subject: "Invitation à rejoindre une tontine");
+
+                                },style: TextButton.styleFrom(
+                                  backgroundColor: Couleur.secondaryGreen
+                                ), label: Text("Inviter un ami",style: TextStyle(
+                                  color: Colors.white
+                                ),),icon: Icon(Icons.share,color: Colors.white,),),)
                             ],
                           ),
                         )

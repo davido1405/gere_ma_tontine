@@ -51,6 +51,9 @@ dependencies:
   workmanager: ^0.9.0+3
   lottie: ^3.3.2
   local_auth: ^2.3.0
+  clipboard: ^2.0.2
+  share_plus: ^12.0.0
+  app_links: ^6.4.1
 
 
 
