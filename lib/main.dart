@@ -7,6 +7,7 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/screens/splashScreen.dart';
+import 'package:gerematontine/services/deep_links.dart';
 import 'package:gerematontine/services/fcm_service.dart';
 import 'package:gerematontine/services/notifications_service.dart';
 import 'package:http/http.dart';
@@ -142,6 +143,10 @@ class _MyAppState extends State<MyApp> {
 
     // ✅ Terminated (app ouverte via une notif)
     checkInitialMessage();
+
+    // ✅ Deep links
+    final handler = DeepLinkHandler(context: context);
+    handler.initDeepLinks();
   }
 
   Future<void>initialiserFirebase()async{

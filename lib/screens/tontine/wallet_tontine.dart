@@ -8,7 +8,6 @@ import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/models/tontines.dart';
 import 'package:gerematontine/models/transactions.dart';
 import 'package:gerematontine/models/wallet_tontine.dart';
-import 'package:gerematontine/screens/dashboard/Acceuil.dart';
 import 'package:http/http.dart';
 import 'package:lottie/lottie.dart';
 
@@ -55,6 +54,8 @@ class _walletTontineState extends State<walletTontine> with SingleTickerProvider
   bool _masque=true;
   late String infoTour;
   bool optionAffiche=false;
+  String _selectedOption ="";
+  bool enCourtraitement=false;
 
 
   //Recupérer le wallet
@@ -95,6 +96,10 @@ Future<void>transacs() async{
           setState(() {
             _listeTransac=donnee.map((donnee)=>Transactions.fromJson(donnee)).toList();
           });
+        }else{
+          setState(() {
+            _listeTransac=[];
+          });
         }
       }
     }
@@ -134,58 +139,154 @@ Future<void>verifierTour()async{
 
 Future<bool>retirer()async{
   String? jwt=await widget.listsession.getSecureJwt();
-    final url=Uri.parse("${adress}?ressource=tontines&action=retirer");
-    final response=await post(url,headers: {"content-Type":"application/json",
-      "Authorization":"Bearer $jwt"},body: jsonEncode(
-        {
-          "code_tontine":widget.listsession.code_tontine,
-          "code_participant":widget.listsession.code_participant
-        }));
-    if(response.statusCode==200){
-      final Map<String,dynamic>donnee=jsonDecode(response.body);
-      if(donnee['success']==true){
-        var cheque=donnee['data'];
-        print(cheque);
-        if(cheque!=0){
-          setState(() {
-            widget.tontine.etat=cheque['statut_tontine'];
-          });
-          return true;
-        }
+  setState(() {
+    enCourtraitement = true;
+  });
+
+  // 1️⃣ Affiche le dialogue de chargement
+  showDialog(
+    context: context,
+    barrierDismissible: false, // empêche de fermer en cliquant dehors
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Center(child: Text("Statut")),
+        content: SizedBox(
+          height: 200.h,
+          child: Center(
+            child: Column(
+              children: [
+                Lottie.asset("assets/animations/Card swiping.json", width: 150.w, height: 150.h),
+                const SizedBox(height: 10),
+                const Text("Retrait en cours...")
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+
+    try{
+      final url=Uri.parse("${adress}?ressource=tontines&action=retirer");
+      final response=await post(url,headers: {"content-Type":"application/json",
+        "Authorization":"Bearer $jwt"},body: jsonEncode(
+          {
+            "code_tontine":widget.listsession.code_tontine,
+            "code_participant":widget.listsession.code_participant
+          }));
+
+      // 2️⃣ Fermer le dialogue de chargement une fois la réponse obtenue
+      if (Navigator.canPop(context)) Navigator.pop(context);
+
+      if(response.statusCode==200){
+        final Map<String,dynamic>donnee=jsonDecode(response.body);
+        bool success=donnee['success']==true;
+        // 3️⃣ Affiche le résultat (succès ou erreur)
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Center(
+                child: Text(
+                  "Statut paiement",
+                  style: TextStyle(fontSize: 15.sp),
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  success
+                      ? Lottie.asset(
+                    'assets/animations/Approve.json',
+                    width: 150.w,
+                    height: 150.h,
+                  )
+                      : Lottie.asset(
+                    'assets/animations/Sign for error _ Flat style.json',
+                    width: 150.w,
+                    height: 150.h,
+                  ),
+                  Text(
+                    donnee['message'],
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ],
+              ),
+              actions: [
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        enCourtraitement = false;
+                        _selectedOption = "";
+                      });
+                      var cheque=donnee['data'];
+                      print(cheque);
+                      if(cheque!=0){
+                        setState(() {
+                          widget.tontine.etat=cheque['statut_tontine'];
+                        });
+                      }
+                      Navigator.of(context)
+                      ..pop()
+                      ..pop();
+                      recupererWallet();
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: Couleur.secondaryGreen,
+                    ),
+                    icon: const Icon(Icons.verified, color: Colors.white),
+                    label: Text(
+                      "Compris",
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            );
+          },
+        );
       }else{
-        showDialog(context: context, builder: (BuildContext context){
-          return AlertDialog(
-            title: Center(child: Text("Désolé"),),
-            content: Text(donnee['message']),
-            actions: [
-              TextButton.icon(onPressed: (){
-                Navigator.of(context).pop();
-                initState();
-              },style: TextButton.styleFrom(
-                  backgroundColor: Couleur.secondaryGreen
-              ), label: Text("Compris",style: TextStyle(
-                color: Colors.white
-              ),),icon: Icon(Icons.verified,color: Colors.white,),)
-            ],
-          );
+        setState(() {
+          enCourtraitement=false;
         });
+        return false;
       }
-    }else{
-      print(response.statusCode);
+    }catch(e){
+      Navigator.of(context).pop();
+      setState(() => enCourtraitement = false);
+
+      // 3bis️⃣ Affiche un dialogue d’erreur
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text("Erreur"),
+          content: Text("Une erreur est survenue : $e"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Compris"),
+            )
+          ],
+        ),
+      );
     }
-    return false;
+  return false;
 }
 
 Future<bool>relancer()async{
   String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=tontines&action=liste_tours");
     final response=await post(url,headers: {'content-Type':'application/json',
-      "Authorization":"Bearer $jwt"},body: jsonEncode([
+      "Authorization":"Bearer $jwt"},body: jsonEncode(
       {
         'code_tontine':widget.listsession.code_tontine,
-        'relancer':'Oui'
+        'relancer':true
       }
-    ]));
+    ));
     if(response.statusCode==200){
       final donnee=jsonDecode(response.body) as Map<String,dynamic>;
       if(donnee['success']){
@@ -227,48 +328,6 @@ Future<bool>relancer()async{
         ),
       );
     }
-    // CORRECTION PRINCIPALE : Dialogue conditionnel
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!_dialogShown && widget.tontine.etat == "En attente") {
-        setState(() {
-          _dialogShown = true;
-        });
-
-        await showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Center(child: Text("Information !")),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Lottie.asset(
-                        'assets/animations/Sign for error _ Flat style.json',
-                        height: 150.h,
-                        width: 150.w
-                    ),
-                    Text("En attente des autres participants. Veuillez patienter svp."),
-                  ],
-                ),
-                actions: [
-                  Center(
-                    child: TextButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      style: TextButton.styleFrom(backgroundColor: Couleur.secondaryGreen),
-                      label: Text("Compris", style: TextStyle(color: Colors.white)),
-                      icon: Icon(Icons.verified, color: Colors.white),
-                    ),
-                  )
-                ],
-              );
-            }
-        );
-      }
-    });
-
     return Scaffold(
       appBar: AppBar(
         title: Center(
@@ -370,135 +429,244 @@ Future<bool>relancer()async{
                                         onPressed: () async {
                                           // Votre logique existante pour le bouton retrait
                                           if(_monTour){
-                                            if(await retirer()){
-                                              showDialog(context: context, builder: (BuildContext context){
-                                                return AlertDialog(
-                                                  title: Center(child: Text("Félicitation"),),
-                                                  content: Column(
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: [
-                                                      Lottie.asset("assets/animations/Trophy Winner.json",width: 150.w,height: 150.h,
-                                                          controller: _controllerAnimation,
-                                                          onLoaded: (composition){
-                                                            _controllerAnimation.forward();
-                                                          }),
-                                                      Text("Retrait éffectué avec succès !",style: TextStyle(
-                                                          fontSize: 14.sp
-                                                      ),),
-                                                    ],
-                                                  ),
-                                                  actions: [
-                                                    TextButton.icon(onPressed: (){
-                                                      if(widget.tontine.etat=="Terminée"){
-                                                        if(widget.listsession.type_participant=="Organisateur" && optionAffiche==false){
-                                                          setState(() {
-                                                            optionAffiche=true;
-                                                          });
-                                                          if(optionAffiche){
-                                                            showDialog(context: context, builder: (BuildContext context){
-                                                              return AlertDialog(
-                                                                title: Text("Encore une tontine qui fini sans palabre",style: TextStyle(
-                                                                    fontSize: 14.sp
-                                                                ),),
-                                                                content: Column(
-                                                                  mainAxisSize: MainAxisSize.min,
-                                                                  children: [
-                                                                    Text("Que voulez vous faire ?",style: TextStyle(
-                                                                        fontSize: 14.sp
-                                                                    ),),
-                                                                    SizedBox(
-                                                                      height: 12.h,
+                                            //Afficher le modal pour le mode de retrait
+                                            showModalBottomSheet(
+                                                backgroundColor: Colors.grey[300],
+                                                elevation: 3,
+                                                isDismissible: true,
+                                                isScrollControlled: true,
+                                                //transitionAnimationController: AnimationController(vsync: ),
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(30.r))),
+                                                context: context,
+                                                builder: (BuildContext context) {
+                                                  return StatefulBuilder(
+                                                      builder: (BuildContext context, StateSetter setModalState) {
+                                                        return Container(
+                                                          decoration: BoxDecoration(
+                                                              color: Colors.grey.shade50,
+                                                              borderRadius: BorderRadius.circular(12.r)),
+                                                          constraints: BoxConstraints(
+                                                            maxHeight: MediaQuery.of(context).size.height*0.8,
+                                                          ),
+                                                          child: SingleChildScrollView(
+                                                            child: Column(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                children: [
+                                                                  SizedBox(
+                                                                    height: 10.h,
+                                                                  ),
+                                                                  Text("Mode de retrait",style: TextStyle(
+                                                                      fontSize: 20.sp,
+                                                                      fontWeight: FontWeight.w500
+                                                                  ),),SizedBox(
+                                                                    height: 10.h,
+                                                                  ),
+                                                                  Card(
+                                                                    elevation: 0,
+                                                                    color: Couleur.lightGray,
+                                                                    child: InkWell(
+                                                                      splashColor: Couleur.primaryBlue.withOpacity(0.2),
+                                                                      highlightColor: Colors.transparent,
+                                                                      onTap: (){
+                                                                        setModalState(() {
+                                                                          _selectedOption="Wave";
+                                                                        });
+                                                                      },
+                                                                      child: Padding(
+                                                                        padding: EdgeInsets.all(8.0.w),
+                                                                        child: Row(
+                                                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                          children: [
+                                                                            Flexible(
+                                                                                flex:3,
+                                                                                child: Row(
+                                                                                  mainAxisSize: MainAxisSize.min,
+                                                                                  children: [
+                                                                                    ClipRRect(
+                                                                                      borderRadius: BorderRadius.circular(5.r),
+                                                                                      child: Image.asset("assets/wave.png",fit: BoxFit.cover,height: 50.h,
+                                                                                        width: 100.w,),
+                                                                                    ),
+                                                                                    SizedBox(width: 10.w,),
+                                                                                    Text("WAVE"),
+                                                                                  ],)),
+                                                                            Flexible(
+                                                                              flex:1,
+                                                                              child: RadioListTile<String>(value: "Wave", groupValue: _selectedOption, onChanged: (value){
+                                                                                setModalState(() {
+                                                                                  _selectedOption=value!;
+                                                                                  print(_selectedOption.toString());
+                                                                                });
+                                                                              }),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
                                                                     ),
-                                                                    Row(
-                                                                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                                                      children: [
-                                                                        TextButton.icon(onPressed: () async{
-                                                                          Navigator.of(context).popUntil((route)=>route.isFirst);
-                                                                          if(await relancer()){
-                                                                            if(widget.listsession.type_participant!="Organisateur"){
-                                                                              showDialog(context: context, builder: (BuildContext context){
-                                                                                return AlertDialog(
-                                                                                  title: Text("Attention !"),
-                                                                                  content: Text("L'organisateur a décidé de lancer un nouveau cycle. Veuillez vous reconnecter pour actualiser les tours. Merci",style: TextStyle(
-                                                                                    fontSize: 12.sp
-                                                                                  ),
-                                                                                    maxLines: 2,
-                                                                                    overflow: TextOverflow.ellipsis,),
-                                                                                  actions: [
-                                                                                    TextButton.icon(onPressed: (){
-                                                                                      Navigator.of(context).popUntil((route)=>route.isFirst);
-                                                                                    },style: TextButton.styleFrom(
-                                                                                        backgroundColor: Couleur.secondaryGreen
-                                                                                    ), label: Text("Compris !",style: TextStyle(color: Colors.white),),icon: Icon(Icons.verified,color: Colors.white,),),
-                                                                                  ],
-                                                                                );
-                                                                              });
-                                                                            }else{
-                                                                              Navigator.of(context).popUntil((route)=>route.isFirst);
-                                                                              Navigator.of(context).popUntil((route)=>route.isFirst);
-                                                                              showDialog(context: context, builder: (BuildContext context){
-                                                                                return AlertDialog(
-                                                                                  title: Text("Avertissement"),
-                                                                                  content: Text("Vous serrez deconnecté automatiquement pour actualiser les tours. Merci"),
-                                                                                  actions: [
-                                                                                    TextButton.icon(onPressed: (){
-                                                                                      Navigator.of(context).pop();
-                                                                                    },style: TextButton.styleFrom(
-                                                                                        backgroundColor: Couleur.secondaryGreen
-                                                                                    ), label: Text("Compris",style: TextStyle(color: Colors.white),),icon: Icon(Icons.verified,color: Colors.white,),)
-                                                                                  ],
-                                                                                );
-                                                                              });
-                                                                            }
-                                                                          }
-                                                                        },style: TextButton.styleFrom(
-                                                                            backgroundColor: Couleur.secondaryGreen
-                                                                        ), label: Text("Nouveau cycle",style: TextStyle(
-                                                                            fontSize: 14.sp
-                                                                        ),),icon: Icon(Icons.loop_rounded,color: Colors.white,size: 25.r,),),
-                                                                        TextButton.icon(onPressed: (){
-                                                                          //Fonction pour cloturer la tontine
-                                                                        },style: TextButton.styleFrom(
-                                                                            backgroundColor: Couleur.lightGray
-                                                                        ), label: Text("Cloturer",style: TextStyle(
-                                                                            color: Colors.black,
-                                                                            fontSize: 14.sp
-                                                                        ),),icon: Icon(Icons.close_rounded,color: Colors.redAccent,),),
-                                                                      ],
-                                                                    )
-                                                                  ],
-                                                                ),
-                                                              );
-                                                            });
-                                                          }
-                                                        }else{
-                                                          showDialog(
-                                                              barrierDismissible: false,
-                                                              context: context, builder: (BuildContext context){
-                                                            return AlertDialog(
-                                                              backgroundColor: Colors.white,
-                                                              elevation: 0,
-                                                              content: Center(
-                                                                child: CircularProgressIndicator(),
-                                                              ),
-                                                            );
-                                                          });
-                                                        }
-                                                      }else{
-                                                        Navigator.of(context).pop();
-                                                      }
-                                                    },style: TextButton.styleFrom(
-                                                        backgroundColor: Couleur.secondaryGreen
-                                                    ), label: Text("Compris",style: TextStyle(color: Colors.white),),icon: Icon(Icons.verified,color: Colors.white,),)
-                                                  ],
-                                                );
-                                              });
-                                            }
-                                          }else if(widget.numeroTour=="N/A"){
+                                                                  ),
+                                                                  SizedBox(
+                                                                    height: 2.h,
+                                                                  ),
+                                                                  Card(
+                                                                    elevation: 0,
+                                                                    color: Couleur.lightGray,
+                                                                    child: InkWell(
+                                                                      splashColor: Couleur.primaryBlue.withOpacity(0.2),
+                                                                      highlightColor: Colors.transparent,
+                                                                      onTap: (){
+                                                                        setModalState(() {
+                                                                          _selectedOption="Orange Money";
+                                                                        });
+                                                                      },
+                                                                      child: Padding(
+                                                                        padding: EdgeInsets.all(8.0.w),
+                                                                        child: Row(
+                                                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                          children: [
+                                                                            Flexible(
+                                                                                flex:3,
+                                                                                child: Row(
+                                                                                  mainAxisSize: MainAxisSize.min,
+                                                                                  children: [
+                                                                                    ClipRRect(
+                                                                                      borderRadius: BorderRadius.circular(5.r),
+                                                                                      child: Image.asset("assets/orange money 2.png",fit: BoxFit.cover,height: 50.h,
+                                                                                        width: 100.w,),
+                                                                                    ),
+                                                                                    SizedBox(width: 10.w,),
+                                                                                    Text("Orange"),
+                                                                                  ],)),
+                                                                            Flexible(
+                                                                              flex:1,
+                                                                              child: RadioListTile<String>(value: "Orange Money", groupValue: _selectedOption, onChanged: (value){
+                                                                                setModalState(() {
+                                                                                  _selectedOption=value!;
+                                                                                  print(_selectedOption.toString());
+                                                                                });
+                                                                              }),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    height: 5.h,
+                                                                  ),
+                                                                  Card(
+                                                                    elevation: 0,
+                                                                    color: Couleur.lightGray,
+                                                                    child: InkWell(
+                                                                      splashColor: Couleur.primaryBlue.withOpacity(0.2),
+                                                                      highlightColor: Colors.transparent,
+                                                                      onTap: (){
+                                                                        setModalState(() {
+                                                                          _selectedOption="MTN Money";
+                                                                        });
+                                                                      },
+                                                                      child: Padding(
+                                                                        padding: EdgeInsets.all(8.0.w),
+                                                                        child: Row(
+                                                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                          children: [
+                                                                            Flexible(
+                                                                                flex:3,
+                                                                                child: Row(
+                                                                                  mainAxisSize: MainAxisSize.min,
+                                                                                  children: [
+                                                                                    ClipRRect(
+                                                                                      borderRadius: BorderRadius.circular(5.r),
+                                                                                      child: Image.asset("assets/MTN MONEY.png",fit: BoxFit.cover,height: 50.h,
+                                                                                        width: 100.w,),
+                                                                                    ),
+                                                                                    SizedBox(width: 10.w,),
+                                                                                    Text("MTN"),
+                                                                                  ],)),
+                                                                            Flexible(
+                                                                              flex:1,
+                                                                              child: RadioListTile<String>(value: "MTN Money", groupValue: _selectedOption, onChanged: (value){
+                                                                                setModalState(() {
+                                                                                  _selectedOption=value!;
+                                                                                  print(_selectedOption.toString());
+                                                                                });
+                                                                              }),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    height: 5.h,
+                                                                  ),
+                                                                  Card(
+                                                                    elevation: 0,
+                                                                    color: Couleur.lightGray,
+                                                                    child: InkWell(
+                                                                      splashColor: Couleur.primaryBlue.withOpacity(0.2),
+                                                                      highlightColor: Colors.transparent,
+                                                                      onTap: (){
+                                                                        setModalState(() {
+                                                                          _selectedOption="Moov Money";
+                                                                        });
+                                                                      },
+                                                                      child: Padding(
+                                                                        padding: EdgeInsets.all(8.0.w),
+                                                                        child: Row(
+                                                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                          children: [
+                                                                            Flexible(
+                                                                                flex:3,
+                                                                                child: Row(
+                                                                                  mainAxisSize: MainAxisSize.min,
+                                                                                  children: [
+                                                                                    ClipRRect(
+                                                                                      borderRadius: BorderRadius.circular(10.r),
+                                                                                      child: Image.asset("assets/moov.png",fit: BoxFit.cover,height: 50.h,
+                                                                                        width: 100.w,),
+                                                                                    ),
+                                                                                    SizedBox(width: 10.w,),
+                                                                                    Text("MOOV"),
+                                                                                  ],)),
+                                                                            Flexible(
+                                                                              flex:1,
+                                                                              child: RadioListTile<String>(value: "Moov Money", groupValue: _selectedOption, onChanged: (value){
+                                                                                setModalState(() {
+                                                                                  _selectedOption=value!;
+                                                                                });
+                                                                              }),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    height: 20.h,
+                                                                  ),
+                                                                  Padding(
+                                                                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                                                                    child: ElevatedButton.icon(onPressed: enCourtraitement? null: (){
+                                                                      String modePaie=_selectedOption.toString();
+                                                                      retirer();
+                                                                    },style: TextButton.styleFrom(
+                                                                        backgroundColor: Couleur.secondaryGreen
+                                                                    ), label:enCourtraitement?Text("Retrait en cours...",style: TextStyle(
+                                                                        color: Colors.white
+                                                                    ),):Text("Valider le retirer",style: TextStyle(
+                                                                        color: Colors.white
+                                                                    ),),icon:enCourtraitement?SizedBox(width:20.w,height:20.h,child: CircularProgressIndicator(color: Colors.white,strokeWidth: 2,)):Icon(Icons.monetization_on,color: Colors.white,),),
+                                                                  )
+                                                                ]),
+                                                          ),
+                                                        );}
+                                                  );
+                                                });
+                                          }else if(widget.listsession.numero_participant=="N/A" || widget.tontine.etat=="Terminée"||widget.tontine.etat=="En attente"){
                                             showDialog(context: context, builder: (BuildContext context){
                                               return AlertDialog(
                                                 title: Center(child: Text("Désolé"),),
-                                                content: Text("Mon vieux, tout le monde n'est pas encore arrivé 😅."),
+                                                content: Text("Vous ne pouvez pas encore faire de retrait."),
                                                 actions: [
                                                   Center(child: TextButton.icon(onPressed: (){
                                                     Navigator.of(context).pop();
@@ -512,7 +680,7 @@ Future<bool>relancer()async{
                                             showDialog(context: context, builder: (BuildContext context){
                                               return AlertDialog(
                                                 title: Center(child: Text("Désolé"),),
-                                                content: Text(_pasJourprevu?"Djo c'est ton tour, mais faut attendre la date. S'il te plaît 🙏🏾":"Mon vieux, tu es N°${widget.numeroTour}, faut pas presser le chauffeur 😅."),
+                                                content: Text(_pasJourprevu?"La date de retrait fixée n'est pas encore atteinte":"Vous bénéficiez en position N°${widget.numeroTour}, veuillez donc attendre votre tour."),
                                                 actions: [
                                                   Center(child: TextButton.icon(onPressed: (){
                                                     Navigator.of(context).pop();
@@ -584,103 +752,116 @@ Future<bool>relancer()async{
               SizedBox(
                   height:435.h,
                   width: double.maxFinite,
-                  child: ListView.builder(
+                  child: _listeTransac.isEmpty ?
+                  Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                    ColorFiltered(colorFilter: ColorFilter.mode(Couleur.primaryBlue, BlendMode.srcATop),
+                    child: Lottie.asset("assets/animations/lottieflow-ecommerce-14-7-000000-easey.json",width: 150.w,height: 150.h),),
+                        SizedBox(height: 15.h,),
+                        Text("Aucune transaction disponible pour le moment")
+                      ],
+                    ),
+                  ): ListView.builder(
                   itemCount: _listeTransac.length,
                   itemBuilder: (context,index){
                     final Transactions transac=_listeTransac[index];
-                return GestureDetector(
-                  onTap: (){
-                    showDialog(context: context, builder: (BuildContext context){
-                      return AlertDialog(
-                        title: Center(child: Text("Détails de transaction",style: TextStyle(
-                            fontSize: 15.sp
-                        ),)),
-                        content: SizedBox(
-                          height: 220.h,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Nom :${transac.nom}",style: TextStyle(
-                                  fontSize: 15.sp
-                              ),),
-                              Text("Prénoms :${transac.prenoms}",style: TextStyle(
-                                  fontSize: 15.sp
-                              ),),
-                              Text("Type de transaction :${transac.type_transaction}",style: TextStyle(
-                                  fontSize: 15.sp
-                              ),),
-                              Text("Montant de transaction :${transac.montant_transaction}",style: TextStyle(
-                                  fontSize: 15.sp
-                              ),),
-                              Text("Date de transaction :${transac.date_transaction}",style: TextStyle(
-                                  fontSize: 15.sp
-                              ),),
-                              Text("Mode de paiement :${transac.mode_paiement}",style: TextStyle(
-                                  fontSize: 15.sp
-                              ),),
-                              Text("Statut: ${transac.statut_paiement}",style: TextStyle(
-                                  fontSize: 15.sp
-                              ),),
+                    return GestureDetector(
+                      onTap: (){
+                        showDialog(context: context, builder: (BuildContext context){
+                          return AlertDialog(
+                            title: Center(child: Text("Détails de transaction",style: TextStyle(
+                                fontSize: 15.sp
+                            ),)),
+                            content: SizedBox(
+                              height: 220.h,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Nom :${transac.nom}",style: TextStyle(
+                                      fontSize: 15.sp
+                                  ),),
+                                  Text("Prénoms :${transac.prenoms}",style: TextStyle(
+                                      fontSize: 15.sp
+                                  ),),
+                                  Text("Type de transaction :${transac.type_transaction}",style: TextStyle(
+                                      fontSize: 15.sp
+                                  ),),
+                                  Text("Montant de transaction :${transac.montant_transaction}",style: TextStyle(
+                                      fontSize: 15.sp
+                                  ),),
+                                  Text("Date de transaction :${transac.date_transaction}",style: TextStyle(
+                                      fontSize: 15.sp
+                                  ),),
+                                  Text("Mode de paiement :${transac.mode_paiement}",style: TextStyle(
+                                      fontSize: 15.sp
+                                  ),),
+                                  Text("Statut: ${transac.statut_paiement}",style: TextStyle(
+                                      fontSize: 15.sp
+                                  ),),
+                                ],
+                              ),
+                            ),
+                            actions: [
+                              Center(
+                                child: TextButton.icon(onPressed: (){
+                                  Navigator.of(context).pop();
+                                },style: TextButton.styleFrom(
+                                    backgroundColor: Couleur.secondaryGreen
+                                ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.white,),),
+                              )
                             ],
-                          ),
-                        ),
-                        actions: [
-                          Center(
-                            child: TextButton.icon(onPressed: (){
-                              Navigator.of(context).pop();
-                            },style: TextButton.styleFrom(
-                                backgroundColor: Couleur.secondaryGreen
-                            ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.white,),),
-                          )
-                        ],
-                      );
-                    });
-                  },
-                  child: ListTile(
-                    title: Text((widget.listsession.nom_participant==transac.nom && widget.listsession.prenoms_participant==transac.prenoms)? "Vous":transac.prenoms+" "+transac.nom, style: TextStyle(
-                      fontSize: 16.sp,
-                        fontWeight: FontWeight.bold
-                    ),),
-                    subtitle: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(transac.type_transaction,style: TextStyle(
-                              fontSize: 14.sp
-                            ),),
-                            Text(transac.date_transaction,style: TextStyle(
-                                fontSize: 14.sp
-                            ),)
-                          ],
-                        ),
-                        Row(
+                          );
+                        });
+                      },
+                      child: ListTile(
+                        title: Text((widget.listsession.nom_participant==transac.nom && widget.listsession.prenoms_participant==transac.prenoms)? "Vous":transac.prenoms+" "+transac.nom, style: TextStyle(
+                          fontSize: 16.sp,
+                            fontWeight: FontWeight.bold
+                        ),),
+                        subtitle: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(transac.type_transaction!="Retrait" ? "+ ${transac.montant_transaction}":"- ${transac.montant_transaction}",style: TextStyle(
-                                color:(transac.type_transaction=="Retrait")?  Colors.red:Colors.green,
-                                  fontWeight: FontWeight.bold
+                                Text(transac.type_transaction,style: TextStyle(
+                                  fontSize: 14.sp
                                 ),),
-                                Text(transac.statut_paiement)
+                                Text(transac.date_transaction,style: TextStyle(
+                                    fontSize: 14.sp
+                                ),)
                               ],
                             ),
-                            SizedBox(
-                              width: 10.h,
-                            ),
-                            Column(
+                            Row(
                               children: [
-                                Icon(transac.type_transaction!="Retrait"? Icons.arrow_outward:Icons.arrow_downward,color:transac.type_transaction!="Retrait"? Colors.green:Colors.red,size: 20.r)
+                                Column(
+                                  children: [
+                                    Text(transac.type_transaction!="Retrait" ? "+ ${transac.montant_transaction}":"- ${transac.montant_transaction}",style: TextStyle(
+                                    color:(transac.type_transaction=="Retrait")?  Colors.red:Colors.green,
+                                      fontWeight: FontWeight.bold
+                                    ),),
+                                    Text(transac.statut_paiement)
+                                  ],
+                                ),
+                                SizedBox(
+                                  width: 10.h,
+                                ),
+                                Column(
+                                  children: [
+                                    Icon(transac.type_transaction!="Retrait"? Icons.arrow_outward:Icons.arrow_downward,color:transac.type_transaction!="Retrait"? Colors.green:Colors.red,size: 20.r)
+                                  ],
+                                )
                               ],
-                            )
+                            ),
+
                           ],
                         ),
-
-                      ],
-                    ),
-                  ),
-                );}))
+                      ),
+                    );
+                  })
+              )
             ],
           ),
         ),

@@ -158,7 +158,11 @@ class _payer_cotisationState extends State<payer_cotisation> {
                         enCourtraitement = false;
                         _selectedOption = "";
                       });
-                      Navigator.of(context).pop();
+                      Navigator.of(context)
+                        ..pop()
+                        ..pop();
+                      montant.clear();
+                      montantFraisinculs.clear();
                     },
                     style: TextButton.styleFrom(
                       backgroundColor: Couleur.secondaryGreen,
@@ -194,8 +198,12 @@ class _payer_cotisationState extends State<payer_cotisation> {
           content: Text("Une erreur est survenue : $e"),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("OK"),
+              onPressed: () => Navigator.pop(context),style: TextButton.styleFrom(
+              backgroundColor: Couleur.secondaryGreen
+            ),
+              child: const Text("Compris",style: TextStyle(
+                color: Colors.white
+              ),),
             )
           ],
         ),
@@ -599,7 +607,18 @@ class _payer_cotisationState extends State<payer_cotisation> {
                 child: Column(
                   children: [
                     Expanded(
-                        child: ListView.builder(
+                        child: _listCotisation.isEmpty ?
+                Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ColorFiltered(colorFilter: ColorFilter.mode(Couleur.primaryBlue, BlendMode.srcATop),
+                      child: Lottie.asset("assets/animations/lottieflow-ecommerce-14-7-000000-easey.json",width: 150.w,height: 150.h),),
+                    SizedBox(height: 15.h,),
+                    Text("Aucune transaction disponible pour le moment")
+                  ],
+                ),
+              ): ListView.builder(
                             itemCount: _listCotisation.length,
                             itemBuilder: (context,index){
                               final Cotisation cotisa=_listCotisation[index];

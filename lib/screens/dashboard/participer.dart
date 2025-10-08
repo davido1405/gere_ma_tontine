@@ -51,7 +51,6 @@ class _participerState extends State<participer> {
       _showErrorDialog("Code tontine invalide", "Veuillez vérifier le format du code");
       return;
     }
-
     // AJOUT 6: Gestion du loading state
     setState(() {
       _isLoading = true;
@@ -276,6 +275,7 @@ class _participerState extends State<participer> {
 
                   // CORRECTION 8: Bouton avec loading state
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       TextButton.icon(
                           onPressed: _isLoading ? null : () {
@@ -300,6 +300,7 @@ class _participerState extends State<participer> {
                               : Text("Participer", style: TextStyle(fontSize: 14.sp, color: Colors.white)),
                           icon: _isLoading ? SizedBox.shrink() : Icon(Icons.rocket_launch, color: Colors.white),
                           style: _buttonStyle),
+                      SizedBox(width: 10.w,),
                       TextButton.icon(
                           onPressed: _isLoading ? null : () {
                             Navigator.push(context,

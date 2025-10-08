@@ -51,6 +51,38 @@ class _connexion_screenState extends State<connexion_screen> {
     });
   }
 
+  Future<void> verifierLien(String token) async {
+    try {
+      final url = Uri.parse("$adress?ressource=tontines&action=verifierInvitation");
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'token': token}),
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> resultat = jsonDecode(response.body);
+        if (resultat['success']) {
+          final data = resultat['data'];
+          // On peut stocker certaines infos si besoin
+          listsession.setCodeTontine(data['code_tontine']);
+        } else {
+          _showErreur(resultat['message'] ?? "Lien invalide ou expiré");
+        }
+      } else {
+        _showErreur("Erreur serveur: ${response.statusCode}");
+      }
+    } catch (e) {
+      _showErreur("Une erreur est survenue: $e");
+    }
+  }
+
+  void _showErreur(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
 
   //Fonction async de connexion
   Future<void>connexion(String numero,String password)async{
@@ -68,15 +100,22 @@ class _connexion_screenState extends State<connexion_screen> {
         print(listsession);
         //Sécuriser le JWT après reception
         await listsession.secureJwt();
-        print(listsession.code_tontine);
         Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>dashboard(listsession: listsession)),(route)=>false);
       }else if(success==true && data['message']=="Connexion réussie (pas encore de tontine)"){
         var parti=data['data'];
         listsession=Session.fromJson(parti);
         //Sécuriser le JWT après reception
         await listsession.secureJwt();
-        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>participer(listsession: listsession)),(route)=>false);
-      }else{
+        //Verifier s'il y'a un lien d'invitation
+        final prefs=await SharedPreferences.getInstance();
+        if(prefs.getString('token_invitation')!=null){
+          String? token_invitation=prefs.getString('token_invitation');
+          await verifierLien(token_invitation!);
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>dashboard(listsession: listsession)), (route)=>false);
+        }else{
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>participer(listsession: listsession)),(route)=>false);
+        }
+        }else{
         showDialog(context: context, builder: (BuildContext contex){
           return AlertDialog(
             title: Center(child: Text('Erreur'),),

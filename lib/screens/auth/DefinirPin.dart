@@ -5,6 +5,7 @@ import 'package:delightful_toast/toast/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/session.dart';
+import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
 import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
 import 'package:pinput/pinput.dart';
@@ -24,8 +25,123 @@ class _DefinirpinState extends State<Definirpin> {
   final secretCodeController=TextEditingController();
   String? premierCode;
 
-  late Session _listsession;
+  late Session listsession;
   bool confirmation=false;
+
+  Future<void> verifierLien(String token) async {
+    try {
+      final url = Uri.parse("$adress?ressource=tontines&action=verifierInvitation");
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'token': token}),
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> resultat = jsonDecode(response.body);
+        if (resultat['success']) {
+          final data = resultat['data'];
+          // On peut stocker certaines infos si besoin
+          listsession.setCodeTontine(data['code_tontine']);
+        } else {
+          _showErreur(resultat['message'] ?? "Lien invalide ou expiré");
+        }
+      } else {
+        _showErreur("Erreur serveur: ${response.statusCode}");
+      }
+    } catch (e) {
+      _showErreur("Une erreur est survenue: $e");
+    }
+  }
+
+  void _showErreur(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+  bool _isLoading = false; // AJOUT 1: État de chargement
+  // AJOUT 5: Validation du code tontine
+    bool _isValidTontineCode(String code) {
+      // Ajustez selon le format de vos codes tontine
+      return code.isNotEmpty && code.length >= 6;
+    }
+  //Participer si lien d'invitation
+  Future<void> participerTontine() async {
+    if (!_isValidTontineCode(listsession.code_tontine)) {
+      _showErrorDialog("Code tontine invalide", "Veuillez vérifier le format du code");
+      return;
+    }
+    // AJOUT 6: Gestion du loading state
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      String? jwt = await listsession.getSecureJwt();
+      final url = Uri.parse("${adress}?ressource=participations&action=participer");
+      final response = await http.post(
+          url,
+          headers: {
+            "Authorization": "Bearer $jwt",
+            "content-Type": "application/json",
+          },
+          body: jsonEncode({
+            "code_participant": listsession.code_participant,
+            "code_tontine": listsession.code_tontine
+          }));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        bool success = data['success'];
+        if (success) {
+          Future.delayed(Duration(milliseconds: 300),(){
+            Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => dashboard(listsession: listsession)),
+                    (route) => false);
+          });
+        } else {
+          _showErrorDialog("Erreur", "Une erreur s'est produite veuillez réesayer plus tard ou contacter le service technique.");
+        }
+      } else {
+        _showErrorDialog("Erreur serveur", "Une erreur s'est produite côté serveur. Veuillez réessayer plus tard");
+      }
+    } catch (e) {
+      _showErrorDialog("Erreur", "Une erreur inattendue s'est produite");
+    } finally {
+      // AJOUT 7: Toujours arrêter le loading
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  // AJOUT 8: Méthode factorisant l'affichage des erreurs
+  void _showErrorDialog(String title, String message) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(title),
+            content: Text(message),
+            actions: [
+              TextButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  style: TextButton.styleFrom(backgroundColor: Couleur.secondaryGreen),
+                  label: Text("Compris", style: TextStyle(color: Colors.white)),
+                  icon: Icon(Icons.verified, color: Colors.white))
+            ],
+          );
+        });
+  }
+
+  // AJOUT 9: Style factorisant pour les boutons
+  ButtonStyle get _buttonStyle => TextButton.styleFrom(
+    backgroundColor: Couleur.primaryBlue,
+    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+  );
 
   //Inscription
   Future<void>inscription(String x,String y,String w,String z) async{
@@ -45,10 +161,18 @@ class _DefinirpinState extends State<Definirpin> {
         SharedPreferences prefs=await SharedPreferences.getInstance();
         prefs.setBool("inscriptionTermine", true);
         setState((){
-          _listsession=Session.fromJson(finalUser);
+          listsession=Session.fromJson(finalUser);
         });
-        await _listsession.secureJwt();
-        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>participer(listsession: _listsession,)), (route)=>false);
+        await listsession.secureJwt();
+        //Verifier s'il y'a un lien d'invitation
+        if(prefs.getString('token_invitation')!=null){
+          String? token_invitation=prefs.getString('token_invitation');
+          await verifierLien(token_invitation!);
+          await participerTontine();
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>dashboard(listsession: listsession,)), (route)=>false);
+        }else{
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>participer(listsession: listsession,)), (route)=>false);
+        }
       }else{
         SharedPreferences prefs=await SharedPreferences.getInstance();
         setState(() {

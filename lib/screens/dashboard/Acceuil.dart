@@ -135,6 +135,30 @@ class _acceuilState extends State<acceuil> {
     }
   }
 
+  Future<void>lienInvitation()async{
+    String? jwt = await widget.listsession.getSecureJwt();
+    final url=Uri.parse("${adress}?ressource=tontines&action=inviter");
+    final reponse=await post(url,headers: {
+      "Authorization": "Bearer $jwt",
+      "Content-Type": "application/json"
+    },body: jsonEncode({
+      'code_tontine': widget.listsession.code_tontine,
+      'code_participant':widget.listsession.code_participant
+    }));
+    if(reponse.statusCode==200){
+      final resultat=jsonDecode(reponse.body);
+      print(reponse.body);
+      if(resultat['data']!=null){
+        setState(() {
+          lienInvitationPartage=resultat['data']['lien'];
+        });
+        print("✅ Lien généré : $lienInvitationPartage");
+      }else{
+        print("Y'a rien dans data");
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -204,6 +228,7 @@ class _acceuilState extends State<acceuil> {
   late int solvabilite = int.tryParse(widget.listsession.indice_solvabilite ?? "0") ?? 0;
   int statut=0;
   bool messageAffich=false;
+  String?lienInvitationPartage;
 
   TextEditingController lienPartage=TextEditingController();
 
@@ -567,12 +592,11 @@ class _acceuilState extends State<acceuil> {
                                 height: 10.h,
                               ),
                               if (widget.listsession.type_participant=="Organisateur")
-                                Center(child: TextButton.icon(onPressed: (){
-                                  final lienInvitation="https://djarrafinances/invite?code_tontine=${widget.listsession.code_tontine}";
-                                  Share.share("Rejoins ma tontine sur Djarra Finances 🚀: $lienInvitation",subject: "Invitation à rejoindre une tontine");
-
+                                Center(child: TextButton.icon(onPressed: () async {
+                                  await lienInvitation();
+                                  Share.share("Rejoins ma tontine sur Djarra Finances 🚀: $lienInvitationPartage",subject: "Invitation à rejoindre une tontine");
                                 },style: TextButton.styleFrom(
-                                  backgroundColor: Couleur.secondaryGreen
+                                  backgroundColor: Couleur.accentOrange
                                 ), label: Text("Inviter un ami",style: TextStyle(
                                   color: Colors.white
                                 ),),icon: Icon(Icons.share,color: Colors.white,),),)
