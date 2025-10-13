@@ -1,13 +1,6 @@
-import 'dart:convert';
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
-import 'package:gerematontine/constants/server.dart';
-import 'package:gerematontine/screens/auth/connexion_screen.dart';
-import 'package:gerematontine/screens/auth/inscription_screen.dart';
-import 'package:gerematontine/screens/dashboard/participer.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/session.dart';
 
 class DeepLinkHandler {
   final AppLinks _appLinks = AppLinks();

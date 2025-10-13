@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:convert' as convert;
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:delightful_toast/delight_toast.dart';
 import 'package:delightful_toast/toast/components/toast_card.dart';
 import 'package:delightful_toast/toast/utils/enums.dart';
@@ -11,8 +13,11 @@ import 'package:gerematontine/models/session.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../constants/colors.dart';
 import '../../constants/server.dart';
+import 'package:path_provider/path_provider.dart'; // Pour getApplicationDocumentsDirectory()
 
 
 class payer_cotisation extends StatefulWidget {
@@ -47,6 +52,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
 
   TextEditingController montant=TextEditingController();
   TextEditingController montantFraisinculs=TextEditingController();
+  final ScreenshotController _screenshotController=ScreenshotController();
 
   //late bool paye;
 
@@ -60,7 +66,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
     }));
     if(response.statusCode==200){
       final Map <String,dynamic> data =convert.jsonDecode(response.body);
-      List<dynamic>coti=data['data'];
+      List<dynamic>coti=data['data']??[];
       setState(() {
         _listCotisation=coti.map((coti)=>Cotisation.fromJson(coti)).toList();
       });
@@ -163,6 +169,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
                         ..pop();
                       montant.clear();
                       montantFraisinculs.clear();
+                      fetchCotisation();
                     },
                     style: TextButton.styleFrom(
                       backgroundColor: Couleur.secondaryGreen,
@@ -624,91 +631,324 @@ class _payer_cotisationState extends State<payer_cotisation> {
                               final Cotisation cotisa=_listCotisation[index];
                               return GestureDetector(
                                 onTap: (){
-                                  showDialog(context: context, builder: (BuildContext context){
-                                    return AlertDialog(
-                                      title: Center(
-                                        child: Text("Détails cotisation",style:
-                                          TextStyle(
-                                            fontSize: 18.sp
-                                          ),),
-                                      ),
-                                      content: SizedBox(
-                                        height: 160.h,
-                                        //width: MediaQuery.of(context).size.width.w,
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Expanded(
-                                                  child: Text("Code transaction : ${cotisa.code_cotisation}",style: TextStyle(
-                                                    fontSize: 14.sp,
-                                                    overflow: TextOverflow.ellipsis
-                                                  ),),
-                                                )
-                                              ],
-                                            ),
-                                            SizedBox(
-                                              height: 5.h,
-                                            ),
-                                            Expanded(
-                                              child: Row(
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true, // Add this to allow custom height
+                                    builder: (BuildContext context) {
+                                      return StatefulBuilder(
+                                        builder: (BuildContext context, StateSetter setModalState) {
+                                          return DraggableScrollableSheet(
+                                            initialChildSize: 0.70, // 90% of screen height
+                                            minChildSize: 0.5,
+                                            //maxChildSize: 0.95,
+                                            expand: false,
+                                            builder: (context, scrollController) {
+                                              return Column(
                                                 children: [
-                                                  Text("Montant: ${cotisa.montant} FCFA",style: TextStyle(
-                                                      fontSize: 14.sp,
-                                                      overflow: TextOverflow.ellipsis
-                                                  ),)
+                                                  // Scrollable content
+                                                  Expanded(
+                                                    child: SingleChildScrollView(
+                                                      controller: scrollController,
+                                                      child: Screenshot(
+                                                        controller: _screenshotController,
+                                                        child: Container(
+                                                          decoration: BoxDecoration(
+                                                            color: Couleur.lightGray,
+                                                            borderRadius: BorderRadius.circular(12.r),
+                                                          ),
+                                                          child: Padding(
+                                                            padding: EdgeInsets.all(8.0.w),
+                                                            child: Column(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                Center(
+                                                                  child: Image.asset(
+                                                                    "assets/Djarra Finances V1.png",
+                                                                    width: 80.w,
+                                                                    height: 80.h,
+                                                                  ),
+                                                                ),
+                                                                SizedBox(height: 10.h),
+                                                                Center(
+                                                                  child: Text(
+                                                                    "Reçu de Transaction",
+                                                                    style: TextStyle(
+                                                                      fontSize: 20.sp,
+                                                                        fontWeight: FontWeight.bold),
+                                                                  ),
+                                                                ),
+                                                                Padding(
+                                                                  padding: EdgeInsets.all(6.0.w),
+                                                                  child: Text("Aperçu"),
+                                                                ),
+                                                                Container(
+                                                                  decoration: BoxDecoration(
+                                                                    color: Colors.white,
+                                                                    borderRadius: BorderRadius.circular(12.r),
+                                                                  ),
+                                                                  child: Padding(
+                                                                    padding: EdgeInsets.all(6.0.w),
+                                                                    child: Column(
+                                                                      mainAxisSize: MainAxisSize.min,
+                                                                      children: [
+                                                                        Row(
+                                                                          children: [
+                                                                            Expanded(
+                                                                              flex: 3,
+                                                                              child: Text(
+                                                                                "Type",
+                                                                                style: TextStyle(
+                                                                                  fontSize: 20.sp,
+                                                                                  overflow: TextOverflow.ellipsis,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            Expanded(
+                                                                              flex: 2,
+                                                                              child: FittedBox(
+                                                                                fit: BoxFit.scaleDown,
+                                                                                child: Text(
+                                                                                  "Paiement de cotisation",
+                                                                                  style: TextStyle(fontSize: 15.sp),
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        Row(
+                                                                          children: [
+                                                                            Expanded(
+                                                                              flex: 3,
+                                                                              child: Text(
+                                                                                "Code",
+                                                                                style: TextStyle(
+                                                                                  fontSize: 20.sp,
+                                                                                  overflow: TextOverflow.ellipsis,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            Expanded(
+                                                                              flex: 2,
+                                                                              child: Text(
+                                                                                cotisa.code_cotisation,
+                                                                                style: TextStyle(fontSize: 15.sp),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        Row(
+                                                                          children: [
+                                                                            Expanded(
+                                                                              flex: 3,
+                                                                              child: Text(
+                                                                                "Opérateur ",
+                                                                                style: TextStyle(
+                                                                                  fontSize: 20.sp,
+                                                                                  overflow: TextOverflow.ellipsis,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            Expanded(
+                                                                              flex: 2,
+                                                                              child: Text(
+                                                                                cotisa.mode_paiement,
+                                                                                style: TextStyle(fontSize: 15.sp),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        Row(
+                                                                          children: [
+                                                                            Expanded(
+                                                                              flex: 3,
+                                                                              child: Text(
+                                                                                "Participant ",
+                                                                                style: TextStyle(
+                                                                                  fontSize: 20.sp,
+                                                                                  overflow: TextOverflow.ellipsis,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            Expanded(
+                                                                              flex: 2,
+                                                                              child: Text(
+                                                                                "${widget.listsession.nom_participant} ${widget.listsession.prenoms_participant}",
+                                                                                style: TextStyle(fontSize: 15.sp),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        Row(
+                                                                          children: [
+                                                                            Expanded(
+                                                                              flex: 3,
+                                                                              child: Text(
+                                                                                "Montant ",
+                                                                                style: TextStyle(
+                                                                                  fontSize: 20.sp,
+                                                                                  overflow: TextOverflow.ellipsis,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            Expanded(
+                                                                              flex: 2,
+                                                                              child: Text(
+                                                                                "${cotisa.montant} FCFA",
+                                                                                style: TextStyle(fontSize: 15.sp),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        Row(
+                                                                          children: [
+                                                                            Expanded(
+                                                                              flex: 3,
+                                                                              child: Text(
+                                                                                "Nombre de tour avancé ",
+                                                                                style: TextStyle(
+                                                                                  fontSize: 20.sp,
+                                                                                  overflow: TextOverflow.ellipsis,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            Expanded(
+                                                                              flex: 2,
+                                                                              child: Text(
+                                                                                cotisa.tour_avance,
+                                                                                style: TextStyle(fontSize: 15.sp),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                SizedBox(height: 5.h),
+                                                                Padding(
+                                                                  padding: EdgeInsets.all(6.0.w),
+                                                                  child: Text("Détails"),
+                                                                ),
+                                                                Container(
+                                                                  decoration: BoxDecoration(
+                                                                    color: Colors.white,
+                                                                    borderRadius: BorderRadius.circular(12.r),
+                                                                  ),
+                                                                  child: Padding(
+                                                                    padding: EdgeInsets.all(6.0.w),
+                                                                    child: Column(
+                                                                      mainAxisSize: MainAxisSize.min,
+                                                                      children: [
+                                                                        Row(
+                                                                          children: [
+                                                                            Expanded(
+                                                                              flex: 3,
+                                                                              child: Text(
+                                                                                "Statut",
+                                                                                style: TextStyle(
+                                                                                  fontSize: 20.sp,
+                                                                                  overflow: TextOverflow.ellipsis,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            Expanded(
+                                                                              flex: 2,
+                                                                              child: FittedBox(
+                                                                                fit: BoxFit.scaleDown,
+                                                                                child: Text(cotisa.statut_paiement),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        Row(
+                                                                          children: [
+                                                                            Expanded(
+                                                                              flex: 3,
+                                                                              child: Text(
+                                                                                "Frais",
+                                                                                style: TextStyle(
+                                                                                  fontSize: 20.sp,
+                                                                                  overflow: TextOverflow.ellipsis,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            Expanded(
+                                                                              flex: 2,
+                                                                              child: Text(
+                                                                                "${(double.tryParse(cotisa.montant) ?? 0) * 1.02 - (double.tryParse(cotisa.montant) ?? 0)} FCFA",
+                                                                                style: TextStyle(fontSize: 15.sp),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        Row(
+                                                                          children: [
+                                                                            Expanded(
+                                                                              flex: 3,
+                                                                              child: Text(
+                                                                                "Date et heure ",
+                                                                                style: TextStyle(
+                                                                                  fontSize: 20.sp,
+                                                                                  overflow: TextOverflow.ellipsis,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            Expanded(
+                                                                              flex: 2,
+                                                                              child: Text(
+                                                                                cotisa.date_paiement,
+                                                                                style: TextStyle(fontSize: 15.sp),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                SizedBox(height: 50.h,),
+                                                                Center(child: Text("En partenariat avec EcoBank")),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  // Fixed button at bottom
+                                                  Padding(
+                                                    padding: EdgeInsets.all(8.0.w),
+                                                    child: SizedBox(
+                                                      width: double.infinity,
+                                                      child: TextButton.icon(
+                                                        onPressed: () async {
+                                                          final Uint8List? image = await _screenshotController.capture();
+                                                          if (image != null) {
+                                                            final directory = await getApplicationDocumentsDirectory();
+                                                            final file = File('${directory.path}/recu_${widget.listsession.nom_participant}_${cotisa.date_paiement}.png');
+                                                            await file.writeAsBytes(image);
+                                                            await Share.shareXFiles([XFile(file.path)], text: 'Réçu du paiement');
+                                                          }
+                                                        },
+                                                        label: Text(
+                                                          "Partager le reçu",
+                                                          style: TextStyle(color: Colors.white),
+                                                        ),
+                                                        icon: Icon(Icons.ios_share_rounded, color: Colors.white),
+                                                        style: TextButton.styleFrom(
+                                                          backgroundColor: Couleur.secondaryGreen,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
                                                 ],
-                                              ),
-                                            ),SizedBox(
-                                              height: 5.h,
-                                            ),
-                                            Row(
-                                              children: [
-                                                Expanded(
-                                                  child: Text("Mode de paiement : ${cotisa.mode_paiement}",style: TextStyle(
-                                                      fontSize: 14.sp,
-                                                      overflow: TextOverflow.ellipsis
-                                                  ),),
-                                                )
-                                              ],
-                                            ),SizedBox(
-                                              height: 5.h,
-                                            ),
-                                            Row(
-                                              children: [
-                                                Expanded(
-                                                  child: Text("Date: ${cotisa.date_paiement}",style: TextStyle(
-                                                      fontSize: 14.sp,
-                                                      overflow: TextOverflow.ellipsis
-                                                  ),),
-                                                )
-                                              ],
-                                            ),SizedBox(
-                                              height: 5.h,
-                                            ),
-                                            Row(
-                                              children: [
-                                                Text("Satut paiement: ${cotisa.statut_paiement}",style: TextStyle(
-                                                    fontSize: 14.sp
-                                                ),)
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      actions: [
-                                        Center(
-                                          child: TextButton.icon(onPressed: (){
-                                            Navigator.of(context).pop();
-                                          }, label: Text("OK",style: TextStyle(
-                                              fontSize: 14.sp
-                                          ),),icon: Icon(Icons.verified,color: Colors.lightGreen,),)
-                                          ,
-                                        )
-                                        ],
-                                    );
-                                  });
+                                              );
+                                            },
+                                          );
+                                        },
+                                      );
+                                    },
+                                  );
                                 },
                                 child: ListTile(
                                     title: Row(
@@ -727,7 +967,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
                                 subtitle: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text("Montant: "+cotisa.montant+" FCFA",style: TextStyle(
+                                    Text("Montant: ${cotisa.montant} FCFA",style: TextStyle(
                                         fontSize: 14.sp
                                     ),),
                                     Text(cotisa.statut_paiement,style: TextStyle(

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/constants/colors.dart';
@@ -120,9 +121,10 @@ class _connexion_screenState extends State<connexion_screen> {
           return AlertDialog(
             title: Center(child: Text('Erreur'),),
             content: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Center(child: Lottie.asset("assets/animations/lottieflow-404-12-10-000000-easey.json",width: 150.w,height: 150.h),),
-                Text("Une erreur s'est produite veuillez réessayer ou contacter le service technique si l'erreur persiste. Merci",overflow: TextOverflow.ellipsis,maxLines: 2,),
+                Center(child: Lottie.asset("assets/animations/Sign for error _ Flat style.json",width: 150.w,height: 150.h),),
+                Center(child: Text("Pin incorrect",overflow: TextOverflow.ellipsis,maxLines: 2,)),
               ],
             ),
             actions: [
@@ -151,7 +153,8 @@ class _connexion_screenState extends State<connexion_screen> {
       appBar: AppBar(
         title: Row(
           mainAxisAlignment: MainAxisAlignment.end,
-          children: [IconButton(onPressed: () {
+          children: [IconButton(onPressed: () async {
+            await FirebaseMessaging.instance.deleteToken();
             Navigator.push(context, MaterialPageRoute(builder: (_)=>inscription_screen()));
         }, icon: Icon(Icons.logout,size:30.r,color: Colors.black,)),],),
         automaticallyImplyLeading: false,

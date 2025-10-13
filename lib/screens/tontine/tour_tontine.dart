@@ -36,6 +36,7 @@ class _tourTontineState extends State<tourTontine> {
   }
 
   List<Beneficiare> _listOrdre=[];
+
   Future<void>verifierTour()async{
     String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=participants&action=verifierTour");
@@ -48,7 +49,7 @@ class _tourTontineState extends State<tourTontine> {
       final Map<String,dynamic>donnee=jsonDecode(response.body);
       if(donnee['success']==true){
         var tour=donnee['data'];
-        if(tour!=null){
+        if(tour!=null && mounted){
           setState(() {
             nomBeneficiare=tour['nom_participant'];
             prenomsBeneficiare=tour['prenoms_participant'];
@@ -61,6 +62,7 @@ class _tourTontineState extends State<tourTontine> {
 
   //Liste des bénéficiares
   Future<void>listeBeneficiare() async{
+    if(!mounted) return;
     String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=tontines&action=ordre_paiement");
     final response=await post(url,headers: {'content-Type':'application/json',
@@ -68,15 +70,19 @@ class _tourTontineState extends State<tourTontine> {
         {
           "code_tontine":widget.listsession.code_tontine
         }));
+    if(!mounted) return;
     if(response.statusCode==200){
       final Map<String,dynamic>donnee=jsonDecode(response.body);
       bool succes=donnee['success'];
       if(succes){
         List<dynamic>resultats=donnee['data'];
         if(resultats!=null){
+          if(!mounted) return;
           setState(() {
             _listOrdre=(resultats).map((resultats)=>Beneficiare.fromJson(resultats)).toList();
           });
+        }else{
+          _listOrdre=[];
         }
       }
     }
@@ -100,70 +106,74 @@ class _tourTontineState extends State<tourTontine> {
         padding: EdgeInsets.all(8.0.w),
         child: Column(
           children: [
-            Card(
-              color: Couleur.primaryBlue,//couleur.primaryPurple,
-              child: Padding(
-                padding: EdgeInsets.all(10.0.w),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            ClipRRect(
+              child: Card(
+                color: Couleur.primaryBlue,//couleur.primaryPurple,
+                child: Padding(
+                  padding: EdgeInsets.all(10.0.w),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Bénéficiare du tour",style: TextStyle(
-                                fontSize: 20.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white
-                            ),),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 5.h,
-                        ),
-                        Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Bénéficiare du tour",style: TextStyle(
+                                    fontSize: 20.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white
+                                ),),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 5.h,
+                            ),
+                            Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  Text("Nom bénéficiare: ${nomBeneficiare?? "N/A"}",style: TextStyle(
-                                      fontSize: 15.sp,
-                                      color: Colors.white
-                                  ),),
-                                  SizedBox(
-                                    width: 10.h,
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text("Nom bénéficiare: ${nomBeneficiare?? "N/A"}",style: TextStyle(
+                                          fontSize: 15.sp,
+                                          color: Colors.white
+                                      ),),
+                                      SizedBox(
+                                        width: 10.h,
+                                      ),
+                                      Text("Prenoms ${prenomsBeneficiare?? "N/A"}",style: TextStyle(
+                                          fontSize: 15.sp,
+                                          color: Colors.white
+                                      ),),
+                                      Text("Position: ${positionBeneficiare.toString() ?? "N/A"}",style: TextStyle(
+                                          fontSize: 15.sp,
+                                          color: Colors.white
+                                      ),),
+                                    ],
                                   ),
-                                  Text("Prenoms ${prenomsBeneficiare?? "N/A"}",style: TextStyle(
-                                      fontSize: 15.sp,
-                                      color: Colors.white
-                                  ),),
-                                  Text("Position: ${positionBeneficiare.toString() ?? "N/A"}",style: TextStyle(
-                                      fontSize: 15.sp,
-                                      color: Colors.white
-                                  ),),
                                 ],
                               ),
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          height: 5.h,
+                            )
+                          ],
                         ),
-                        Container(child: ColorFiltered(colorFilter: ColorFilter.mode(Couleur.accentOrange, BlendMode.srcATop),
-                        child: Lottie.asset("assets/animations/lottieflow-ecommerce-14-13-000000-easey.json",width: 140.w,height: 140.h)),)
-                      ],
-                    ),
-                  ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            height: 5.h,
+                          ),
+                          Container(child: ColorFiltered(colorFilter: ColorFilter.mode(Couleur.accentOrange, BlendMode.srcATop),
+                          child: Lottie.asset("assets/animations/lottieflow-ecommerce-14-13-000000-easey.json",width: 140.w,height: 140.h)),)
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -183,7 +193,14 @@ class _tourTontineState extends State<tourTontine> {
             SizedBox(
               height: 500.h,
               width: double.maxFinite.w,
-              child: ListView.builder(
+              child: _listOrdre.isEmpty ? Center(child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children:[
+                  Lottie.asset("assets/animations/No-Data.json",width: 150.w,height: 150.h),
+                  SizedBox(height: 15.h,),
+                  Center(child: Text("Les tours seront générés automatiquement dès que possible. Merci",overflow: TextOverflow.ellipsis,maxLines: 2,))
+                ]
+              )): ListView.builder(
                 itemCount: _listOrdre.length,
                 itemBuilder: (context, index) {
                   final Beneficiare prochain = _listOrdre[index];

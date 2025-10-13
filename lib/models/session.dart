@@ -9,13 +9,14 @@ class Session{
   final String type_participant;
   final String numero_participant;
   final String indice_solvabilite;
+  final String niveau_kyc;
   late String  code_tontine;
   String? token;
 
-  Session( {required this.code_participant,required this.nom_participant,required this.prenoms_participant, required this.type_participant, required this.numero_participant,required this.indice_solvabilite,required this.code_tontine,required this.token});
+  Session({required this.code_participant,required this.nom_participant,required this.prenoms_participant, required this.type_participant, required this.numero_participant,required this.indice_solvabilite,required this.niveau_kyc,required this.code_tontine,required this.token});
 
   factory Session.fromJson(Map<String,dynamic>json){
-    return Session(code_participant: json['code_participant'], nom_participant: json['nom'], prenoms_participant: json['prenoms'], type_participant: json['type'], numero_participant: (json['numero']).toString(),indice_solvabilite: json['indice_solvabilite'].toString(),code_tontine: json['code_tontine'],  token: json['jwt_token']);
+    return Session(code_participant: json['code_participant'], nom_participant: json['nom'], prenoms_participant: json['prenoms'], type_participant: json['type'], numero_participant: (json['numero']).toString(),indice_solvabilite: json['indice_solvabilite'].toString(),code_tontine: json['code_tontine'],  token: json['jwt_token'], niveau_kyc: json['niveau_kyc']);
   }
 
   void setCodeTontine(String tontineC){

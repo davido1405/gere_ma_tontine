@@ -35,8 +35,10 @@ class _notificationsState extends State<notifications> {
 
 
   Future<void>recupererNotif()async {
+    String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=notifications&action=lister_notification");
-    final reponse=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
+    final reponse=await post(url,headers: {"Content-Type":"application/json",
+      "Authorization":"Bearer $jwt"},body: jsonEncode(
         {
           "code_participant":widget.listsession.code_participant,
           "filtre":filtre,
@@ -63,7 +65,7 @@ class _notificationsState extends State<notifications> {
   void marquerCommelu(int x) async{
     String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=notifications&action=lire_notification");
-    final reponse=await post(url,headers: {"content-Type":"application/json",
+    final reponse=await post(url,headers: {"Content-Type":"application/json",
       "Authorization":"Bearer $jwt"},body: jsonEncode(
         {
           "code_participant":widget.listsession.code_participant,

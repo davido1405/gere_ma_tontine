@@ -64,8 +64,12 @@ class _details_tontineState extends State<details_tontine> with SingleTickerProv
   Future<void>envoyerRappelCotisation()async{
     String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=notifications&action=envoyer_rappel_cotisation");
-    final reponse=await http.post(url,headers: {"content-Type":"application/json",
-      "Authorization":"Bearer $jwt"},body: jsonEncode(
+    final reponse=await http.post(
+        url,
+        headers: {
+          "Content-Type":"Application/json",
+          "Authorization":"Bearer $jwt"
+        },body: jsonEncode(
         {
           "code_tontine":widget.listsession.code_tontine,
           "type_notification":"Rappel de cotisation"

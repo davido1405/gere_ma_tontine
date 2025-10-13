@@ -7,9 +7,11 @@ import 'package:gerematontine/models/session.dart';
 import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
 import 'package:gerematontine/screens/tontine/creer_tontine.dart';
 import 'package:http/http.dart' as http;
+import 'package:lottie/lottie.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../constants/colors.dart';
 import '../../constants/server.dart';
+import '../auth/verifier_profil_kyc.dart';
 
 class participer extends StatefulWidget {
   final Session listsession;
@@ -83,6 +85,43 @@ class _participerState extends State<participer> {
                   MaterialPageRoute(builder: (context) => dashboard(listsession: widget.listsession)),
                       (route) => false);
             });
+        }else if(!success && data['message']=="Votre niveau de vérification est insuffisant pour réjoindre cette tontine. Veuillez fournir des informations supplémentaire à votre identification. Merci"){
+          showDialog(context: context, builder: (BuildContext context){
+            return AlertDialog(
+              title: Text("Oups !"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Lottie.asset("assets/animations/Sign for error _ Flat style.json",width: 150.w,height: 150.h),
+                  Text("Niveau de vérification insuffisant",overflow: TextOverflow.ellipsis,maxLines: 2,),
+                ],
+              ),
+              actions: [
+                Center(
+                  child: Row(
+
+                    children: [
+                      TextButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          style: TextButton.styleFrom(backgroundColor: Couleur.secondaryGreen),
+                          label: Text("Compris", style: TextStyle(color: Colors.white)),
+                          icon: Icon(Icons.verified, color: Colors.white)),
+                      TextButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=>verifier_profil_kyc()));
+                          },
+                          style: TextButton.styleFrom(backgroundColor: Couleur.secondaryGreen),
+                          label: Text("Vérifier maintenant", style: TextStyle(color: Colors.white)),
+                          icon: Icon(Icons.verified, color: Colors.white)),
+                    ],
+                  ),
+                )
+              ],
+            );
+          });
         } else {
           _showErrorDialog("Erreur", "Une erreur s'est produite veuillez réesayer plus tard ou contacter le service technique.");
         }
@@ -215,6 +254,9 @@ class _participerState extends State<participer> {
                                     elevation: 3,
                                     duration: Duration(seconds: 2), // AJOUT 13: Durée limitée
                                   ));
+                              setState(() {
+                                _scannerActive=true;
+                              });
                             }
                           },
                         ),

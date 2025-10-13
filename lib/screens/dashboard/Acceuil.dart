@@ -16,6 +16,7 @@ import 'package:gerematontine/screens/tontine/wallet_tontine.dart';
 import 'package:gerematontine/services/fcm_service.dart';
 import 'package:gerematontine/services/notifications_service.dart';
 import 'package:http/http.dart';
+import 'package:lottie/lottie.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -34,7 +35,7 @@ class _acceuilState extends State<acceuil> {
   Future<void> monTour() async{
     String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=participants&action=mon_tour");
-    final reponse=await post(url,headers: {"content-Type":"application/json",
+    final reponse=await post(url,headers: {"Content-Type":"application/json",
       "Authorization":"Bearer $jwt"},body: jsonEncode(
         {
           "code_participant":widget.listsession.code_participant,
@@ -83,23 +84,19 @@ class _acceuilState extends State<acceuil> {
   Future<void> tontineInfo() async {
     final prefs = await SharedPreferences.getInstance();
 
-    // Vérifier si on a déjà des données en cache
+    // Charger immédiatement les données du cache (affichage rapide)
     final cachedTontine = prefs.getString('tontine_info');
-    final lastFetchStr = prefs.getString('tontine_last_fetch');
-    DateTime? lastFetch = lastFetchStr != null ? DateTime.parse(lastFetchStr) : null;
-
-    // Si cache existe et moins de 24h, utiliser cache
-    if (cachedTontine != null && lastFetch != null && DateTime.now().difference(lastFetch).inHours < 24) {
+    if (cachedTontine != null) {
       setState(() {
         tontine = Tontine.fromJson(jsonDecode(cachedTontine));
       });
-      print("Données tontine chargées depuis le cache");
-      return;
+      print("✅ Tontine chargée depuis le cache");
     }
 
-    // Sinon, appel API
+    // Ensuite, vérifier s'il y a une mise à jour côté serveur
     String? jwt = await widget.listsession.getSecureJwt();
     final url = Uri.parse("${adress}?ressource=tontines&action=details_tontine");
+
     try {
       final reponse = await post(
         url,
@@ -110,30 +107,34 @@ class _acceuilState extends State<acceuil> {
         body: jsonEncode({
           "code_tontine": widget.listsession.code_tontine
         }),
-      ).timeout(Duration(seconds: 5));
+      ).timeout(const Duration(seconds: 5));
 
       if (reponse.statusCode == 200) {
         final data = jsonDecode(reponse.body) as Map<String, dynamic>;
         if (data['success'] == true) {
           final tontineData = Tontine.fromJson(data['data']);
-          setState(() {
-            tontine = tontineData;
-          });
-          // Stocker dans le cache
-          await prefs.setString('tontine_info', jsonEncode(data['data']));
-          await prefs.setString('tontine_last_fetch', DateTime.now().toIso8601String());
-          print("Données tontine chargées depuis l'API et mises en cache");
+
+          // Comparer les états (ou autre champ clé)
+          if (tontine == null || tontine!.etat != tontineData.etat) {
+            setState(() {
+              tontine = tontineData;
+            });
+
+            // Mettre à jour le cache
+            await prefs.setString('tontine_info', jsonEncode(data['data']));
+            await prefs.setString('tontine_last_fetch', DateTime.now().toIso8601String());
+
+            print("🔄 Cache mis à jour (changement d'état détecté)");
+          } else {
+            print("✅ Aucune modification détectée");
+          }
         }
-      } else {
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => connexion_screen()),
-                (route) => false);
       }
     } catch (e) {
-      print("Erreur lors de la récupération des infos tontine: $e");
+      print("⚠️ Erreur lors de la vérification des infos tontine: $e");
     }
   }
+
 
   Future<void>lienInvitation()async{
     String? jwt = await widget.listsession.getSecureJwt();
@@ -159,6 +160,96 @@ class _acceuilState extends State<acceuil> {
     }
   }
 
+  //RElancer les tours
+  Future<bool>relancer()async{
+    showDialog(context: context, builder: (context){
+      return AlertDialog(
+        title: Center(child: Text("Relance des tour")),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ColorFiltered(colorFilter: ColorFilter.mode(Couleur.primaryBlue, BlendMode.srcATop),child: Lottie.asset("assets/animations/Icon Set - Setting.json",width: 150.w,height: 150.h),),
+            SizedBox(height: 15.h,),
+            Text("Génération des tours...")
+          ],
+        ),
+      );
+    });
+    String? jwt=await widget.listsession.getSecureJwt();
+    final url=Uri.parse("${adress}?ressource=tontines&action=liste_tours");
+    final response=await post(url,headers: {'content-Type':'application/json',
+      "Authorization":"Bearer $jwt"},body: jsonEncode(
+        {
+          'code_tontine':widget.listsession.code_tontine,
+          'relancer':true
+        }
+    ));
+    //Fermer le premier dialogue
+    Navigator.of(context).pop();
+
+    if(response.statusCode==200){
+      final donnee=jsonDecode(response.body) as Map<String,dynamic>;
+      bool success=donnee['success'];
+      showDialog(context: context, builder: (BuildContext context){
+        return AlertDialog(
+          title: Center(child: Text("Statut")),
+          content: success? Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Lottie.asset("assets/animations/Approve.json",width: 150.w,height: 150.h),
+              SizedBox(height: 10.h,),
+              Text(donnee['message'])
+            ],
+          ):Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Lottie.asset("assets/animations/Sign for error _ Flat style.json",width: 150.w,height: 150.h),
+              SizedBox(height: 10.h,),
+              Text("Oups! Une erreur s'est produite, veuillez réessayer.")
+            ],
+          ),
+          actions: [
+            Center(child: TextButton.icon(onPressed: (){
+              if(success){
+                setState(() {
+                  tontine?.etat="En cours";
+                });
+                monTour();
+                Navigator.of(context).pop();
+              }else{
+                Navigator.of(context).pop();
+              }
+            }, label: Text("Compris", style: TextStyle(color: Colors.white),),icon: Icon(Icons.verified,color: Colors.white,),style: TextButton.styleFrom(
+              backgroundColor: Couleur.secondaryGreen
+            ),),)
+          ],
+        );
+      });
+    }else{
+      showDialog(context: context, builder: (BuildContext context){
+        return AlertDialog(
+          title: Center(child: Text("Information")),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Une erreur serveur s'est produite, veuillez reéssayer plus tard. Merci",overflow: TextOverflow.ellipsis,maxLines: 2,),
+            ],
+          ),
+          actions: [
+            Center(
+              child: TextButton.icon(onPressed: (){
+                Navigator.of(context).pop();
+              },style: TextButton.styleFrom(
+                  backgroundColor: Couleur.secondaryGreen
+              ), label: Text("Compris",style: TextStyle(color: Colors.white),),icon: Icon(Icons.verified,color: Colors.white,),),
+            )
+          ],
+        );
+      });
+    }
+    return false;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -167,42 +258,6 @@ class _acceuilState extends State<acceuil> {
     monTour();
     envoyerToken();
     NotificationService.initialize();
-    if(mounted){
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        if (tontine?.etat=="En attente" && messageAffich==false && widget.listsession.type_participant!="Organisateur") {
-          showDialog(
-              context: context,
-              barrierDismissible: true,
-              builder: (BuildContext context){
-                return AlertDialog(
-                  backgroundColor: Colors.white,
-                  title:const Text("Oups !"),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16.h,),
-                      Text("Tontine incomplete. Partagez votre code tontine ou flasher votre QRCode pour inviter."),
-                    ],
-                  ),
-                  actions: [
-                    TextButton.icon(onPressed: (){
-                      setState(() {
-                        messageAffich=true;
-                      });
-                      Navigator.of(context).pop();
-                    },style: TextButton.styleFrom(
-                        backgroundColor: Colors.blueAccent
-                    ), label: Text("Compris",style: TextStyle(
-                        color: Colors.white
-                    ),),icon: Icon(Icons.verified,color: Colors.green,),)
-                  ],
-                );
-              });
-        }
-      });
-      print("Code tontine:${widget.listsession.code_tontine}");
-    }
   }
 
   Future<void>initSharedPrefs()async{
@@ -229,6 +284,7 @@ class _acceuilState extends State<acceuil> {
   int statut=0;
   bool messageAffich=false;
   String?lienInvitationPartage;
+  late String infoTour;
 
   TextEditingController lienPartage=TextEditingController();
 
@@ -273,176 +329,181 @@ class _acceuilState extends State<acceuil> {
             SizedBox(height: 5.h),
             Padding(
               padding: EdgeInsets.only(right: 5.0.w),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(left: 10.w),
-                    child: Row(
-                      children: [
-                        Text("Bienvenue, ${widget.listsession.nom_participant} ${widget.listsession.prenoms_participant}",
-                          style: TextStyle(
-                              fontSize: 20.sp,
-                              fontWeight: FontWeight.bold
-                          ),)
-                      ],
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  tontineInfo();
+                },
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(left: 10.w),
+                      child: Row(
+                        children: [
+                          Text("Bienvenue, ${widget.listsession.nom_participant} ${widget.listsession.prenoms_participant}",
+                            style: TextStyle(
+                                fontSize: 20.sp,
+                                fontWeight: FontWeight.bold
+                            ),)
+                        ],
+                      ),
                     ),
-                  ),
-                  Row(
-                    children: [
-                      Expanded(child: GestureDetector(
-                        onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (_)=>tourTontine(listsession: widget.listsession, monTour: numeroTour, statut: statut,)));
-                        },
-                        child: Card(
-                          elevation: 2,
-                          color: Couleur.primaryBlue,
-                          margin: EdgeInsets.all(10.w),
-                          child: Padding(
-                            padding: EdgeInsets.all(10.0.w),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Mon numéro",style: TextStyle(
-                                    fontSize: 17.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white
-                                ),),
-                                SizedBox(height: 5.h),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(numeroTour,
-                                      style: TextStyle(
-                                          fontSize: 35.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white
-                                      ),
-                                    ),
-                                    Icon(statut==0?Icons.monetization_on_outlined:Icons.monetization_on,color: statut==0? Colors.red:Colors.green,size: 40.r,)
-                                  ],
-                                ),
-                                SizedBox(height: 5.h)
-                              ],
-                            ),
-                          ),
-                        ),
-                      )),
-                      Expanded(child: GestureDetector(
-                        onTap: (){
-                          setState(() {
-                            Navigator.push(context, MaterialPageRoute(builder: (context)=>payer_cotisation(listsession: widget.listsession,)));
-                          });
-                        },
-                        child: Card(
-                          elevation: 2,
-                          color: Couleur.primaryBlue,
-                          margin: EdgeInsets.all(5.w),
-                          child: Padding(
-                            padding: EdgeInsets.all(15.w),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Mes cotisations",style: TextStyle(
-                                    fontSize: 18.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white
-                                ),),
-                                SizedBox(height: 20.h),
-                                TweenAnimationBuilder(tween: Tween(begin: 0,end:double.tryParse(montantCotiser) ?? 0.0), duration: Duration(seconds: 2), builder: (context,value,child){
-                                  return FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Text("${value.toStringAsFixed(2)} FCFA",style: TextStyle(
-                                        fontSize: 20.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white
-                                    ),),
-                                  );
-                                })
-                              ],
-                            ),
-                          ),
-                        ),
-                      ))
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Expanded(child: Card(
-                        elevation: 2,
-                        color: Couleur.secondaryGreen,
-                        margin: EdgeInsets.symmetric(horizontal:5.w),
-                        child: Padding(
-                          padding: EdgeInsets.all(10.w),
-                          child: Row(
-                            children: [
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
+                    Row(
+                      children: [
+                        Expanded(child: GestureDetector(
+                          onTap: (){
+                            Navigator.push(context, MaterialPageRoute(builder: (_)=>tourTontine(listsession: widget.listsession, monTour: numeroTour, statut: statut,)));
+                          },
+                          child: Card(
+                            elevation: 2,
+                            color: Couleur.primaryBlue,
+                            margin: EdgeInsets.all(10.w),
+                            child: Padding(
+                              padding: EdgeInsets.all(10.0.w),
+                              child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text("Points de confiance",style: TextStyle(
-                                      fontSize: 14.sp,
+                                  Text("Mon numéro",style: TextStyle(
+                                      fontSize: 17.sp,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white
                                   ),),
-                                  SizedBox(height: 10.h),
-                                  TweenAnimationBuilder<double>(
-                                      tween: Tween<double>(begin: 0, end: solvabilite.toDouble()),
-                                      duration: Duration(seconds: 2),
-                                      builder: (context, value, child){
-                                        return Text(
-                                          "${value.toStringAsFixed(0)} Pts",
-                                          style: TextStyle(
-                                              fontSize: 35.sp,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white
-                                          ),
-                                        );
-                                      }
-                                  )
+                                  SizedBox(height: 5.h),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(numeroTour,
+                                        style: TextStyle(
+                                            fontSize: 35.sp,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white
+                                        ),
+                                      ),
+                                      Icon(statut==0?Icons.monetization_on_outlined:Icons.monetization_on,color: statut==0? Colors.red:Colors.green,size: 40.r,)
+                                    ],
+                                  ),
+                                  SizedBox(height: 5.h)
                                 ],
                               ),
-                              SizedBox(width: 125.w),
-                              Column(
-                                children: [
-                                  IconButton(
-                                      onPressed: (int.tryParse(widget.listsession.indice_solvabilite ?? "0") ?? 0) < 75 ? null : (){
-                                        showDialog(context: context, builder: (BuildContext context){
-                                          return AlertDialog(
-                                            title: Center(child: Text("Information"),),
-                                            content: Text("Cette option sera bientôt disponible. Continuez à utiliser Djarra Finances"),
-                                            actions: [
-                                              Center(
-                                                child: TextButton.icon(onPressed: (){
-                                                  Navigator.of(context).pop();
-                                                },style: TextButton.styleFrom(
-                                                    backgroundColor: Couleur.secondaryGreen
-                                                ), label: Text("Compris",style: TextStyle(
-                                                    color: Colors.white
-                                                ),),icon: Icon(Icons.verified,color: Colors.white,),),
-                                              )
-                                            ],
-                                          );
-                                        });
-                                      },
-                                      icon: Icon(Icons.add_circle,color: Colors.white,size:30.r,)
-                                  ),
-                                  // CORRECTION PRINCIPALE ICI - ligne 442
-                                  Icon(
-                                    (int.tryParse(widget.listsession.indice_solvabilite ?? "0") ?? 0) < 50
-                                        ? Icons.warning
-                                        : Icons.verified,
-                                    color: Colors.white,
-                                    size: 80.r,
-                                  ),
-                                ],
-                              )
-                            ],
+                            ),
                           ),
-                        ),
-                      ))
-                    ],
-                  )
-                ],
+                        )),
+                        Expanded(child: GestureDetector(
+                          onTap: (){
+                            setState(() {
+                              Navigator.push(context, MaterialPageRoute(builder: (context)=>payer_cotisation(listsession: widget.listsession,)));
+                            });
+                          },
+                          child: Card(
+                            elevation: 2,
+                            color: Couleur.primaryBlue,
+                            margin: EdgeInsets.all(5.w),
+                            child: Padding(
+                              padding: EdgeInsets.all(15.w),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Mes cotisations",style: TextStyle(
+                                      fontSize: 18.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white
+                                  ),),
+                                  SizedBox(height: 20.h),
+                                  TweenAnimationBuilder(tween: Tween(begin: 0,end:double.tryParse(montantCotiser) ?? 0.0), duration: Duration(seconds: 2), builder: (context,value,child){
+                                    return FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text("${value.toStringAsFixed(2)} FCFA",style: TextStyle(
+                                          fontSize: 20.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white
+                                      ),),
+                                    );
+                                  })
+                                ],
+                              ),
+                            ),
+                          ),
+                        ))
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Expanded(child: Card(
+                          elevation: 2,
+                          color: Couleur.secondaryGreen,
+                          margin: EdgeInsets.symmetric(horizontal:5.w),
+                          child: Padding(
+                            padding: EdgeInsets.all(10.w),
+                            child: Row(
+                              children: [
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text("Points de confiance",style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white
+                                    ),),
+                                    SizedBox(height: 10.h),
+                                    TweenAnimationBuilder<double>(
+                                        tween: Tween<double>(begin: 0, end: solvabilite.toDouble()),
+                                        duration: Duration(seconds: 2),
+                                        builder: (context, value, child){
+                                          return Text(
+                                            "${value.toStringAsFixed(0)} Pts",
+                                            style: TextStyle(
+                                                fontSize: 35.sp,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white
+                                            ),
+                                          );
+                                        }
+                                    )
+                                  ],
+                                ),
+                                SizedBox(width: 125.w),
+                                Column(
+                                  children: [
+                                    IconButton(
+                                        onPressed: (int.tryParse(widget.listsession.indice_solvabilite ?? "0") ?? 0) < 75 ? null : (){
+                                          showDialog(context: context, builder: (BuildContext context){
+                                            return AlertDialog(
+                                              title: Center(child: Text("Information"),),
+                                              content: Text("Cette option sera bientôt disponible. Continuez à utiliser Djarra Finances"),
+                                              actions: [
+                                                Center(
+                                                  child: TextButton.icon(onPressed: (){
+                                                    Navigator.of(context).pop();
+                                                  },style: TextButton.styleFrom(
+                                                      backgroundColor: Couleur.secondaryGreen
+                                                  ), label: Text("Compris",style: TextStyle(
+                                                      color: Colors.white
+                                                  ),),icon: Icon(Icons.verified,color: Colors.white,),),
+                                                )
+                                              ],
+                                            );
+                                          });
+                                        },
+                                        icon: Icon(Icons.add_circle,color: Colors.white,size:30.r,)
+                                    ),
+                                    // CORRECTION PRINCIPALE ICI - ligne 442
+                                    Icon(
+                                      (int.tryParse(widget.listsession.indice_solvabilite ?? "0") ?? 0) < 50
+                                          ? Icons.warning
+                                          : Icons.verified,
+                                      color: Colors.white,
+                                      size: 80.r,
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                        ))
+                      ],
+                    )
+                  ],
+                ),
               ),
             ),
             Padding(
@@ -459,6 +520,22 @@ class _acceuilState extends State<acceuil> {
                             fontWeight: FontWeight.bold
                         ),
                       ),
+                      if (widget.listsession.type_participant == "Organisateur")
+                        TextButton.icon(
+                          onPressed: (tontine?.etat.toLowerCase() ?? "")== "terminée" ?() async {
+                            if( await relancer()){
+                              setState(() {
+                                tontine!.etat="En cours";
+                              });
+                              monTour();
+                            }
+                          }:null ,
+                          label: Text("Relancer",style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                          ),),
+                          icon: Icon(Icons.replay,color: Couleur.primaryBlue,size: 30.r,),
+                        ),
                       TextButton.icon(
                         onPressed: tontine != null ? (){
                           Navigator.push(context, MaterialPageRoute(builder: (context)=>walletTontine(tontine: tontine!, listsession: widget.listsession, numeroTour: numeroTour)));

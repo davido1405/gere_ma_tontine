@@ -52,7 +52,6 @@ class _walletTontineState extends State<walletTontine> with SingleTickerProvider
   bool _dialogShown=false;
   bool _pasJourprevu=false;
   bool _masque=true;
-  late String infoTour;
   bool optionAffiche=false;
   String _selectedOption ="";
   bool enCourtraitement=false;
@@ -222,15 +221,15 @@ Future<bool>retirer()async{
                       });
                       var cheque=donnee['data'];
                       print(cheque);
-                      if(cheque!=0){
+                      if(cheque != null && cheque is Map && cheque.containsKey('statut_tontine')){
                         setState(() {
                           widget.tontine.etat=cheque['statut_tontine'];
                         });
+                        recupererWallet();
                       }
                       Navigator.of(context)
-                      ..pop()
-                      ..pop();
-                      recupererWallet();
+                        ..pop()
+                        ..pop();
                     },
                     style: TextButton.styleFrom(
                       backgroundColor: Couleur.secondaryGreen,
@@ -277,45 +276,6 @@ Future<bool>retirer()async{
   return false;
 }
 
-Future<bool>relancer()async{
-  String? jwt=await widget.listsession.getSecureJwt();
-    final url=Uri.parse("${adress}?ressource=tontines&action=liste_tours");
-    final response=await post(url,headers: {'content-Type':'application/json',
-      "Authorization":"Bearer $jwt"},body: jsonEncode(
-      {
-        'code_tontine':widget.listsession.code_tontine,
-        'relancer':true
-      }
-    ));
-    if(response.statusCode==200){
-      final donnee=jsonDecode(response.body) as Map<String,dynamic>;
-      if(donnee['success']){
-        setState(() {
-          infoTour=donnee['message'];
-        });
-        return true;
-      }
-    }else{
-      showDialog(context: context, builder: (BuildContext context){
-        return AlertDialog(
-          title: Text("Attention"),
-          content: Expanded(child: Text("Une erreur serveur s'est produite, veuillez reéssayer plus tard. Merci",overflow: TextOverflow.ellipsis,maxLines: 2,)),
-          actions: [
-            TextButton.icon(onPressed: (){
-              Navigator.of(context).pop();
-            },style: TextButton.styleFrom(
-                backgroundColor: Couleur.secondaryGreen
-            ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.white,),)
-          ],
-        );
-      });
-    }
-    return false;
-}
-
-
-
-
   @override
   Widget build(BuildContext context) {
     if(wallet==null){
@@ -349,7 +309,6 @@ Future<bool>relancer()async{
                   child: Padding(
                     padding: EdgeInsets.all(10.0.w),
                     child: // Remplacez tout le Row principal (ligne 259 à ~423) par ce code :
-
                     Row(
                       children: [
                         // Utilisez Expanded pour la colonne principale
@@ -774,34 +733,32 @@ Future<bool>relancer()async{
                             title: Center(child: Text("Détails de transaction",style: TextStyle(
                                 fontSize: 15.sp
                             ),)),
-                            content: SizedBox(
-                              height: 220.h,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text("Nom :${transac.nom}",style: TextStyle(
-                                      fontSize: 15.sp
-                                  ),),
-                                  Text("Prénoms :${transac.prenoms}",style: TextStyle(
-                                      fontSize: 15.sp
-                                  ),),
-                                  Text("Type de transaction :${transac.type_transaction}",style: TextStyle(
-                                      fontSize: 15.sp
-                                  ),),
-                                  Text("Montant de transaction :${transac.montant_transaction}",style: TextStyle(
-                                      fontSize: 15.sp
-                                  ),),
-                                  Text("Date de transaction :${transac.date_transaction}",style: TextStyle(
-                                      fontSize: 15.sp
-                                  ),),
-                                  Text("Mode de paiement :${transac.mode_paiement}",style: TextStyle(
-                                      fontSize: 15.sp
-                                  ),),
-                                  Text("Statut: ${transac.statut_paiement}",style: TextStyle(
-                                      fontSize: 15.sp
-                                  ),),
-                                ],
-                              ),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Nom :${transac.nom}",style: TextStyle(
+                                    fontSize: 15.sp
+                                ),),
+                                Text("Prénoms :${transac.prenoms}",style: TextStyle(
+                                    fontSize: 15.sp
+                                ),),
+                                Text("Type de transaction :${transac.type_transaction}",style: TextStyle(
+                                    fontSize: 15.sp
+                                ),),
+                                Text("Montant de transaction :${transac.montant_transaction}",style: TextStyle(
+                                    fontSize: 15.sp
+                                ),),
+                                Text("Date de transaction :${transac.date_transaction}",style: TextStyle(
+                                    fontSize: 15.sp
+                                ),),
+                                Text("Mode de paiement :${transac.mode_paiement}",style: TextStyle(
+                                    fontSize: 15.sp
+                                ),),
+                                Text("Statut: ${transac.statut_paiement}",style: TextStyle(
+                                    fontSize: 15.sp
+                                ),),
+                              ],
                             ),
                             actions: [
                               Center(
@@ -809,7 +766,9 @@ Future<bool>relancer()async{
                                   Navigator.of(context).pop();
                                 },style: TextButton.styleFrom(
                                     backgroundColor: Couleur.secondaryGreen
-                                ), label: Text("Compris"),icon: Icon(Icons.verified,color: Colors.white,),),
+                                ), label: Text("Compris",style: TextStyle(
+                                  color: Colors.white
+                                ),),icon: Icon(Icons.verified,color: Colors.white,),),
                               )
                             ],
                           );

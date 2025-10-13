@@ -45,13 +45,15 @@ class _dashboardState extends State<dashboard> {
     });
   }
 
-
-
-
   Future<void>recupererNotif()async {
-
+    String? jwt=await widget.listsession.getSecureJwt();
     final url=Uri.parse("${adress}?ressource=notifications&action=lister_notification");
-    final reponse=await post(url,headers: {"content-Type":"application/json"},body: jsonEncode(
+    final reponse=await post(
+        url,
+        headers: {
+      "content-Type":"application/json",
+      "Authorization":"Bearer $jwt"
+        },body: jsonEncode(
         {
           "code_participant":widget.listsession.code_participant,
           "filtre":"Non lu"
@@ -61,6 +63,8 @@ class _dashboardState extends State<dashboard> {
       bool success=data['success'];
       if(success && data['data']!=null){
         List<dynamic>notifs=data['data'];
+
+        if(!mounted) return;
         setState(() {
           _listnotification=notifs.map((notifs)=>Notifications.fromJson(notifs)).toList();
           // ✅ Mets à jour ton compteur du badge
@@ -68,13 +72,14 @@ class _dashboardState extends State<dashboard> {
         });
       }else{
         // ✅ Cas où il n'y a AUCUNE notif
+        if(!mounted)return;
         setState(() {
-          _listnotification = [];
           notifCount = 0; // ➝ ton badge va afficher 0
         });
       }
     }else{
-      print("Erreur serveur : ${reponse.statusCode}");}
+      print("Erreur serveur : ${reponse.statusCode}");
+      }
     }
 
   @override

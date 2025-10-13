@@ -63,6 +63,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '224843671416',
     projectId: 'djarrafinances',
     storageBucket: 'djarrafinances.firebasestorage.app',
-    iosBundleId: 'com.example.gerematontine',
+    iosBundleId: 'com.example.djarrafinances',
   );
 }

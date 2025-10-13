@@ -25,6 +25,28 @@ class _parametreState extends State<parametre> {
     final couleurs=[Colors.deepOrange,Colors.amber,Colors.cyan,Colors.green,Couleur.primaryBlue,Colors.red,Colors.blue,Couleur.primaryBlue];
     return couleurs[hash % couleurs.length];
   }
+
+  Color choixCouleur(){
+    late Color couleurNiveau;
+    switch(widget.listsession.niveau_kyc){
+      case "KYC1":
+        setState(() {
+          couleurNiveau=Couleur.primaryBlue;
+        });
+        break;
+      case "KYC2":
+        setState(() {
+          couleurNiveau=Couleur.accentOrange;
+        });
+        break;
+      case "KYC3":
+        setState(() {
+          couleurNiveau=Couleur.secondaryGreen;
+        });
+        break;
+    }
+    return couleurNiveau;
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,10 +70,21 @@ class _parametreState extends State<parametre> {
               ),
               ListTile(
                 title: Center(
-                  child: Text("${widget.listsession.prenoms_participant} ${widget.listsession.nom_participant}",style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold
-                  ),),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text("${widget.listsession.prenoms_participant} ${widget.listsession.nom_participant}",style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold
+                      ),),
+                      TextButton(onPressed: null,style: TextButton.styleFrom(
+                        backgroundColor:choixCouleur()
+                      ), child: Text(widget.listsession.niveau_kyc,style: TextStyle(
+                        color: Colors.white
+                      ),),),
+                    ],
+                  ),
                 ),
               ),
             ],

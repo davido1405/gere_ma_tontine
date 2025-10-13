@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
 
 import '../../constants/server.dart';
+import '../auth/verifier_profil_kyc.dart';
 
 class creer_tontine extends StatefulWidget {
   final Session listsession;
@@ -152,47 +153,88 @@ class _creer_tontineState extends State<creer_tontine> {
         });
         //print(widget.listsession.code_tontine);
       }else{
-        showDialog(context: context, builder: (BuildContext context){
-          return AlertDialog(
-            title: Center(child: Text("Erreur"),),
-            content: SizedBox(
-              height: 200.h,
-                child: Center(
-                  child: Column(
+        if(data['message']=="Votre niveau de vérification est insuffisant pour réjoindre cette tontine. Veuillez fournir des informations supplémentaire à votre identification. Merci"){
+          showDialog(context: context, builder: (BuildContext context){
+            return AlertDialog(
+              title: Center(child: Text("Erreur"),),
+              content: SizedBox(
+                  height: 200.h,
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Lottie.asset("assets/animations/Sign for error _ Flat style.json",width: 150.w,height: 150.h),
+                    Text("Niveau de vérification insuffisant pour créer une tontine avec ce montant de cotisation.",overflow: TextOverflow.ellipsis,maxLines: 2,),
+                      ],
+                    ),
+                  )),
+              actions: [
+                Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Lottie.asset("assets/animations/Sign for error _ Flat style.json",width: 150.w,height: 150.h),
-                      Text(data['message']),
+                      TextButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          style: TextButton.styleFrom(backgroundColor: Couleur.primaryBlue),
+                          label: Text("Compris", style: TextStyle(color: Colors.white)),
+                          icon: Icon(Icons.verified, color: Colors.white)),
+                      TextButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=>verifier_profil_kyc()));
+                          },
+                          style: TextButton.styleFrom(backgroundColor: Couleur.accentOrange),
+                          label: Text("Vérifier compte", style: TextStyle(color: Colors.white)),
+                          icon: Icon(Icons.verified_user_rounded, color: Colors.white)),
                     ],
                   ),
-                )),
-            actions: [
-              Center(
-                child: TextButton.icon(onPressed: (){
-                  Navigator.of(context).pop();
-                }, label: Text("Compris",style: TextStyle(
-                  color: Colors.white
-                ),),icon: Icon(Icons.verified,color: Colors.white,),style: TextButton.styleFrom(
-                  backgroundColor: Couleur.secondaryGreen
-                ),),
-              )
-            ],
-          );
-        });
+                )
+              ],
+            );
+          });
+        }else{
+          showDialog(context: context, builder: (BuildContext context){
+            return AlertDialog(
+              title: Center(child: Text("Erreur"),),
+              content: SizedBox(
+                  height: 200.h,
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Lottie.asset("assets/animations/Sign for error _ Flat style.json",width: 150.w,height: 150.h),
+                        Text("Une erreur s'est produite veuillez contacter le service technique"),
+                      ],
+                    ),
+                  )),
+              actions: [
+                Center(
+                  child: TextButton.icon(onPressed: (){
+                    Navigator.of(context).pop();
+                  }, label: Text("Compris",style: TextStyle(
+                      color: Colors.white
+                  ),),icon: Icon(Icons.verified,color: Colors.white,),style: TextButton.styleFrom(
+                      backgroundColor: Couleur.secondaryGreen
+                  ),),
+                )
+              ],
+            );
+          });
+        }
       }
     }else{
       showDialog(context: context, builder: (BuildContext context){
         return AlertDialog(
           title: Center(child: Text("Erreur"),),
-          content: SizedBox(
-              height: 200.h,
-              child: Center(
-                child: Column(
-                  children: [
-                    Lottie.asset("assets/animations/Sign for error _ Flat style.json",width: 150.w,height: 150.h),
-                    Text("Une erreur s'est produite,veuillez réessayer plus tard ou contacter le service technique",overflow: TextOverflow.ellipsis,maxLines: 2,),
-                  ],
-                ),
-              )),
+          content: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Lottie.asset("assets/animations/Sign for error _ Flat style.json",width: 150.w,height: 150.h),
+                Text("Une erreur s'est produite,veuillez réessayer plus tard ou contacter le service technique",overflow: TextOverflow.ellipsis,maxLines: 2,),
+              ],
+            ),
+          ),
           actions: [
             Center(
               child: TextButton.icon(onPressed: (){
