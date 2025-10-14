@@ -111,7 +111,7 @@ class _participerState extends State<participer> {
                       TextButton.icon(
                           onPressed: () {
                             Navigator.of(context).pop();
-                            Navigator.push(context, MaterialPageRoute(builder: (context)=>verifier_profil_kyc()));
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=>verifier_profil_kyc(listsession: widget.listsession,)));
                           },
                           style: TextButton.styleFrom(backgroundColor: Couleur.secondaryGreen),
                           label: Text("Vérifier maintenant", style: TextStyle(color: Colors.white)),

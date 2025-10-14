@@ -1,15 +1,24 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:delightful_toast/delight_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:gerematontine/constants/server.dart';
+import 'package:gerematontine/models/session.dart';
+import 'package:gerematontine/screens/auth/connexion_screen.dart';
+import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:lottie/lottie.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../constants/colors.dart';
 
 class verifier_profil_kyc extends StatefulWidget {
-  const verifier_profil_kyc({super.key});
+  final Session listsession;
+  const verifier_profil_kyc({super.key, required this.listsession});
 
   @override
   State<verifier_profil_kyc> createState() => _verifier_profil_kycState();
@@ -54,12 +63,129 @@ class _verifier_profil_kycState extends State<verifier_profil_kyc> {
     return chemin;
   }
 
-  //Envoie de la demande de vérification
-  Future<void>envoyerDemande()async{
-    showDialog(context: context, builder: (BuildContext context){
-      return AlertDialog(title: Text("Envoyé"),);
-    });
+  Future<void> envoyerDemande() async {
+    String? jwt = await widget.listsession.getSecureJwt();
+
+    if (_typeChoisi == null || numeroDocument.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Veuillez remplir tous les champs")),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text("Statut"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Lottie.asset("assets/animations/Checking Phone.json",
+                width: 150.w, height: 150.h),
+            SizedBox(height: 10.h),
+            Text("Envoi de la demande..."),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      final uri = Uri.parse("${adress}?ressource=participants&action=demande_upgrade_kyc");
+
+      var request = http.MultipartRequest('POST', uri)
+        ..headers['Authorization'] = 'Bearer $jwt'
+        ..fields['code_participant'] = widget.listsession.code_participant
+        ..fields['type_document'] = _typeChoisi!
+        ..fields['numero_document'] = numeroDocument.text;
+
+      // 🔹 Ajout des fichiers selon le type de document
+      if (imageRectoPath!.path.isNotEmpty) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'fichier_document_recto',
+          imageRectoPath!.path,
+        ));
+      }
+
+      if (_typeChoisi != "Passeport" && imageVersoPath!.path.isNotEmpty) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'fichier_document_verso',
+          imageVersoPath!.path,
+        ));
+      }
+
+      if (imageSelfiePath!.path.isNotEmpty) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'selfie_photo',
+          imageSelfiePath!.path,
+        ));
+      }
+
+      // 🔹 Envoi de la requête
+      var response = await request.send();
+
+      // Fermer le dialogue de chargement
+      Navigator.of(context).pop();
+
+      if (response.statusCode == 200) {
+        var body = await response.stream.bytesToString();
+
+        print(body);
+        var data = jsonDecode(body);
+        bool statutReq = data['success'];
+
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("Statut"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Lottie.asset(
+                  statutReq
+                      ? "assets/animations/Approve.json"
+                      : "assets/animations/Sign for error _ Flat style.json",
+                  width: 150.w,
+                  height: 150.h,
+                ),
+                Center(child: Text(data['message'])),
+              ],
+            ),
+            actions: [
+              TextButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  //Future.delayed(const Duration(seconds: 2), () {Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => connexion_screen()),(route) => false,);});
+                },
+                icon: const Icon(Icons.verified, color: Colors.white),
+                label: const Text("Compris", style: TextStyle(color: Colors.white)),
+                style: TextButton.styleFrom(
+                  backgroundColor: Couleur.secondaryGreen,
+                ),
+              )
+            ],
+          ),
+        );
+      } else {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Oups! Une erreur s'est produite veuillez réessayer plus tard. Merci !)")),
+        );
+      }
+    } catch (e) {
+      //Navigator.of(context).pop();
+      //ScaffoldMessenger.of(context).showSnackBar(
+        //SnackBar(content: Text("Erreur : $e")),
+      //);
+      print("$e");
+    }
   }
+
+
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -180,7 +306,7 @@ class _verifier_profil_kycState extends State<verifier_profil_kyc> {
               children: [
               Expanded(
                 flex: 3,
-                  child: Text("Veuille saisir le numéro tel que inscrit sur le document")),
+                  child: Text("Veuillez saisir le numéro tel que inscrit sur le document")),
               Expanded(
                 flex: 1,
                 child: Text("*",style: TextStyle(

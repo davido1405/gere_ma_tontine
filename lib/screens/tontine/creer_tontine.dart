@@ -182,7 +182,7 @@ class _creer_tontineState extends State<creer_tontine> {
                       TextButton.icon(
                           onPressed: () {
                             Navigator.of(context).pop();
-                            Navigator.push(context, MaterialPageRoute(builder: (context)=>verifier_profil_kyc()));
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=>verifier_profil_kyc(listsession: widget.listsession,)));
                           },
                           style: TextButton.styleFrom(backgroundColor: Couleur.accentOrange),
                           label: Text("Vérifier compte", style: TextStyle(color: Colors.white)),
