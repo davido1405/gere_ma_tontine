@@ -97,7 +97,7 @@ class _tourTontineState extends State<tourTontine> {
     return Scaffold(
       appBar: AppBar(
         title: Center(
-          child: Text("Planing des tours",style: TextStyle(
+          child: Text("Planning des tours",style: TextStyle(
             fontSize: 20.sp
           ),),
         ),
@@ -122,7 +122,7 @@ class _tourTontineState extends State<tourTontine> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text("Bénéficiare du tour",style: TextStyle(
+                                Text("Bénéficiaire du tour",style: TextStyle(
                                     fontSize: 20.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
@@ -139,14 +139,14 @@ class _tourTontineState extends State<tourTontine> {
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text("Nom bénéficiare: ${nomBeneficiare?? "N/A"}",style: TextStyle(
+                                      Text("Nom: ${nomBeneficiare?? "N/A"}",style: TextStyle(
                                           fontSize: 15.sp,
                                           color: Colors.white
                                       ),),
                                       SizedBox(
                                         width: 10.h,
                                       ),
-                                      Text("Prenoms ${prenomsBeneficiare?? "N/A"}",style: TextStyle(
+                                      Text("Prénoms: ${prenomsBeneficiare?? "N/A"}",style: TextStyle(
                                           fontSize: 15.sp,
                                           color: Colors.white
                                       ),),

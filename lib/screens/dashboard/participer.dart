@@ -88,7 +88,7 @@ class _participerState extends State<participer> {
         }else if(!success && data['message']=="Votre niveau de vérification est insuffisant pour réjoindre cette tontine. Veuillez fournir des informations supplémentaire à votre identification. Merci"){
           showDialog(context: context, builder: (BuildContext context){
             return AlertDialog(
-              title: Text("Oups !"),
+              title: Center(child: Text("Oups !")),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -99,23 +99,26 @@ class _participerState extends State<participer> {
               actions: [
                 Center(
                   child: Row(
-
                     children: [
-                      TextButton.icon(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          style: TextButton.styleFrom(backgroundColor: Couleur.secondaryGreen),
-                          label: Text("Compris", style: TextStyle(color: Colors.white)),
-                          icon: Icon(Icons.verified, color: Colors.white)),
-                      TextButton.icon(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            Navigator.push(context, MaterialPageRoute(builder: (context)=>verifier_profil_kyc(listsession: widget.listsession,)));
-                          },
-                          style: TextButton.styleFrom(backgroundColor: Couleur.secondaryGreen),
-                          label: Text("Vérifier maintenant", style: TextStyle(color: Colors.white)),
-                          icon: Icon(Icons.verified, color: Colors.white)),
+                      Expanded(
+                        child: TextButton.icon(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            style: TextButton.styleFrom(backgroundColor: Couleur.primaryBlue),
+                            label: Text("Compris", style: TextStyle(color: Colors.white)),
+                            icon: Icon(Icons.verified, color: Colors.white)),
+                      ),
+                      Expanded(
+                        child: TextButton.icon(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.push(context, MaterialPageRoute(builder: (context)=>verifier_profil_kyc(listsession: widget.listsession,)));
+                            },
+                            style: TextButton.styleFrom(backgroundColor: Couleur.accentOrange),
+                            label: Text("Vérifier maintenant", style: TextStyle(color: Colors.white)),
+                            icon: Icon(Icons.verified, color: Colors.white)),
+                      ),
                     ],
                   ),
                 )

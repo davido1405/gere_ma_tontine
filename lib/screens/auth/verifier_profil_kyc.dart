@@ -152,15 +152,17 @@ class _verifier_profil_kycState extends State<verifier_profil_kyc> {
               ],
             ),
             actions: [
-              TextButton.icon(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  //Future.delayed(const Duration(seconds: 2), () {Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => connexion_screen()),(route) => false,);});
-                },
-                icon: const Icon(Icons.verified, color: Colors.white),
-                label: const Text("Compris", style: TextStyle(color: Colors.white)),
-                style: TextButton.styleFrom(
-                  backgroundColor: Couleur.secondaryGreen,
+              Center(
+                child: TextButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Future.delayed(const Duration(seconds: 2), () {Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => connexion_screen()),(route) => false,);});
+                  },
+                  icon: const Icon(Icons.verified, color: Colors.white),
+                  label: const Text("Compris", style: TextStyle(color: Colors.white)),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Couleur.secondaryGreen,
+                  ),
                 ),
               )
             ],

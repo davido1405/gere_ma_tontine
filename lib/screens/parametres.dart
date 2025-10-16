@@ -78,11 +78,11 @@ class _parametreState extends State<parametre> {
                           fontSize: 16.sp,
                           fontWeight: FontWeight.bold
                       ),),
-                      TextButton(onPressed: null,style: TextButton.styleFrom(
+                      TextButton.icon(onPressed: null,style: TextButton.styleFrom(
                         backgroundColor:choixCouleur()
-                      ), child: Text(widget.listsession.niveau_kyc,style: TextStyle(
+                      ), label: Text(widget.listsession.niveau_kyc,style: TextStyle(
                         color: Colors.white
-                      ),),),
+                      ),),icon:widget.listsession.niveau_kyc!="KYC1"? Icon(Icons.verified,color:Colors.white):null),
                     ],
                   ),
                 ),

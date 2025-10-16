@@ -719,7 +719,8 @@ Future<bool>retirer()async{
                     ColorFiltered(colorFilter: ColorFilter.mode(Couleur.primaryBlue, BlendMode.srcATop),
                     child: Lottie.asset("assets/animations/lottieflow-ecommerce-14-7-000000-easey.json",width: 150.w,height: 150.h),),
                         SizedBox(height: 15.h,),
-                        Text("Aucune transaction disponible pour le moment")
+                        Text("Vos transactions apparaîtront ici",
+                          style: TextStyle(color: Colors.grey[600]),)
                       ],
                     ),
                   ): ListView.builder(

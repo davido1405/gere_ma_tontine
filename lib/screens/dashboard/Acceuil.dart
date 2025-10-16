@@ -58,6 +58,30 @@ class _acceuilState extends State<acceuil> {
     }
   }
 
+  //Retards
+  Future<void> cotisationManquees() async{
+    String? jwt=await widget.listsession.getSecureJwt();
+    final url=Uri.parse("${adress}?ressource=participants&action=cotisations_manquees");
+    final reponse=await post(url,headers: {"Content-Type":"application/json",
+      "Authorization":"Bearer $jwt"},body: jsonEncode(
+        {
+          "code_participant":widget.listsession.code_participant,
+          "code_tontine":widget.listsession.code_tontine
+        })).timeout(Duration(seconds: 5));
+
+    if(reponse.statusCode==200){
+      final total=jsonDecode(reponse.body) as Map<String,dynamic>;
+      if(total['success']){
+        var donnee=total['data'];
+          setState(() {
+            totalRetards=donnee.toString();
+          });
+      }
+    }else{
+      print(reponse.statusCode);
+    }
+  }
+
   Future <void> totalCotisation() async{
     String? jwt=await widget.listsession.getSecureJwt();
     print("Le token est :$jwt");
@@ -256,6 +280,7 @@ class _acceuilState extends State<acceuil> {
     totalCotisation();
     tontineInfo();
     monTour();
+    cotisationManquees();
     envoyerToken();
     NotificationService.initialize();
   }
@@ -280,6 +305,7 @@ class _acceuilState extends State<acceuil> {
   String montantPenalite="0";
   Tontine? tontine;
   String numeroTour="N/A";
+  String totalRetards="N/A";
   late int solvabilite = int.tryParse(widget.listsession.indice_solvabilite ?? "0") ?? 0;
   int statut=0;
   bool messageAffich=false;
@@ -364,7 +390,7 @@ class _acceuilState extends State<acceuil> {
                                 children: [
                                   Text("Mon numéro",style: TextStyle(
                                       fontSize: 17.sp,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.w400,
                                       color: Colors.white
                                   ),),
                                   SizedBox(height: 5.h),
@@ -378,8 +404,33 @@ class _acceuilState extends State<acceuil> {
                                             color: Colors.white
                                         ),
                                       ),
-                                      Icon(statut==0?Icons.monetization_on_outlined:Icons.monetization_on,color: statut==0? Colors.red:Colors.green,size: 40.r,)
-                                    ],
+                                      Container(
+                                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: statut==0 ?  Colors.red:Couleur.secondaryGreen ,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              statut==0 ?  Icons.warning:Icons.check_circle ,
+                                              size: 14,
+                                              color: Colors.white,
+                                            ),
+                                            SizedBox(width: 4),
+                                            Text(
+                                              statut==0 ? 'En attente' :'Payé' ,
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      ],
                                   ),
                                   SizedBox(height: 5.h)
                                 ],
@@ -403,11 +454,11 @@ class _acceuilState extends State<acceuil> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text("Mes cotisations",style: TextStyle(
-                                      fontSize: 18.sp,
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w400,
                                       color: Colors.white
                                   ),),
-                                  SizedBox(height: 20.h),
+                                  SizedBox(height: 25.h),
                                   TweenAnimationBuilder(tween: Tween(begin: 0,end:double.tryParse(montantCotiser) ?? 0.0), duration: Duration(seconds: 2), builder: (context,value,child){
                                     return FittedBox(
                                       fit: BoxFit.scaleDown,
@@ -449,43 +500,24 @@ class _acceuilState extends State<acceuil> {
                                         tween: Tween<double>(begin: 0, end: solvabilite.toDouble()),
                                         duration: Duration(seconds: 2),
                                         builder: (context, value, child){
-                                          return Text(
-                                            "${value.toStringAsFixed(0)} Pts",
-                                            style: TextStyle(
-                                                fontSize: 35.sp,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white
+                                          return FittedBox(
+                                            fit:BoxFit.scaleDown,
+                                            child: Text(
+                                              "${value.toStringAsFixed(0)} Pts",
+                                              style: TextStyle(
+                                                  fontSize: 35.sp,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white
+                                              ),
                                             ),
                                           );
                                         }
                                     )
                                   ],
                                 ),
-                                SizedBox(width: 125.w),
+                                //SizedBox(width: 125.w),
                                 Column(
                                   children: [
-                                    IconButton(
-                                        onPressed: (int.tryParse(widget.listsession.indice_solvabilite ?? "0") ?? 0) < 75 ? null : (){
-                                          showDialog(context: context, builder: (BuildContext context){
-                                            return AlertDialog(
-                                              title: Center(child: Text("Information"),),
-                                              content: Text("Cette option sera bientôt disponible. Continuez à utiliser Djarra Finances"),
-                                              actions: [
-                                                Center(
-                                                  child: TextButton.icon(onPressed: (){
-                                                    Navigator.of(context).pop();
-                                                  },style: TextButton.styleFrom(
-                                                      backgroundColor: Couleur.secondaryGreen
-                                                  ), label: Text("Compris",style: TextStyle(
-                                                      color: Colors.white
-                                                  ),),icon: Icon(Icons.verified,color: Colors.white,),),
-                                                )
-                                              ],
-                                            );
-                                          });
-                                        },
-                                        icon: Icon(Icons.add_circle,color: Colors.white,size:30.r,)
-                                    ),
                                     // CORRECTION PRINCIPALE ICI - ligne 442
                                     Icon(
                                       (int.tryParse(widget.listsession.indice_solvabilite ?? "0") ?? 0) < 50
@@ -495,7 +527,36 @@ class _acceuilState extends State<acceuil> {
                                       size: 80.r,
                                     ),
                                   ],
-                                )
+                                ),
+                                SizedBox(height: 60.h,width: 2.5.w,child: Container(decoration: BoxDecoration(
+                                  color: Colors.white
+                                ),),),
+                                SizedBox(width: 10.w,),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    FittedBox(
+                                      fit:BoxFit.scaleDown,
+                                      child: Text("Retards de paiement",style: TextStyle(
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white
+                                      ),),
+                                    ),
+                                    SizedBox(height: 20.h),
+                                    FittedBox(
+                                      fit:BoxFit.scaleDown,
+                                      child: Text(totalRetards=="0"?"Tout est OK !":"$totalRetards jours",
+                                        style: TextStyle(
+                                            fontSize: 25.sp,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white
+                                        ),),
+                                    ),
+
+                                  ],
+                                ),
                               ],
                             ),
                           ),
