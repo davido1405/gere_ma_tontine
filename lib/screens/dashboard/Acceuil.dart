@@ -386,6 +386,7 @@ class _acceuilState extends State<acceuil> {
                             child: Padding(
                               padding: EdgeInsets.all(10.0.w),
                               child: Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text("Mon numéro",style: TextStyle(
@@ -404,6 +405,7 @@ class _acceuilState extends State<acceuil> {
                                             color: Colors.white
                                         ),
                                       ),
+                                      SizedBox(height: 10.h,),
                                       Container(
                                         padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                         decoration: BoxDecoration(
@@ -432,7 +434,6 @@ class _acceuilState extends State<acceuil> {
                                       ),
                                       ],
                                   ),
-                                  SizedBox(height: 5.h)
                                 ],
                               ),
                             ),
@@ -524,10 +525,11 @@ class _acceuilState extends State<acceuil> {
                                           ? Icons.warning
                                           : Icons.verified,
                                       color: Colors.white,
-                                      size: 80.r,
+                                      size: 40.r,
                                     ),
                                   ],
                                 ),
+                                SizedBox(width: 10.w,),
                                 SizedBox(height: 60.h,width: 2.5.w,child: Container(decoration: BoxDecoration(
                                   color: Colors.white
                                 ),),),

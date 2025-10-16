@@ -708,7 +708,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
                                                                               child: FittedBox(
                                                                                 fit: BoxFit.scaleDown,
                                                                                 child: Text(
-                                                                                  "Paiement de cotisation",
+                                                                                  cotisa.type_cotisation,
                                                                                   style: TextStyle(fontSize: 15.sp),
                                                                                 ),
                                                                               ),
@@ -814,7 +814,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
                                                                             Expanded(
                                                                               flex: 2,
                                                                               child: Text(
-                                                                                cotisa.tour_avance,
+                                                                                cotisa.tour_avance=="null"?"0":cotisa.tour_avance,
                                                                                 style: TextStyle(fontSize: 15.sp),
                                                                               ),
                                                                             ),
