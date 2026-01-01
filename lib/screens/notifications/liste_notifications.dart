@@ -57,7 +57,6 @@ class _notificationsState extends State<notifications> {
         });
       }
     }else{
-
       print("Erreur serveur : ${reponse.statusCode}");
     }
   }
@@ -87,10 +86,11 @@ class _notificationsState extends State<notifications> {
               Center(child: TextButton.icon(onPressed: (){
                 Navigator.of(context).pop();
               },style: TextButton.styleFrom(
-                  backgroundColor: Colors.blueAccent
+                  backgroundColor: Couleur.secondaryGreen
               ), label: Text("Compris",style: TextStyle(
-                  fontSize: 14.sp
-              ),),icon: Icon(Icons.verified,color: Colors.lightGreen,),),)
+                  fontSize: 14.sp,
+                color: Colors.white
+              ),),icon: Icon(Icons.verified,color: Colors.white,),),)
             ],
           );
         });
@@ -109,7 +109,6 @@ class _notificationsState extends State<notifications> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        automaticallyImplyLeading: false,
         title: Center(
           child: Text("Notifications",style: TextStyle(
             fontSize: 20.sp,
@@ -182,26 +181,23 @@ class _notificationsState extends State<notifications> {
                               title: Center(child: Text("Détails notification",style: TextStyle(
                                   fontSize: 16.sp
                               ),),),
-                              content: SizedBox(
-                                height: 145.h,
-                                width: double.infinity,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(notifica.type_notif,
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(notifica.type_notif,
+                                  overflow: TextOverflow.ellipsis,),
+                                  SizedBox(
+                                    height: 5.h,
+                                  ),
+                                  Text(notifica.contenu_notif,
+                                    maxLines: 2,
                                     overflow: TextOverflow.ellipsis,),
-                                    SizedBox(
-                                      height: 5.h,
-                                    ),
-                                    Text(notifica.contenu_notif,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,),
-                                    SizedBox(
-                                      height: 5.h,
-                                    ),
-                                    Text(notifica.date_envoie),
-                                  ],
-                                ),
+                                  SizedBox(
+                                    height: 5.h,
+                                  ),
+                                  Text(notifica.date_envoie),
+                                ],
                               ),
                               actions: [
                                 Center(child: TextButton.icon(onPressed: (){
@@ -209,10 +205,11 @@ class _notificationsState extends State<notifications> {
                                   marquerCommelu(int.parse(notifica.id_notif));
                                   recupererNotif();
                                 },style: TextButton.styleFrom(
-                                    backgroundColor: Colors.blueAccent
+                                    backgroundColor: Couleur.secondaryGreen
                                 ), label: Text("Compris",style: TextStyle(
-                                    fontSize: 14.sp
-                                ),),icon: Icon(Icons.verified,color: Colors.lightGreen,),),)
+                                    fontSize: 14.sp,
+                                  color: Colors.white
+                                ),),icon: Icon(Icons.verified,color: Colors.white,),),)
                               ],
                             );
                           });

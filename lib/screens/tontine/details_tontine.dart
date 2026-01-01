@@ -157,7 +157,6 @@ class _details_tontineState extends State<details_tontine> with SingleTickerProv
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
         title: Center(child: Text("Détails tontine",style: TextStyle(
             fontSize: 20.sp,
             fontWeight: FontWeight.bold),),),

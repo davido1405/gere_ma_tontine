@@ -5,7 +5,7 @@ import 'package:delightful_toast/toast/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/session.dart';
-import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
+import 'package:gerematontine/screens/dashboard/Acceuil.dart';
 import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
 import 'package:pinput/pinput.dart';
@@ -27,6 +27,13 @@ class _DefinirpinState extends State<Definirpin> {
 
   late Session listsession;
   bool confirmation=false;
+  bool _isLoading=false;
+
+  @override
+  void dispose(){
+    secretCodeController.dispose();
+    super.dispose();
+  }
 
   Future<void> verifierLien(String token) async {
     try {
@@ -59,7 +66,7 @@ class _DefinirpinState extends State<Definirpin> {
       SnackBar(content: Text(message)),
     );
   }
-  bool _isLoading = false; // AJOUT 1: État de chargement
+  //bool _isLoading = false; // AJOUT 1: État de chargement
   // AJOUT 5: Validation du code tontine
     bool _isValidTontineCode(String code) {
       // Ajustez selon le format de vos codes tontine
@@ -72,9 +79,11 @@ class _DefinirpinState extends State<Definirpin> {
       return;
     }
     // AJOUT 6: Gestion du loading state
-    setState(() {
-      _isLoading = true;
-    });
+    if(mounted){
+      setState(() {
+        _isLoading = true;
+      });
+    }
 
     try {
       String? jwt = await listsession.getSecureJwt();
@@ -97,7 +106,7 @@ class _DefinirpinState extends State<Definirpin> {
           Future.delayed(Duration(milliseconds: 300),(){
             Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => dashboard(listsession: listsession)),
+                MaterialPageRoute(builder: (context) => acceuil(listsession: listsession)),
                     (route) => false);
           });
         } else {
@@ -110,14 +119,17 @@ class _DefinirpinState extends State<Definirpin> {
       _showErrorDialog("Erreur", "Une erreur inattendue s'est produite");
     } finally {
       // AJOUT 7: Toujours arrêter le loading
-      setState(() {
-        _isLoading = false;
-      });
+      if(mounted){
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   // AJOUT 8: Méthode factorisant l'affichage des erreurs
   void _showErrorDialog(String title, String message) {
+    if(!mounted) return;
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -160,27 +172,35 @@ class _DefinirpinState extends State<Definirpin> {
         var finalUser=user['data'];
         SharedPreferences prefs=await SharedPreferences.getInstance();
         prefs.setBool("inscriptionTermine", true);
-        setState((){
-          listsession=Session.fromJson(finalUser);
-        });
+        if(mounted){
+          setState((){
+            listsession=Session.fromJson(finalUser);
+          });
+        }
         await listsession.secureJwt();
         //Verifier s'il y'a un lien d'invitation
         if(prefs.getString('token_invitation')!=null){
           String? token_invitation=prefs.getString('token_invitation');
           await verifierLien(token_invitation!);
           await participerTontine();
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>dashboard(listsession: listsession,)), (route)=>false);
-        }else{
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>participer(listsession: listsession,)), (route)=>false);
-        }
+          if(mounted){
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>acceuil(listsession: listsession,)), (route)=>false);
+          }
+          }else{
+          if(mounted){
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>participer(listsession: listsession,)), (route)=>false);
+          }
+          }
       }else{
         SharedPreferences prefs=await SharedPreferences.getInstance();
-        setState(() {
-          prefs.remove('nom');
-          prefs.remove('prenom');
-          prefs.remove('mobile');
-          prefs.remove('identifiant');
-        });
+        if(mounted){
+          setState(() {
+            prefs.remove('nom');
+            prefs.remove('prenom');
+            prefs.remove('mobile');
+            prefs.remove('identifiant');
+          });
+        }
         showDialog(context: context, builder: (BuildContext context){
           return AlertDialog(
             title: Center(
@@ -211,7 +231,7 @@ class _DefinirpinState extends State<Definirpin> {
               Center(
                 child: TextButton.icon(
                   onPressed: () {
-                    Navigator.of(context).pop();
+                    if(mounted) Navigator.of(context).pop();
                   },
                   style: TextButton.styleFrom(
                     backgroundColor: Couleur.secondaryGreen,
@@ -231,31 +251,34 @@ class _DefinirpinState extends State<Definirpin> {
         });
       }
     }else{
-      DelightToastBar(
-        position: DelightSnackbarPosition.top,
-        autoDismiss: true,
-        snackbarDuration: Duration(seconds: 2),
-        builder: (BuildContext context) {
-          return ToastCard(
-            title: Row(
-              mainAxisAlignment:MainAxisAlignment.start,
-              children: [
-                Column(
+      if(mounted){
+        DelightToastBar(
+          position: DelightSnackbarPosition.top,
+          autoDismiss: true,
+          snackbarDuration: Duration(seconds: 2),
+          builder: (BuildContext context) {
+            return ToastCard(
+              title: Row(
+                mainAxisAlignment:MainAxisAlignment.start,
                 children: [
-                  Icon(Icons.error_outline,color: Colors.white,size: 30.r,),
-                ],
-              ),Column(
-                children: [
-                  Text("Une erreur s'est produite",style: TextStyle(
-                      color: Colors.white
-                  ),overflow: TextOverflow.ellipsis,maxLines: 2,),
-                  Text("Contactez le service technique. Merci",style: TextStyle(
-                      color: Colors.white
-                  ),overflow: TextOverflow.ellipsis,maxLines: 2,),
-                ],
-              )],),
-            color: Colors.red.shade700,);
-        },).show(context) as SnackBar;
+                  Column(
+                    children: [
+                      Icon(Icons.error_outline,color: Colors.white,size: 30.r,),
+                    ],
+                  ),Column(
+                    children: [
+                      Text("Une erreur s'est produite",style: TextStyle(
+                          color: Colors.white
+                      ),overflow: TextOverflow.ellipsis,maxLines: 2,),
+                      Text("Contactez le service technique. Merci",style: TextStyle(
+                          color: Colors.white
+                      ),overflow: TextOverflow.ellipsis,maxLines: 2,),
+                    ],
+                  )],),
+              color: Colors.red.shade700,);
+          },).show(context) as SnackBar;
+      }
+
     }
   }
 

@@ -13,9 +13,7 @@ import '../../constants/server.dart';
 
 class tourTontine extends StatefulWidget {
   final Session listsession;
-  final String monTour;
-  final int statut;
-  const tourTontine({super.key, required this.listsession, required this.monTour,required this.statut});
+  const tourTontine({super.key, required this.listsession,});
 
   @override
   State<tourTontine> createState() => _tourTontineState();

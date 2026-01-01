@@ -4,7 +4,7 @@ import 'dart:convert' as convert;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/session.dart';
-import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
+import 'package:gerematontine/screens/dashboard/Acceuil.dart';
 import 'package:gerematontine/screens/tontine/creer_tontine.dart';
 import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
@@ -82,7 +82,7 @@ class _participerState extends State<participer> {
             Future.delayed(Duration(milliseconds: 300),(){
               Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => dashboard(listsession: widget.listsession)),
+                  MaterialPageRoute(builder: (context) => acceuil(listsession: widget.listsession)),
                       (route) => false);
             });
         }else if(!success && data['message']=="Votre niveau de vérification est insuffisant pour réjoindre cette tontine. Veuillez fournir des informations supplémentaire à votre identification. Merci"){

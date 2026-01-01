@@ -34,9 +34,11 @@ class _ConfirmationNumeroState extends State<ConfirmationNumero> {
   void startTimer(){
     timer = Timer.periodic(Duration(seconds: 1), (t) {
       if (second > 0) {
-        setState(() {
-          second--;
-        });
+        if(mounted){
+          setState(() {
+            second--;
+          });
+        }
       } else {
         t.cancel(); // Stop le timer
       }
@@ -60,11 +62,34 @@ class _ConfirmationNumeroState extends State<ConfirmationNumero> {
   Future<void> sendOtp() async {
     // Récupère le numéro depuis SharedPreferences
     SharedPreferences prefs=await SharedPreferences.getInstance();
-    setState(() {
-      numero = prefs.getString('mobile');
-    });
+    if(mounted){
+      setState(() {
+        numero = prefs.getString('mobile');
+      });
+    }
     if (numero == null || numero!.isEmpty) {
       print("Erreur: Numéro de téléphone non trouvé");
+      if(mounted){
+        DelightToastBar(
+          position: DelightSnackbarPosition.top,
+          autoDismiss: true,
+          snackbarDuration: Duration(seconds: 2),
+          builder: (BuildContext context) {
+            return ToastCard(
+              title: Row(
+                mainAxisAlignment:MainAxisAlignment.start,
+                children: [Icon(Icons.error_outline,color: Colors.white,size: 30.r,),SizedBox(width: 8.w,),Expanded(
+                  child: Text("Erreur: Numéro de téléphone non trouvé",style: TextStyle(
+                      color: Colors.white
+                  ),overflow: TextOverflow.ellipsis,maxLines: 2,),
+                )],),
+              color: Colors.red.shade700,);
+          },).show(context);
+      }
+    }
+
+    print("Envoi OTP vers: $numero");
+    if(mounted){
       DelightToastBar(
         position: DelightSnackbarPosition.top,
         autoDismiss: true,
@@ -73,31 +98,14 @@ class _ConfirmationNumeroState extends State<ConfirmationNumero> {
           return ToastCard(
             title: Row(
               mainAxisAlignment:MainAxisAlignment.start,
-              children: [Icon(Icons.error_outline,color: Colors.white,size: 30.r,),SizedBox(width: 8.w,),Expanded(
-                child: Text("Erreur: Numéro de téléphone non trouvé",style: TextStyle(
+              children: [Icon(Icons.info,color: Colors.white,size: 30.r,),SizedBox(width: 8.w,),Expanded(
+                child: Text("OTP envoyé au ${numero}",style: TextStyle(
                     color: Colors.white
                 ),overflow: TextOverflow.ellipsis,maxLines: 2,),
               )],),
-            color: Colors.red.shade700,);
+            color: Couleur.secondaryGreen,);
         },).show(context);
     }
-
-    print("Envoi OTP vers: $numero");
-    DelightToastBar(
-      position: DelightSnackbarPosition.top,
-      autoDismiss: true,
-      snackbarDuration: Duration(seconds: 2),
-      builder: (BuildContext context) {
-        return ToastCard(
-          title: Row(
-            mainAxisAlignment:MainAxisAlignment.start,
-            children: [Icon(Icons.info,color: Colors.white,size: 30.r,),SizedBox(width: 8.w,),Expanded(
-              child: Text("OTP envoyé au ${numero}",style: TextStyle(
-                  color: Colors.white
-              ),overflow: TextOverflow.ellipsis,maxLines: 2,),
-            )],),
-          color: Couleur.secondaryGreen,);
-      },).show(context);
 
     await _auth.verifyPhoneNumber(
       phoneNumber: numero, // ton numéro complet
@@ -111,16 +119,20 @@ class _ConfirmationNumeroState extends State<ConfirmationNumero> {
         print("$numero");
       },
       codeSent: (String verificationId, int? resendToken) {
-        setState(() {
-          _verificationId = verificationId;
-        });
+        if(mounted){
+          setState(() {
+            _verificationId = verificationId;
+          });
+        }
         print("OTP envoyé ID: $_verificationId");
         print("$numero");
       },
       codeAutoRetrievalTimeout: (String verificationId) {
-        setState(() {
-          _verificationId = verificationId;
-        });
+        if(mounted){
+          setState(() {
+            _verificationId = verificationId;
+          });
+        }
         print("$numero");
       },
     );
@@ -158,24 +170,28 @@ class _ConfirmationNumeroState extends State<ConfirmationNumero> {
                     );
                     await _auth.signInWithCredential(credential);
                     // OTP correct → passer à écran définir code secret
-                    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>Definirpin()), (route)=>false);
-                  } catch (e) {
-                    DelightToastBar(
-                      position: DelightSnackbarPosition.top,
-                      autoDismiss: true,
-                      snackbarDuration: Duration(seconds: 2),
-                      builder: (BuildContext context) {
-                        return ToastCard(
-                          title: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment:MainAxisAlignment.start,
-                            children: [Icon(Icons.error_outline,color: Colors.white,size: 30.r,),SizedBox(width: 8.w,),Expanded(
-                              child: Text("Veuillez vérifier le code OTP ou le numéro saisi",style: TextStyle(
-                                  color: Colors.white
-                              ),maxLines: 2,overflow: TextOverflow.ellipsis,),
-                            )],),
-                          color: Colors.red.shade700,);
-                      },).show(context);
+                    if(mounted){
+                      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>Definirpin()), (route)=>false);
+                    }
+                    } catch (e) {
+                    if(mounted){
+                      DelightToastBar(
+                        position: DelightSnackbarPosition.top,
+                        autoDismiss: true,
+                        snackbarDuration: Duration(seconds: 2),
+                        builder: (BuildContext context) {
+                          return ToastCard(
+                            title: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment:MainAxisAlignment.start,
+                              children: [Icon(Icons.error_outline,color: Colors.white,size: 30.r,),SizedBox(width: 8.w,),Expanded(
+                                child: Text("Veuillez vérifier le code OTP ou le numéro saisi",style: TextStyle(
+                                    color: Colors.white
+                                ),maxLines: 2,overflow: TextOverflow.ellipsis,),
+                              )],),
+                            color: Colors.red.shade700,);
+                        },).show(context);
+                    }
                   }
                 },
               ),
@@ -188,13 +204,20 @@ class _ConfirmationNumeroState extends State<ConfirmationNumero> {
                 : GestureDetector(
               onTap: () {
                 timer?.cancel();
-                setState(() {
-                  second = 30; // réinitialiser le timer
-                });
+                if(mounted){
+                  setState(() {
+                    second = 30; // réinitialiser le timer
+                  });
+                }
                 sendOtp();
                 startTimer();
               },
-              child: Text("Renvoyer"),
+              child: Text("Renvoyer",
+                style: TextStyle(
+                  color: Couleur.primaryBlue,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.underline,
+                ),),
             )
           ],
         ),

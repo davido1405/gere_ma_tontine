@@ -1,4 +1,4 @@
-import 'dart:convert';
+
 
 import 'package:delightful_toast/delight_toast.dart';
 import 'package:delightful_toast/toast/components/toast_card.dart';
@@ -6,15 +6,10 @@ import 'package:delightful_toast/toast/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:gerematontine/models/session.dart';
 import 'package:gerematontine/screens/auth/confirmation_numero.dart';
-import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants/colors.dart';
-import '../../constants/server.dart';
-import '../dashboard/participer.dart';
 
 class inscription_screen extends StatefulWidget {
   const inscription_screen({super.key});

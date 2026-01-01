@@ -5,7 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/constants/colors.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:gerematontine/screens/dashboard/Acceuil.dart';
-import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
 import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
 
@@ -109,7 +108,6 @@ class _creer_tontineState extends State<creer_tontine> {
   
   
   Future<void>creerTontine() async{
-    String? jwt=await widget.listsession.getSecureJwt();
 
     //Afficher dialogue pendent chargement
     showDialog(context: context, builder: (BuildContext context){
@@ -128,7 +126,7 @@ class _creer_tontineState extends State<creer_tontine> {
       );
     });
     final url=Uri.parse("${adress}?ressource=tontines&action=creer_tontine");
-    final reponse=await http.post(url,headers: {'content-Type':'application/json','Authorization':'Bearer $jwt'},body: jsonEncode({
+    final reponse=await http.post(url,headers: {'content-Type':'application/json'},body: jsonEncode({
           "code_participant":widget.listsession.code_participant,
           "nom_tontine":nomTontine.text,
           "type_tontine":_typeChoisi,
@@ -149,7 +147,7 @@ class _creer_tontineState extends State<creer_tontine> {
         //print(donnee['code_tontine']);
         setState(() {
           widget.listsession.setCodeTontine(donnee['code_tontine']);
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>dashboard(listsession: widget.listsession,)), (route)=>false);
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>acceuil(listsession: widget.listsession,)), (route)=>false);
         });
         //print(widget.listsession.code_tontine);
       }else{

@@ -8,12 +8,13 @@ import 'package:gerematontine/constants/server.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:gerematontine/screens/auth/inscription_screen.dart';
 import 'package:gerematontine/screens/auth/mot_passe_oublie.dart';
-import 'package:gerematontine/screens/dashboard/ecran_dashboard.dart';
 import 'package:gerematontine/screens/dashboard/participer.dart';
 import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
 import 'package:pinput/pinput.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../dashboard/Acceuil.dart';
 
 class connexion_screen extends StatefulWidget {
   const connexion_screen({super.key});
@@ -101,7 +102,7 @@ class _connexion_screenState extends State<connexion_screen> {
         print(listsession);
         //Sécuriser le JWT après reception
         await listsession.secureJwt();
-        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>dashboard(listsession: listsession)),(route)=>false);
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>acceuil(listsession: listsession)),(route)=>false);
       }else if(success==true && data['message']=="Connexion réussie (pas encore de tontine)"){
         var parti=data['data'];
         listsession=Session.fromJson(parti);
@@ -112,7 +113,7 @@ class _connexion_screenState extends State<connexion_screen> {
         if(prefs.getString('token_invitation')!=null){
           String? token_invitation=prefs.getString('token_invitation');
           await verifierLien(token_invitation!);
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>dashboard(listsession: listsession)), (route)=>false);
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>acceuil(listsession: listsession)), (route)=>false);
         }else{
           Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>participer(listsession: listsession)),(route)=>false);
         }
