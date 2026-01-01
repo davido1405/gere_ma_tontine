@@ -1,12 +1,20 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:gerematontine/models/session.dart';
+import 'package:http/http.dart';
+import 'package:lottie/lottie.dart';
 import 'package:pinput/pinput.dart';
 import 'package:screenshot/screenshot.dart';
 
 import '../../constants/colors.dart';
+import '../../constants/server.dart';
+import '../../models/wallet_tontine.dart';
 
 class retirer_gains extends StatefulWidget {
-  const retirer_gains({super.key});
+  final Session listsession;
+  const retirer_gains({super.key, required this.listsession});
 
   @override
   State<retirer_gains> createState() => _retirer_gainsState();
@@ -37,6 +45,167 @@ class _retirer_gainsState extends State<retirer_gains> {
 
 
   TextEditingController montant=TextEditingController();
+  WalletTontine? wallet;
+
+  //Recupérer le wallet
+  Future<void>recupererWallet() async{
+    String? jwt=await widget.listsession.getSecureJwt();
+    final url=Uri.parse("${adress}?ressource=tontines&action=wallet_infos");
+    final reponse=await post(url,headers: {'Authorization':'Bearer $jwt','content-Type':'application/json'},body: jsonEncode(
+        {
+          "code_tontine":widget.listsession.code_tontine
+        }));
+    if(reponse.statusCode==200){
+      Map<String,dynamic>data=jsonDecode(reponse.body);
+      if(data['success']==true){
+        var infos=data['data'];
+        if(infos!=null){
+          setState(() {
+            wallet=WalletTontine.fromJson(infos);
+          });
+        }
+      }
+    }
+  }
+
+
+  Future<bool>retirer()async{
+    String? jwt=await widget.listsession.getSecureJwt();
+    setState(() {
+      enCourtraitement = true;
+    });
+
+    // 1️⃣ Affiche le dialogue de chargement
+    showDialog(
+      context: context,
+      barrierDismissible: false, // empêche de fermer en cliquant dehors
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Center(child: Text("Statut")),
+          content: SizedBox(
+            height: 200.h,
+            child: Center(
+              child: Column(
+                children: [
+                  Lottie.asset("assets/animations/Card swiping.json", width: 150.w, height: 150.h),
+                  const SizedBox(height: 10),
+                  const Text("Retrait en cours...")
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    try{
+      final url=Uri.parse("${adress}?ressource=tontines&action=retirer");
+      final response=await post(url,headers: {"content-Type":"application/json",
+        "Authorization":"Bearer $jwt"},body: jsonEncode(
+          {
+            "code_tontine":widget.listsession.code_tontine,
+            "code_participant":widget.listsession.code_participant
+          }));
+
+      // 2️⃣ Fermer le dialogue de chargement une fois la réponse obtenue
+      if (Navigator.canPop(context)) Navigator.pop(context);
+
+      if(response.statusCode==200){
+        final Map<String,dynamic>donnee=jsonDecode(response.body);
+        bool success=donnee['success']==true;
+        // 3️⃣ Affiche le résultat (succès ou erreur)
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Center(
+                child: Text(
+                  "Statut paiement",
+                  style: TextStyle(fontSize: 15.sp),
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  success
+                      ? Lottie.asset(
+                    'assets/animations/Approve.json',
+                    width: 150.w,
+                    height: 150.h,
+                  )
+                      : Lottie.asset(
+                    'assets/animations/Sign for error _ Flat style.json',
+                    width: 150.w,
+                    height: 150.h,
+                  ),
+                  Text(
+                    donnee['message'],
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ],
+              ),
+              actions: [
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        enCourtraitement = false;
+                        _selectedOption = "";
+                      });
+                      var cheque=donnee['data'];
+                      print(cheque);
+                      if(cheque != null && cheque is Map && cheque.containsKey('statut_tontine')){
+                        recupererWallet();
+                      }
+                      Navigator.of(context)
+                        ..pop()
+                        ..pop();
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: Couleur.secondaryGreen,
+                    ),
+                    icon: const Icon(Icons.verified, color: Colors.white),
+                    label: Text(
+                      "Compris",
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            );
+          },
+        );
+      }else{
+        setState(() {
+          enCourtraitement=false;
+        });
+        return false;
+      }
+    }catch(e){
+      Navigator.of(context).pop();
+      setState(() => enCourtraitement = false);
+
+      // 3bis️⃣ Affiche un dialogue d’erreur
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text("Erreur"),
+          content: Text("Une erreur est survenue : $e"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Compris"),
+            )
+          ],
+        ),
+      );
+    }
+    return false;
+  }
+
 
   @override
   Widget build(BuildContext context) {

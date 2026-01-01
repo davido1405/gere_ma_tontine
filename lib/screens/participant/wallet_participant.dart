@@ -126,7 +126,7 @@ class _wallet_participantState extends State<wallet_participant> {
                           ),)),
                           SizedBox(width: 15.w,),
                           Expanded(child: TextButton.icon(onPressed: (){
-                            Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>retirer_gains()));
+                            Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>retirer_gains(listsession: widget.listsession,)));
                           }, label: Text("Retirer",style: TextStyle(color: Colors.white),),icon: Icon(Icons.north_east,color: Colors.white,),style: TextButton.styleFrom(
                               backgroundColor: Couleur.primaryBlue
                           ),))

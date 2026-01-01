@@ -38,13 +38,9 @@ class _acceuilState extends State<acceuil> {
 
   WalletTontine? wallet;
   List<Transactions>_listeTransac=[];
-  bool _ouvert=true;
-  bool _monTour=false;
-  bool _dialogShown=false;
-  bool _pasJourprevu=false;
+
   bool _masque=true;
   bool optionAffiche=false;
-  String _selectedOption ="";
   bool enCourtraitement=false;
 
   int notifCount = 0;
@@ -779,7 +775,7 @@ class _acceuilState extends State<acceuil> {
                           ),
                               SizedBox(width: 20.w,),GestureDetector(
                                 onTap: (){
-                                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>retirer_gains()));
+                                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>retirer_gains(listsession:widget.listsession)));
                                 },
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
