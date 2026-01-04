@@ -1,5 +1,9 @@
 import 'dart:convert';
+import 'dart:convert' as convert;
 
+import 'package:delightful_toast/delight_toast.dart';
+import 'package:delightful_toast/toast/components/toast_card.dart';
+import 'package:delightful_toast/toast/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/session.dart';
@@ -10,6 +14,7 @@ import 'package:screenshot/screenshot.dart';
 
 import '../../constants/colors.dart';
 import '../../constants/server.dart';
+import '../../models/infos_wallet_participant.dart';
 import '../../models/wallet_tontine.dart';
 
 class retirer_gains extends StatefulWidget {
@@ -25,6 +30,8 @@ class _retirer_gainsState extends State<retirer_gains> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    infosFinanceParticipant();
+
   }
 
   bool saisiMontant=false;
@@ -32,7 +39,6 @@ class _retirer_gainsState extends State<retirer_gains> {
   bool misejourEncour=false;
   bool enCourtraitement=false;
   String lottieAffiche='';
-  int? solde_wallet_participant;
   String modePaiement="Choisir mode de paiement";
   bool wallet_parti=true;
   bool payable=false;
@@ -45,26 +51,22 @@ class _retirer_gainsState extends State<retirer_gains> {
 
 
   TextEditingController montant=TextEditingController();
-  WalletTontine? wallet;
+
+  InfosWallet? infos_wallet_participant;
 
   //Recupérer le wallet
-  Future<void>recupererWallet() async{
+  Future<void>infosFinanceParticipant() async{
     String? jwt=await widget.listsession.getSecureJwt();
-    final url=Uri.parse("${adress}?ressource=tontines&action=wallet_infos");
-    final reponse=await post(url,headers: {'Authorization':'Bearer $jwt','content-Type':'application/json'},body: jsonEncode(
-        {
-          "code_tontine":widget.listsession.code_tontine
-        }));
-    if(reponse.statusCode==200){
-      Map<String,dynamic>data=jsonDecode(reponse.body);
-      if(data['success']==true){
-        var infos=data['data'];
-        if(infos!=null){
-          setState(() {
-            wallet=WalletTontine.fromJson(infos);
-          });
-        }
-      }
+    final url=Uri.parse("${adress}?ressource=participants&action=infos_wallet_participant");
+    final response = await post(url,headers: {'content-Type':'application/json',
+      "Authorization":"Bearer $jwt"},body: convert.jsonEncode({
+      "code_participant":widget.listsession.code_participant
+    }));
+    if(response.statusCode==200){
+      Map <String,dynamic> data =convert.jsonDecode(response.body);
+      setState(() {
+        infos_wallet_participant=InfosWallet.fromJson(data['data']);
+      });
     }
   }
 
@@ -99,12 +101,13 @@ class _retirer_gainsState extends State<retirer_gains> {
     );
 
     try{
-      final url=Uri.parse("${adress}?ressource=tontines&action=retirer");
+      final url=Uri.parse("${adress}?ressource=participants&action=retirer");
       final response=await post(url,headers: {"content-Type":"application/json",
         "Authorization":"Bearer $jwt"},body: jsonEncode(
           {
-            "code_tontine":widget.listsession.code_tontine,
-            "code_participant":widget.listsession.code_participant
+            "code_participant":widget.listsession.code_participant,
+            "montant":montant.text,
+            "libelle_mode_paiement":modePaiement
           }));
 
       // 2️⃣ Fermer le dialogue de chargement une fois la réponse obtenue
@@ -147,19 +150,18 @@ class _retirer_gainsState extends State<retirer_gains> {
               actions: [
                 Center(
                   child: TextButton.icon(
-                    onPressed: () {
-                      setState(() {
-                        enCourtraitement = false;
-                        _selectedOption = "";
-                      });
-                      var cheque=donnee['data'];
-                      print(cheque);
-                      if(cheque != null && cheque is Map && cheque.containsKey('statut_tontine')){
-                        recupererWallet();
+                    onPressed: () async {
+                      if(mounted){
+                        setState((){
+                          enCourtraitement = false;
+                          _selectedOption = "";
+                          montant.clear();
+
+                        });
+                        await infosFinanceParticipant();
+                        Navigator.of(context).pop();
                       }
-                      Navigator.of(context)
-                        ..pop()
-                        ..pop();
+
                     },
                     style: TextButton.styleFrom(
                       backgroundColor: Couleur.secondaryGreen,
@@ -213,13 +215,73 @@ class _retirer_gainsState extends State<retirer_gains> {
       appBar: AppBar(
         title: Text("Retirer mes gains"),
       ),
-      body: SafeArea(child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12.0.w),
-              child: Container(
+      body: SafeArea(child: RefreshIndicator(
+        onRefresh: ()async{
+          infosFinanceParticipant();
+        },
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12.0.w),
+                child: Container(
+                  decoration: BoxDecoration(
+                      border: Border(
+                        top: BorderSide(color: Colors.grey,
+                            width: 0.5.w,
+                            style: BorderStyle.solid),
+                        bottom: BorderSide(color: Colors.grey,
+                            width: 0.5.w,
+                            style: BorderStyle.solid),
+                        left: BorderSide(color: Colors.grey,
+                            width: 0.5.w,
+                            style: BorderStyle.solid),
+                        right: BorderSide(color: Colors.grey,
+                            width: 0.5.w,
+                            style: BorderStyle.solid),
+
+                      ),
+                      borderRadius: BorderRadius.circular(12.r),
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey,
+                          blurRadius: 2,
+                        )]
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(12.0.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(padding: EdgeInsets.symmetric(horizontal:10.w,vertical: 5.h),child:
+                        Text("Solde disponible",style: TextStyle(
+                            fontSize: 15.sp,
+                            color: Colors.grey
+                        ),),),
+                        Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8.0.w,),
+                            child:Row(
+                              children: [
+                                Expanded(
+                                  child: Text("${infos_wallet_participant?.solde_participant ?? 0} FCFA",style: TextStyle(
+                                      fontSize: 40.sp,
+                                      fontWeight: FontWeight.bold,
+                                  ),),
+                                ),
+                              ],
+                            )
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 10.h,),
+              Padding(padding: EdgeInsets.all(12.w),child: Container(
                 decoration: BoxDecoration(
                     border: Border(
                       top: BorderSide(color: Colors.grey,
@@ -248,419 +310,382 @@ class _retirer_gainsState extends State<retirer_gains> {
                   padding: EdgeInsets.all(12.0.w),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Padding(padding: EdgeInsets.symmetric(horizontal:10.w,vertical: 5.h),child:
-                      Text("Solde disponible",style: TextStyle(
+                      Text("Montant à retirer",style: TextStyle(
                           fontSize: 15.sp,
                           color: Colors.grey
                       ),),),
                       Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8.0.w,),
-                          child:Row(
-                            children: [
-                              Expanded(
-                                child: Text("125000 FCFA",style: TextStyle(
-                                    fontSize: 40.sp,
-                                    fontWeight: FontWeight.bold,
-                                ),),
-                              ),
-                            ],
-                          )
+                        padding: EdgeInsets.symmetric(horizontal: 8.0.w,),
+                        child: TextField(
+                          keyboardType: TextInputType.number,
+                          controller: montant,
+                          decoration: InputDecoration(
+                              suffix: Text("FCFA"),
+                              hint: Text("0 FCFA",style: TextStyle(
+                                  fontSize: 25.sp,
+                                  color: Colors.grey
+                              ),)
+                          ),
+                          style: TextStyle(
+                              fontSize: 30.sp,
+                              color: Colors.black
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 5.h,),
+                      Padding(
+                        padding: EdgeInsets.all(8.0.w),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                GestureDetector(
+                                  onTap:(){
+                                    montant.setText("10000");
+                                    print("Retrait de ${montant.text}");
+                                  },
+                                  child: Container(
+                                    decoration:BoxDecoration(
+                                        color: Couleur.lightGray,
+                                        borderRadius: BorderRadius.circular(12.r)
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 25.0.w,vertical: 10.h),
+                                      child: Text("10k",style: TextStyle(
+                                          fontSize: 15.sp,
+                                          fontWeight: FontWeight.w500
+                                      ),),
+                                    ),),
+                                ),
+                                GestureDetector(
+                                  onTap:(){
+                                    montant.setText("15000");
+                                    print("Retrait de ${montant.text}");
+                                  },
+                                  child: Container(
+                                    decoration:BoxDecoration(
+                                        color: Couleur.lightGray,
+                                        borderRadius: BorderRadius.circular(12.r)
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 25.0.w,vertical: 10.h),
+                                      child: Text("15k",style: TextStyle(
+                                          fontSize: 15.sp,
+                                          fontWeight: FontWeight.w500
+                                      ),),
+                                    ),),
+                                ),
+                                GestureDetector(
+                                  onTap:(){
+                                    montant.setText("25000");
+                                    print("Retrait de ${montant.text}");
+                                  },
+                                  child: Container(
+                                    decoration:BoxDecoration(
+                                        color: Couleur.lightGray,
+                                        borderRadius: BorderRadius.circular(12.r)
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 25.0.w,vertical: 10.h),
+                                      child: Text("25k",style: TextStyle(
+                                          fontSize: 15.sp,
+                                          fontWeight: FontWeight.w500
+                                      ),),
+                                    ),),
+                                ),
+                                GestureDetector(
+                                  onTap:(){
+                                    montant.setText("50000");
+                                    print("Retrait de ${montant.text}");
+                                  },
+                                  child: Container(
+                                    decoration:BoxDecoration(
+                                        color: Couleur.lightGray,
+                                        borderRadius: BorderRadius.circular(12.r)
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 25.0.w,vertical: 10.h),
+                                      child: Text("50k",style: TextStyle(
+                                          fontSize: 15.sp,
+                                          fontWeight: FontWeight.w500
+                                      ),),
+                                    ),),
+                                ),
+                              ],),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ),
-            SizedBox(height: 10.h,),
-            Padding(padding: EdgeInsets.all(12.w),child: Container(
-              decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(color: Colors.grey,
-                        width: 0.5.w,
-                        style: BorderStyle.solid),
-                    bottom: BorderSide(color: Colors.grey,
-                        width: 0.5.w,
-                        style: BorderStyle.solid),
-                    left: BorderSide(color: Colors.grey,
-                        width: 0.5.w,
-                        style: BorderStyle.solid),
-                    right: BorderSide(color: Colors.grey,
-                        width: 0.5.w,
-                        style: BorderStyle.solid),
-
-                  ),
-                  borderRadius: BorderRadius.circular(12.r),
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey,
-                      blurRadius: 2,
-                    )]
-              ),
-              child: Padding(
-                padding: EdgeInsets.all(12.0.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              ),),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(padding: EdgeInsets.symmetric(horizontal:10.w,vertical: 5.h),child:
-                    Text("Montant à cotiser",style: TextStyle(
-                        fontSize: 15.sp,
-                        color: Colors.grey
-                    ),),),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0.w,),
-                      child: TextField(
-                        keyboardType: TextInputType.number,
-                        controller: montant,
-                        decoration: InputDecoration(
-                            suffix: Text("FCFA"),
-                            hint: Text("0 FCFA",style: TextStyle(
-                                fontSize: 25.sp,
-                                color: Colors.grey
-                            ),)
-                        ),
-                        style: TextStyle(
-                            fontSize: 30.sp,
-                            color: Colors.black
-                        ),
-                      ),
+                    SizedBox(
+                      height: 15.h,
                     ),
-                    SizedBox(height: 5.h,),
                     Padding(
-                      padding: EdgeInsets.all(8.0.w),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              GestureDetector(
-                                onTap:(){
-                                  montant.setText("10000");
-                                  print("Retrait de ${montant.text}");
-                                },
-                                child: Container(
-                                  decoration:BoxDecoration(
-                                      color: Couleur.lightGray,
-                                      borderRadius: BorderRadius.circular(12.r)
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 25.0.w,vertical: 10.h),
-                                    child: Text("10k",style: TextStyle(
-                                        fontSize: 15.sp,
-                                        fontWeight: FontWeight.w500
-                                    ),),
-                                  ),),
-                              ),
-                              GestureDetector(
-                                onTap:(){
-                                  montant.setText("15000");
-                                  print("Retrait de ${montant.text}");
-                                },
-                                child: Container(
-                                  decoration:BoxDecoration(
-                                      color: Couleur.lightGray,
-                                      borderRadius: BorderRadius.circular(12.r)
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 25.0.w,vertical: 10.h),
-                                    child: Text("15k",style: TextStyle(
-                                        fontSize: 15.sp,
-                                        fontWeight: FontWeight.w500
-                                    ),),
-                                  ),),
-                              ),
-                              GestureDetector(
-                                onTap:(){
-                                  montant.setText("25000");
-                                  print("Retrait de ${montant.text}");
-                                },
-                                child: Container(
-                                  decoration:BoxDecoration(
-                                      color: Couleur.lightGray,
-                                      borderRadius: BorderRadius.circular(12.r)
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 25.0.w,vertical: 10.h),
-                                    child: Text("25k",style: TextStyle(
-                                        fontSize: 15.sp,
-                                        fontWeight: FontWeight.w500
-                                    ),),
-                                  ),),
-                              ),
-                              GestureDetector(
-                                onTap:(){
-                                  montant.setText("50000");
-                                  print("Retrait de ${montant.text}");
-                                },
-                                child: Container(
-                                  decoration:BoxDecoration(
-                                      color: Couleur.lightGray,
-                                      borderRadius: BorderRadius.circular(12.r)
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 25.0.w,vertical: 10.h),
-                                    child: Text("50k",style: TextStyle(
-                                        fontSize: 15.sp,
-                                        fontWeight: FontWeight.w500
-                                    ),),
-                                  ),),
-                              ),
-                            ],),
-                        ],
-                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 15.0.w),
+                      child: Text("Options de retrait",style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w500,
+                        color: Colors.grey[500]
+                      ),),
+                    ),SizedBox(
+                      height: 5.h,
                     ),
-                  ],
-                ),
-              ),
-            ),),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    height: 15.h,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 15.0.w),
-                    child: Text("Options de retrait",style: TextStyle(
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.w500,
-                      color: Colors.grey[500]
-                    ),),
-                  ),SizedBox(
-                    height: 5.h,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                          child: Card(
-                            elevation: 0,
-                            color: Couleur.lightGray,
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 5.w),
-                              child: InkWell(
-                                splashColor: Colors.blueAccent.withOpacity(0.2),
-                                highlightColor: Colors.transparent,
-                                onTap: (){
-                                  setState(() {
-                                    _selectedOption="Wave";
-                                  });
-                                },
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                        flex:3,
-                                        child: Row(children: [
-                                          ClipRRect(
-                                            borderRadius: BorderRadius.circular(5.r),
-                                            child: Image.asset("assets/wave.png",fit: BoxFit.cover,height: 50.h,
-                                              width: 100.w,),
-                                          ),
-                                          SizedBox(width: 10.w,),
-                                          Text("WAVE",style: TextStyle(
-                                            fontWeight: FontWeight.w500
-                                          ),),
-                                        ],)),
-                                    SizedBox(width: 60.w,),
-                                    Expanded(
-                                      flex:1,
-                                      child: RadioListTile<String>(value: "Wave", groupValue: _selectedOption, onChanged: (value){
-                                        setState(() {
-                                          _selectedOption=value!;
-                                          print(_selectedOption.toString());
-                                        });
-                                      }),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          )
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 2.h,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                          child: Card(
-                            elevation: 0,
-                            color: Couleur.lightGray,
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 5.w),
-                              child: InkWell(
-                                splashColor: Colors.deepOrange.withOpacity(0.2),
-                                highlightColor: Colors.transparent,
-                                onTap: (){
-                                  setState(() {
-                                    _selectedOption="Orange Money";
-                                  });
-                                },
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    Expanded(
-                                        flex:3,
-                                        child: Row(children: [
-                                          ClipRRect(
-                                            borderRadius: BorderRadius.circular(5.r),
-                                            child: Image.asset("assets/orange money 2.png",fit: BoxFit.cover,height: 50.h,
-                                              width: 100.w,),
-                                          ),
-                                          SizedBox(width: 10.w,),
-                                          Text("ORANGE",style: TextStyle(
-                                              fontWeight: FontWeight.w500
-                                          ),),
-                                        ],)),
-                                    SizedBox(width: 70.w,),
-                                    Expanded(
-                                      flex: 1,
-                                      child: RadioListTile<String>(value: "Orange Money", groupValue: _selectedOption, onChanged: (value){
-                                        setState(() {
-                                          _selectedOption=value!;
-                                          print(_selectedOption.toString());
-                                        });
-                                      }),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          )
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 5.h,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                          child: Card(
-                            elevation: 0,
-                            color: Couleur.lightGray,
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 5.w),
-                              child: InkWell(
-                                splashColor: Colors.yellow.withOpacity(0.5),
-                                highlightColor: Colors.transparent,
-                                onTap: (){
-                                  setState(() {
-                                    _selectedOption="MTN Money";
-                                  });
-                                },
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                        flex:3,
-                                        child: Row(children: [
-                                          ClipRRect(
-                                            borderRadius: BorderRadius.circular(5.r),
-                                            child: Image.asset("assets/MTN MONEY.png",fit: BoxFit.cover,height: 50.h,
-                                              width: 100.w,),
-                                          ),
-                                          SizedBox(width: 10.w,),
-                                          Text("MTN",style: TextStyle(
-                                              fontWeight: FontWeight.w500
-                                          ),),
-                                        ],
-                                        )
-                                    ),
-                                    SizedBox(width: 70.w,),
-                                    Expanded(
-                                      flex: 1,
-                                      child: RadioListTile<String>(value: "MTN Money", groupValue: _selectedOption, onChanged: (value){
-                                        setState(() {
-                                          _selectedOption=value!;
-                                          print(_selectedOption.toString());
-                                        });
-                                      }),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          )
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 5.h,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                          child: Card(
-                            elevation: 0,
-                            color: Couleur.lightGray,
-                            child: InkWell(
-                              splashColor: Colors.blueAccent.withOpacity(0.5),
-                              highlightColor: Colors.transparent,
-                              onTap: (){
-                                setState(() {
-                                  _selectedOption="Moov Money";
-                                });
-                              },
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                      flex:3,
-                                      child: Row(children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(14.r),
-                                          child: Image.asset("assets/moov.png",fit: BoxFit.cover,height: 50.h,
-                                            width: 110.w,),
-                                        ),
-                                        SizedBox(width: 10.w,),
-                                        Text("MOOV",style: TextStyle(
-                                            fontWeight: FontWeight.w500
-                                        ),),
-                                      ],)),
-                                  SizedBox(width: 70.w,),
-                                  Expanded(
-                                    flex: 1,
-                                    child: RadioListTile<String>(value: "Moov Money", groupValue: _selectedOption, onChanged: (value){
-                                      setState(() {
-                                        _selectedOption=value!;
-                                        print(_selectedOption.toString());
-                                      });
-                                    }),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 25.h,),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 50.0.w),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                    Row(
                       children: [
-                        Expanded(child: TextButton.icon(onPressed:enCourtraitement?null: (){
-                          setState(() {
-                            enCourtraitement=true;
-                          });
-                        }, label: Text(enCourtraitement?"Retrait en cours":"Retirer",style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15.sp
-                        ),),icon:enCourtraitement?SizedBox(width:25.w,height:25.h,child: CircularProgressIndicator(color: Colors.white,)):Icon(Icons.north_east, color: Colors.white, size: 28.sp),style: TextButton.styleFrom(
-                          backgroundColor:enCourtraitement?Couleur.iconInactive:Couleur.secondaryGreen,
-                        ),))
+                        Expanded(
+                            child: Card(
+                              elevation: 0,
+                              color: Couleur.lightGray,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 5.w),
+                                child: InkWell(
+                                  splashColor: Colors.blueAccent.withOpacity(0.2),
+                                  highlightColor: Colors.transparent,
+                                  onTap: (){
+                                    setState(() {
+                                      _selectedOption="Wave";
+                                    });
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                          flex:3,
+                                          child: Row(children: [
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(5.r),
+                                              child: Image.asset("assets/wave.png",fit: BoxFit.cover,height: 50.h,
+                                                width: 100.w,),
+                                            ),
+                                            SizedBox(width: 10.w,),
+                                            Text("WAVE",style: TextStyle(
+                                              fontWeight: FontWeight.w500
+                                            ),),
+                                          ],)),
+                                      SizedBox(width: 60.w,),
+                                      Expanded(
+                                        flex:1,
+                                        child: RadioListTile<String>(value: "Wave", groupValue: _selectedOption, onChanged: (value){
+                                          setState(() {
+                                            _selectedOption=value!;
+                                            print(_selectedOption.toString());
+                                          });
+                                        }),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            )
+                        ),
                       ],
                     ),
-                  )
-                ]),
-          ],
+                    SizedBox(
+                      height: 2.h,
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                            child: Card(
+                              elevation: 0,
+                              color: Couleur.lightGray,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 5.w),
+                                child: InkWell(
+                                  splashColor: Colors.deepOrange.withOpacity(0.2),
+                                  highlightColor: Colors.transparent,
+                                  onTap: (){
+                                    setState(() {
+                                      _selectedOption="Orange Money";
+                                    });
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Expanded(
+                                          flex:3,
+                                          child: Row(children: [
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(5.r),
+                                              child: Image.asset("assets/orange money 2.png",fit: BoxFit.cover,height: 50.h,
+                                                width: 100.w,),
+                                            ),
+                                            SizedBox(width: 10.w,),
+                                            Text("ORANGE",style: TextStyle(
+                                                fontWeight: FontWeight.w500
+                                            ),),
+                                          ],)),
+                                      SizedBox(width: 70.w,),
+                                      Expanded(
+                                        flex: 1,
+                                        child: RadioListTile<String>(value: "Orange Money", groupValue: _selectedOption, onChanged: (value){
+                                          setState(() {
+                                            _selectedOption=value!;
+                                            print(_selectedOption.toString());
+                                          });
+                                        }),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            )
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 5.h,
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                            child: Card(
+                              elevation: 0,
+                              color: Couleur.lightGray,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 5.w),
+                                child: InkWell(
+                                  splashColor: Colors.yellow.withOpacity(0.5),
+                                  highlightColor: Colors.transparent,
+                                  onTap: (){
+                                    setState(() {
+                                      _selectedOption="MTN Money";
+                                    });
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                          flex:3,
+                                          child: Row(children: [
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(5.r),
+                                              child: Image.asset("assets/MTN MONEY.png",fit: BoxFit.cover,height: 50.h,
+                                                width: 100.w,),
+                                            ),
+                                            SizedBox(width: 10.w,),
+                                            Text("MTN",style: TextStyle(
+                                                fontWeight: FontWeight.w500
+                                            ),),
+                                          ],
+                                          )
+                                      ),
+                                      SizedBox(width: 70.w,),
+                                      Expanded(
+                                        flex: 1,
+                                        child: RadioListTile<String>(value: "MTN Money", groupValue: _selectedOption, onChanged: (value){
+                                          setState(() {
+                                            _selectedOption=value!;
+                                            print(_selectedOption.toString());
+                                          });
+                                        }),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            )
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 5.h,
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                            child: Card(
+                              elevation: 0,
+                              color: Couleur.lightGray,
+                              child: InkWell(
+                                splashColor: Colors.blueAccent.withOpacity(0.5),
+                                highlightColor: Colors.transparent,
+                                onTap: (){
+                                  setState(() {
+                                    _selectedOption="Moov Money";
+                                  });
+                                },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                        flex:3,
+                                        child: Row(children: [
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.circular(14.r),
+                                            child: Image.asset("assets/moov.png",fit: BoxFit.cover,height: 50.h,
+                                              width: 110.w,),
+                                          ),
+                                          SizedBox(width: 10.w,),
+                                          Text("MOOV",style: TextStyle(
+                                              fontWeight: FontWeight.w500
+                                          ),),
+                                        ],)),
+                                    SizedBox(width: 70.w,),
+                                    Expanded(
+                                      flex: 1,
+                                      child: RadioListTile<String>(value: "Moov Money", groupValue: _selectedOption, onChanged: (value){
+                                        setState(() {
+                                          _selectedOption=value!;
+                                          print(_selectedOption.toString());
+                                        });
+                                      }),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 25.h,),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 50.0.w),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Expanded(child: TextButton.icon(onPressed:enCourtraitement?null: (){
+                            if(montant.text.isEmpty || modePaiement.isEmpty){
+                              DelightToastBar(
+                                position: DelightSnackbarPosition.top,
+                                autoDismiss: true,
+                                snackbarDuration: Duration(seconds: 2),
+                                builder: (BuildContext context) {
+                                  return ToastCard(
+                                    title: Row(
+                                      mainAxisAlignment:MainAxisAlignment.start,
+                                      children: [Icon(Icons.error_outline,color: Colors.white,size: 30.r,),Text("Veuillez remplir tout les champs !",style: TextStyle(
+                                          color: Colors.white
+                                      ),)],),
+                                    color: Colors.red.shade700,);
+                                },).show(context);
+                            }else{
+                              setState(() {
+                                enCourtraitement=true;
+                              });
+                              retirer();
+                            }
+                          }, label: Text(enCourtraitement?"Retrait en cours":"Retirer",style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15.sp
+                          ),),icon:enCourtraitement?SizedBox(width:25.w,height:25.h,child: CircularProgressIndicator(color: Colors.white,)):Icon(Icons.north_east, color: Colors.white, size: 28.sp),style: TextButton.styleFrom(
+                            backgroundColor:enCourtraitement?Couleur.iconInactive:Couleur.secondaryGreen,
+                          ),))
+                        ],
+                      ),
+                    )
+                  ]),
+            ],
+          ),
         ),
       )),
     );

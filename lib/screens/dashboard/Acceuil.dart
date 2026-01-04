@@ -46,32 +46,6 @@ class _acceuilState extends State<acceuil> {
   int notifCount = 0;
   List<Notifications>_listnotification=[];
 
-  Future<void> monTour() async{
-    String? jwt=await widget.listsession.getSecureJwt();
-    final url=Uri.parse("${adress}?ressource=participants&action=mon_tour");
-    final reponse=await post(url,headers: {"Content-Type":"application/json",
-      "Authorization":"Bearer $jwt"},body: jsonEncode(
-        {
-          "code_participant":widget.listsession.code_participant,
-          "code_tontine":widget.listsession.code_tontine
-        })).timeout(Duration(seconds: 5));
-
-    if(reponse.statusCode==200){
-      final tour=jsonDecode(reponse.body) as Map<String,dynamic>;
-      if(tour['success']){
-        Map<String,dynamic>donnee=tour['data'];
-        if(donnee.isNotEmpty){
-          setState(() {
-            numeroTour=donnee['ordre'].toString();
-            statut=donnee['statut'];
-          });
-        }
-      }
-    }else{
-      print(reponse.statusCode);
-    }
-  }
-
   //Recupérer le wallet
   Future<void>recupererWallet() async{
     String? jwt=await widget.listsession.getSecureJwt();
@@ -199,94 +173,6 @@ class _acceuilState extends State<acceuil> {
   }
 
   //RElancer les tours
-  Future<bool>relancer()async{
-    showDialog(context: context, builder: (context){
-      return AlertDialog(
-        title: Center(child: Text("Relance des tour")),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ColorFiltered(colorFilter: ColorFilter.mode(Couleur.primaryBlue, BlendMode.srcATop),child: Lottie.asset("assets/animations/Icon Set - Setting.json",width: 150.w,height: 150.h),),
-            SizedBox(height: 15.h,),
-            Text("Génération des tours...")
-          ],
-        ),
-      );
-    });
-    String? jwt=await widget.listsession.getSecureJwt();
-    final url=Uri.parse("${adress}?ressource=tontines&action=liste_tours");
-    final response=await post(url,headers: {'content-Type':'application/json',
-      "Authorization":"Bearer $jwt"},body: jsonEncode(
-        {
-          'code_tontine':widget.listsession.code_tontine,
-          'relancer':true
-        }
-    ));
-    //Fermer le premier dialogue
-    Navigator.of(context).pop();
-
-    if(response.statusCode==200){
-      final donnee=jsonDecode(response.body) as Map<String,dynamic>;
-      bool success=donnee['success'];
-      showDialog(context: context, builder: (BuildContext context){
-        return AlertDialog(
-          title: Center(child: Text("Statut")),
-          content: success? Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Lottie.asset("assets/animations/Approve.json",width: 150.w,height: 150.h),
-              SizedBox(height: 10.h,),
-              Text(donnee['message'])
-            ],
-          ):Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Lottie.asset("assets/animations/Sign for error _ Flat style.json",width: 150.w,height: 150.h),
-              SizedBox(height: 10.h,),
-              Text("Oups! Une erreur s'est produite, veuillez réessayer.")
-            ],
-          ),
-          actions: [
-            Center(child: TextButton.icon(onPressed: (){
-              if(success){
-                setState(() {
-                  tontine?.etat="En cours";
-                });
-                monTour();
-                Navigator.of(context).pop();
-              }else{
-                Navigator.of(context).pop();
-              }
-            }, label: Text("Compris", style: TextStyle(color: Colors.white),),icon: Icon(Icons.verified,color: Colors.white,),style: TextButton.styleFrom(
-              backgroundColor: Couleur.secondaryGreen
-            ),),)
-          ],
-        );
-      });
-    }else{
-      showDialog(context: context, builder: (BuildContext context){
-        return AlertDialog(
-          title: Center(child: Text("Information")),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Une erreur serveur s'est produite, veuillez reéssayer plus tard. Merci",overflow: TextOverflow.ellipsis,maxLines: 2,),
-            ],
-          ),
-          actions: [
-            Center(
-              child: TextButton.icon(onPressed: (){
-                Navigator.of(context).pop();
-              },style: TextButton.styleFrom(
-                  backgroundColor: Couleur.secondaryGreen
-              ), label: Text("Compris",style: TextStyle(color: Colors.white),),icon: Icon(Icons.verified,color: Colors.white,),),
-            )
-          ],
-        );
-      });
-    }
-    return false;
-  }
 
   Future<void>recupererNotif()async {
     String? jwt=await widget.listsession.getSecureJwt();
@@ -329,7 +215,6 @@ class _acceuilState extends State<acceuil> {
   void initState() {
     super.initState();
     tontineInfo();
-    monTour();
     envoyerToken();
     recupererNotif();
     Timer.periodic(Duration(seconds: 3), (timer){
@@ -376,711 +261,719 @@ class _acceuilState extends State<acceuil> {
               Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>connexion_screen()), (route)=>false);
             },
             child: SafeArea(
-                child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    height: 350.h,
-                    child: Stack(
-                      children: [
-                        Positioned(
-                        top: 0,
-                        left: 10.w,
-                        right: 10.w,
-                          child: Container(
-                            height: 160,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.only(bottomLeft:Radius.circular(12.r),bottomRight: Radius.circular(12.r)),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 10,
-                                  offset: Offset(0, 2),
-                                ),
-                              ]
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.all(15.0.w),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Container(child: Row(children: [
-                                          Image.asset("assets/djarra_finances_v1ico.png",width: 45.w,height: 45.h,),
-                                          SizedBox(width: 10.w,),
-                                          Text("Djarra Finances", style: TextStyle(fontSize: 25.sp, fontWeight: FontWeight.bold),),
+                child: RefreshIndicator(
+                  onRefresh: ()async{
+                    recupererWallet();
+                    recupererNotif();
+                },
+                  child: SingleChildScrollView(
 
-                                        ],),),
-                                        Row(
-                                          children: [
-                                            GestureDetector(
-                                              onTap: (){
-                                                Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>notifications(listsession: widget.listsession)));
-                                              },
-                                              child: Container(
-                                                width: 30.w,
-                                                height: 30.h,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.grey[100],
-                                                  borderRadius: BorderRadius.circular(12.r)
-                                                ),
-                                                child:
-                                                   Center(
-                                                     child: badges.Badge(
-                                                      badgeStyle: badges.BadgeStyle(
-                                                        badgeColor: Colors.red,
-                                                      ), badgeContent: Text("${notifCount}",style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontWeight: FontWeight.bold),),child: Icon(Icons.notifications),),
-                                                   ),
-                                                ),
-                                            ),
-                                            SizedBox(width: 20.w,),
-                                            GestureDetector(
-                                              onTap: (){
-                                                Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>parametre(listsession: widget.listsession)));
-                                              },
-                                              child: Container(
-                                                width: 30.w,
-                                                height: 30.h,
-                                                decoration: BoxDecoration(
-                                                    color: Colors.grey[100],
-                                                    borderRadius: BorderRadius.circular(12.r)
-                                                ),
-                                                child:
-                                                Center(
-                                                  child: Icon(Icons.settings_outlined),
-                                                ),
-                                              ),
-                                            ),
-
-                                          ],
-                                        ),]),
-                                    SizedBox(height: 15.h,),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text("Salut 👋, ",style: TextStyle(fontSize: 15.sp),),
-                                        Text("${widget.listsession.nom_participant} ${widget.listsession.prenoms_participant}",style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 25.sp),)
-                                      ],
-                                    ),]),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          top: 140.h, // Position verticale
-                          left: 25.w,
-                          right: 25.w,
-                          child: // ✅ CARTE VIRTUELLE STYLE MODERNE
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(20.r),
+                    physics: const AlwaysScrollableScrollPhysics(),
+                                scrollDirection: Axis.vertical,
+                                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 350.h,
+                      child: Stack(
+                        children: [
+                          Positioned(
+                          top: 0,
+                          left: 10.w,
+                          right: 10.w,
                             child: Container(
-                              // ✅ Dégradé inspiré de votre logo (bleu Djarra)
+                              height: 160,
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    Couleur.primaryBlue,  // Bleu moyen
-                                    Couleur.secondaryGreen,  // Bleu foncé
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(20.r),
+                                color: Colors.white,
+                                borderRadius: BorderRadius.only(bottomLeft:Radius.circular(12.r),bottomRight: Radius.circular(12.r)),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Color(0xFF0EA5E9).withOpacity(0.4),
-                                    blurRadius: 20,
-                                    offset: Offset(0, 10),
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 10,
+                                    offset: Offset(0, 2),
                                   ),
-                                ],
+                                ]
                               ),
-                              child: Stack(
-                                children: [
-                                  // ✅ Cercles décoratifs (effet carte bancaire)
-                                  Positioned(
-                                    top: -50,
-                                    right: -50,
-                                    child: Container(
-                                      width: 150.w,
-                                      height: 150.h,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.white.withOpacity(0.1),
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    bottom: -30,
-                                    left: -30,
-                                    child: Container(
-                                      width: 100.w,
-                                      height: 100.h,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.white.withOpacity(0.08),
-                                      ),
-                                    ),
-                                  ),
+                              child: Padding(
+                                padding: EdgeInsets.all(15.0.w),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Container(child: Row(children: [
+                                            Image.asset("assets/djarra_finances_v1ico.png",width: 45.w,height: 45.h,),
+                                            SizedBox(width: 10.w,),
+                                            Text("Djarra Finances", style: TextStyle(fontSize: 25.sp, fontWeight: FontWeight.bold),),
 
-                                  // Contenu principal
-                                  Padding(
-                                    padding: EdgeInsets.all(20.w),
-                                    child: Row(
-                                      children: [
-                                        // Colonne texte (65%)
-                                        Expanded(
-                                          flex: 65,
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                          ],),),
+                                          Row(
                                             children: [
-                                              // Header avec logo mini
-                                              Row(
-                                                children: [
-                                                  // Mini logo ou icône
-                                                  Container(
-                                                    padding: EdgeInsets.all(6.w),
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.white.withOpacity(0.2),
-                                                      borderRadius: BorderRadius.circular(8.r),
-                                                    ),
-                                                    child: Icon(
-                                                      Icons.account_balance_wallet,
-                                                      color: Colors.white,
-                                                      size: 16.sp,
-                                                    ),
+                                              GestureDetector(
+                                                onTap: (){
+                                                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>notifications(listsession: widget.listsession)));
+                                                },
+                                                child: Container(
+                                                  width: 30.w,
+                                                  height: 30.h,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey[100],
+                                                    borderRadius: BorderRadius.circular(12.r)
                                                   ),
-                                                  SizedBox(width: 8.w),
-                                                  Text(
-                                                    "TONTINE",
-                                                    style: TextStyle(
-                                                      fontSize: 12.sp,
-                                                      fontWeight: FontWeight.w600,
-                                                      color: Colors.white.withOpacity(0.9),
-                                                      letterSpacing: 2,
-                                                    ),
+                                                  child:
+                                                     Center(
+                                                       child: badges.Badge(
+                                                        badgeStyle: badges.BadgeStyle(
+                                                          badgeColor: Colors.red,
+                                                        ), badgeContent: Text("${notifCount}",style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight: FontWeight.bold),),child: Icon(Icons.notifications),),
+                                                     ),
                                                   ),
-                                                ],
                                               ),
-
-                                              SizedBox(height: 20.h),
-
-                                              // Label
-                                              Text(
-                                                "Solde de la caisse",
-                                                style: TextStyle(
-                                                  fontSize: 14.sp,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Colors.white.withOpacity(0.8),
+                                              SizedBox(width: 20.w,),
+                                              GestureDetector(
+                                                onTap: (){
+                                                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>parametre(listsession: widget.listsession)));
+                                                },
+                                                child: Container(
+                                                  width: 30.w,
+                                                  height: 30.h,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.grey[100],
+                                                      borderRadius: BorderRadius.circular(12.r)
+                                                  ),
+                                                  child:
+                                                  Center(
+                                                    child: Icon(Icons.settings_outlined),
+                                                  ),
                                                 ),
                                               ),
 
-                                              SizedBox(height: 8.h),
+                                            ],
+                                          ),]),
+                                      SizedBox(height: 15.h,),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text("Salut 👋, ",style: TextStyle(fontSize: 15.sp),),
+                                          Text("${widget.listsession.nom_participant} ${widget.listsession.prenoms_participant}",style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 25.sp),)
+                                        ],
+                                      ),]),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 140.h, // Position verticale
+                            left: 25.w,
+                            right: 25.w,
+                            child: // ✅ CARTE VIRTUELLE STYLE MODERNE
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(20.r),
+                              child: Container(
+                                // ✅ Dégradé inspiré de votre logo (bleu Djarra)
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Couleur.primaryBlue,  // Bleu moyen
+                                      Couleur.secondaryGreen,  // Bleu foncé
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(20.r),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Color(0xFF0EA5E9).withOpacity(0.4),
+                                      blurRadius: 20,
+                                      offset: Offset(0, 10),
+                                    ),
+                                  ],
+                                ),
+                                child: Stack(
+                                  children: [
+                                    // ✅ Cercles décoratifs (effet carte bancaire)
+                                    Positioned(
+                                      top: -50,
+                                      right: -50,
+                                      child: Container(
+                                        width: 150.w,
+                                        height: 150.h,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white.withOpacity(0.1),
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      bottom: -30,
+                                      left: -30,
+                                      child: Container(
+                                        width: 100.w,
+                                        height: 100.h,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white.withOpacity(0.08),
+                                        ),
+                                      ),
+                                    ),
 
-                                              // Montant avec masquage
-                                              Row(
-                                                children: [
-                                                  Flexible(
-                                                    child: _masque
-                                                        ? Text(
-                                                      "•••  •••  •••",
-                                                      style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 28.sp,
-                                                        fontWeight: FontWeight.bold,
-                                                        letterSpacing: 4,
-                                                      ),
-                                                    )
-                                                        : wallet != null
-                                                        ? TweenAnimationBuilder(
-                                                        tween: Tween(
-                                                            begin: 0.0,
-                                                            end: double.parse(wallet!.solde_tontine.toString())
-                                                        ),
-                                                        duration: Duration(seconds: 2),
-                                                        builder: (context, double value, child) {
-                                                          return Text(
-                                                            "${value.toStringAsFixed(0)} FCFA",
-                                                            style: TextStyle(
-                                                              fontSize: 28.sp,
-                                                              fontWeight: FontWeight.bold,
-                                                              color: Colors.white,
-                                                              shadows: [
-                                                                Shadow(
-                                                                  color: Colors.black.withOpacity(0.2),
-                                                                  offset: Offset(0, 2),
-                                                                  blurRadius: 4,
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            maxLines: 2,
-                                                            overflow: TextOverflow.ellipsis,
-                                                          );
-                                                        }
-                                                    )
-                                                        : Text(
-                                                      "0 FCFA",
-                                                      style: TextStyle(
-                                                        fontSize: 26.sp,
-                                                        fontWeight: FontWeight.bold,
-                                                        color: Colors.white,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  SizedBox(width: 12.w),
-                                                  GestureDetector(
-                                                    onTap: () {
-                                                      setState(() {
-                                                        _masque = !_masque;
-                                                      });
-                                                    },
-                                                    child: Container(
-                                                      padding: EdgeInsets.all(8.w),
+                                    // Contenu principal
+                                    Padding(
+                                      padding: EdgeInsets.all(20.w),
+                                      child: Row(
+                                        children: [
+                                          // Colonne texte (65%)
+                                          Expanded(
+                                            flex: 65,
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                // Header avec logo mini
+                                                Row(
+                                                  children: [
+                                                    // Mini logo ou icône
+                                                    Container(
+                                                      padding: EdgeInsets.all(6.w),
                                                       decoration: BoxDecoration(
                                                         color: Colors.white.withOpacity(0.2),
                                                         borderRadius: BorderRadius.circular(8.r),
                                                       ),
                                                       child: Icon(
-                                                        _masque ? Icons.visibility_off : Icons.visibility,
+                                                        Icons.account_balance_wallet,
                                                         color: Colors.white,
-                                                        size: 20.sp,
+                                                        size: 16.sp,
                                                       ),
                                                     ),
-                                                  ),
-                                                ],
-                                              ),
-
-                                              SizedBox(height: 16.h),
-
-                                              // Info supplémentaire (numéro de carte fictif)
-                                              Row(
-                                                children: [
-                                                  Text(
-                                                    "****  ****  ****  ${widget.listsession.code_tontine.substring(widget.listsession.code_tontine.length - 4)}",
-                                                    style: TextStyle(
-                                                      fontSize: 12.sp,
-                                                      color: Colors.white.withOpacity(0.7),
-                                                      letterSpacing: 2,
-                                                    ),
-                                                  ),
-                                                  Spacer(),
-                                                  // Badge KYC
-                                                  Container(
-                                                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.white.withOpacity(0.2),
-                                                      borderRadius: BorderRadius.circular(12.r),
-                                                    ),
-                                                    child: Text(
-                                                      widget.listsession.niveau_kyc ?? 'LOADING',
+                                                    SizedBox(width: 8.w),
+                                                    Text(
+                                                      "TONTINE",
                                                       style: TextStyle(
-                                                        fontSize: 10.sp,
-                                                        color: Colors.white,
-                                                        fontWeight: FontWeight.bold,
+                                                        fontSize: 12.sp,
+                                                        fontWeight: FontWeight.w600,
+                                                        color: Colors.white.withOpacity(0.9),
+                                                        letterSpacing: 2,
                                                       ),
                                                     ),
+                                                  ],
+                                                ),
+
+                                                SizedBox(height: 20.h),
+
+                                                // Label
+                                                Text(
+                                                  "Solde de la caisse",
+                                                  style: TextStyle(
+                                                    fontSize: 14.sp,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Colors.white.withOpacity(0.8),
                                                   ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ))
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 10.h,),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 25.0.w),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(onPressed: (){
-                            Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>payer_cotisation(listsession:widget.listsession)));
-                          }, label: Text("Payer ma cotisation",style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white
-                          ),),icon: Icon(Icons.payment),style: OutlinedButton.styleFrom(
-                            backgroundColor: Couleur.primaryBlue,
-                            iconColor: Colors.white,
-                            iconSize: 30.r
-                          ),),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: 15.h,
-                  ),
-                  Padding(
-                    padding:  EdgeInsets.symmetric(horizontal: 25.0.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Actions rapides",style: TextStyle(
-                          fontSize: 25.sp,
-                          fontWeight: FontWeight.bold
-                        ),),
-                        SizedBox(height: 15.h,),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                            GestureDetector(
-                            onTap: (){
-                              Navigator.push(context,MaterialPageRoute(builder: (BuildContext context)=>wallet_participant(listsession:widget.listsession)));
-                            },
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 60.w,
-                                  height: 60.h,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(16.r),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.2),
-                                        blurRadius: 8,
-                                        offset: Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Icon(Icons.wallet, color: Couleur.primaryBlue, size: 28.sp),
-                                ),
-                                SizedBox(height: 8.h),
-                                Text(
-                                  "Mon wallet",
-                                  style: TextStyle(
-                                    fontSize: 12.sp,
-                                    color: Colors.black87,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                              SizedBox(width: 20.w,),GestureDetector(
-                                onTap: (){
-                                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>retirer_gains(listsession:widget.listsession)));
-                                },
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 60.w,
-                                      height: 60.h,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(16.r),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.grey.withOpacity(0.2),
-                                            blurRadius: 8,
-                                            offset: Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Icon(Icons.north_east, color: Couleur.primaryBlue, size: 28.sp),
-                                    ),
-                                    SizedBox(height: 8.h),
-                                    Text(
-                                      "Retirer",
-                                      style: TextStyle(
-                                        fontSize: 12.sp,
-                                        color: Colors.black87,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),SizedBox(width: 20.w,),
-                              GestureDetector(
-                                onTap: (){
-                                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>details_tontine(listsession: widget.listsession)));
-                                },
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 60.w,
-                                      height: 60.h,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(16.r),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.grey.withOpacity(0.2),
-                                            blurRadius: 8,
-                                            offset: Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Icon(Icons.group, color: Couleur.primaryBlue, size: 28.sp),
-                                    ),
-                                    SizedBox(height: 8.h),
-                                    Text(
-                                      "Tontine",
-                                      style: TextStyle(
-                                        fontSize: 12.sp,
-                                        color: Colors.black87,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),SizedBox(width: 20.w,),
-                              GestureDetector(
-                                onTap: (){
-                                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>tourTontine(listsession: widget.listsession)));
-                                },
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 60.w,
-                                      height: 60.h,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(16.r),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.grey.withOpacity(0.2),
-                                            blurRadius: 8,
-                                            offset: Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Icon(Icons.calendar_month, color: Couleur.primaryBlue, size: 28.sp),
-                                    ),
-                                    SizedBox(height: 8.h),
-                                    Text(
-                                      "Planning",
-                                      style: TextStyle(
-                                        fontSize: 12.sp,
-                                        color: Colors.black87,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),SizedBox(width: 20.w,),
-                              GestureDetector(
-                                onTap: (){
+                                                ),
 
-                                },
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 60.w,
-                                      height: 60.h,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(16.r),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.grey.withOpacity(0.2),
-                                            blurRadius: 8,
-                                            offset: Offset(0, 4),
+                                                SizedBox(height: 8.h),
+
+                                                // Montant avec masquage
+                                                Row(
+                                                  children: [
+                                                    Flexible(
+                                                      child: _masque
+                                                          ? Text(
+                                                        "•••  •••  •••",
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 28.sp,
+                                                          fontWeight: FontWeight.bold,
+                                                          letterSpacing: 4,
+                                                        ),
+                                                      )
+                                                          : wallet != null
+                                                          ? TweenAnimationBuilder(
+                                                          tween: Tween(
+                                                              begin: 0.0,
+                                                              end: double.parse(wallet!.solde_tontine.toString())
+                                                          ),
+                                                          duration: Duration(seconds: 2),
+                                                          builder: (context, double value, child) {
+                                                            return Text(
+                                                              "${value.toStringAsFixed(0)} FCFA",
+                                                              style: TextStyle(
+                                                                fontSize: 28.sp,
+                                                                fontWeight: FontWeight.bold,
+                                                                color: Colors.white,
+                                                                shadows: [
+                                                                  Shadow(
+                                                                    color: Colors.black.withOpacity(0.2),
+                                                                    offset: Offset(0, 2),
+                                                                    blurRadius: 4,
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              maxLines: 2,
+                                                              overflow: TextOverflow.ellipsis,
+                                                            );
+                                                          }
+                                                      )
+                                                          : Text(
+                                                        "0 FCFA",
+                                                        style: TextStyle(
+                                                          fontSize: 26.sp,
+                                                          fontWeight: FontWeight.bold,
+                                                          color: Colors.white,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 12.w),
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        setState(() {
+                                                          _masque = !_masque;
+                                                        });
+                                                      },
+                                                      child: Container(
+                                                        padding: EdgeInsets.all(8.w),
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.white.withOpacity(0.2),
+                                                          borderRadius: BorderRadius.circular(8.r),
+                                                        ),
+                                                        child: Icon(
+                                                          _masque ? Icons.visibility_off : Icons.visibility,
+                                                          color: Colors.white,
+                                                          size: 20.sp,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+
+                                                SizedBox(height: 16.h),
+
+                                                // Info supplémentaire (numéro de carte fictif)
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      "****  ****  ****  ${widget.listsession.code_tontine.substring(widget.listsession.code_tontine.length - 4)}",
+                                                      style: TextStyle(
+                                                        fontSize: 12.sp,
+                                                        color: Colors.white.withOpacity(0.7),
+                                                        letterSpacing: 2,
+                                                      ),
+                                                    ),
+                                                    Spacer(),
+                                                    // Badge KYC
+                                                    Container(
+                                                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.white.withOpacity(0.2),
+                                                        borderRadius: BorderRadius.circular(12.r),
+                                                      ),
+                                                      child: Text(
+                                                        widget.listsession.niveau_kyc ?? 'LOADING',
+                                                        style: TextStyle(
+                                                          fontSize: 10.sp,
+                                                          color: Colors.white,
+                                                          fontWeight: FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ],
-                                      ),
-                                      child: Icon(Icons.query_stats_rounded, color: Couleur.primaryBlue, size: 28.sp),
-                                    ),
-                                    SizedBox(height: 8.h),
-                                    Text(
-                                      "Vue globale",
-                                      style: TextStyle(
-                                        fontSize: 12.sp,
-                                        color: Colors.black87,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),SizedBox(width: 20.w,),
-
-                              GestureDetector(
-                                onTap: (){
-
-                                },
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 60.w,
-                                      height: 60.h,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(16.r),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.grey.withOpacity(0.2),
-                                            blurRadius: 8,
-                                            offset: Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Icon(Icons.share, color: Couleur.primaryBlue, size: 28.sp),
-                                    ),
-                                    SizedBox(height: 8.h),
-                                    Text(
-                                      "Inviter",
-                                      style: TextStyle(
-                                        fontSize: 12.sp,
-                                        color: Colors.black87,
-                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              ],
+                            ))
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 10.h,),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 25.0.w),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(onPressed: (){
+                              Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>payer_cotisation(listsession:widget.listsession)));
+                            }, label: Text("Payer ma cotisation",style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white
+                            ),),icon: Icon(Icons.payment),style: OutlinedButton.styleFrom(
+                              backgroundColor: Couleur.primaryBlue,
+                              iconColor: Colors.white,
+                              iconSize: 30.r
+                            ),),
                           ),
-                        ),SizedBox(
-                          height: 15.h,
-                        ),
-                        Text("Activité récente",style: TextStyle(
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 15.h,
+                    ),
+                    Padding(
+                      padding:  EdgeInsets.symmetric(horizontal: 25.0.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Actions rapides",style: TextStyle(
                             fontSize: 25.sp,
                             fontWeight: FontWeight.bold
-                        ),),
-                        SizedBox(
-                          height: 10.h,
-                        ),
-                        SizedBox(
-                            height:300.h,
-                            width: double.maxFinite,
-                            child: _listeTransac.isEmpty ?
-                            Center(
+                          ),),
+                          SizedBox(height: 15.h,),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                              GestureDetector(
+                              onTap: (){
+                                Navigator.push(context,MaterialPageRoute(builder: (BuildContext context)=>wallet_participant(listsession:widget.listsession)));
+                              },
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  ColorFiltered(colorFilter: ColorFilter.mode(Couleur.primaryBlue, BlendMode.srcATop),
-                                    child: Lottie.asset("assets/animations/lottieflow-ecommerce-14-7-000000-easey.json",width: 150.w,height: 150.h),),
-                                  SizedBox(height: 15.h,),
-                                  Text("Vos transactions apparaîtront ici",
-                                    style: TextStyle(color: Colors.grey[600]),)
+                                  Container(
+                                    width: 60.w,
+                                    height: 60.h,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(16.r),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.2),
+                                          blurRadius: 8,
+                                          offset: Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Icon(Icons.wallet, color: Couleur.primaryBlue, size: 28.sp),
+                                  ),
+                                  SizedBox(height: 8.h),
+                                  Text(
+                                    "Mon wallet",
+                                    style: TextStyle(
+                                      fontSize: 12.sp,
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
                                 ],
                               ),
-                            ): ListView.builder(
-                                itemCount: _listeTransac.length,
-                                itemBuilder: (context,index){
-                                  final Transactions transac=_listeTransac[index];
-                                  return GestureDetector(
-                                    onTap: (){
-                                      showDialog(context: context, builder: (BuildContext context){
-                                        return AlertDialog(
-                                          title: Center(child: Text("Détails de transaction",style: TextStyle(
-                                              fontSize: 15.sp
-                                          ),)),
-                                          content: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text("Nom :${transac.nom}",style: TextStyle(
-                                                  fontSize: 15.sp
-                                              ),),
-                                              Text("Prénoms :${transac.prenoms}",style: TextStyle(
-                                                  fontSize: 15.sp
-                                              ),),
-                                              Text("Type de transaction :${transac.type_transaction}",style: TextStyle(
-                                                  fontSize: 15.sp
-                                              ),),
-                                              Text("Montant de transaction :${transac.montant_transaction}",style: TextStyle(
-                                                  fontSize: 15.sp
-                                              ),),
-                                              Text("Date de transaction :${transac.date_transaction}",style: TextStyle(
-                                                  fontSize: 15.sp
-                                              ),),
-                                              Text("Mode de paiement :${transac.mode_paiement}",style: TextStyle(
-                                                  fontSize: 15.sp
-                                              ),),
-                                              Text("Statut: ${transac.statut_paiement}",style: TextStyle(
-                                                  fontSize: 15.sp
-                                              ),),
-                                            ],
-                                          ),
-                                          actions: [
-                                            Center(
-                                              child: TextButton.icon(onPressed: (){
-                                                Navigator.of(context).pop();
-                                              },style: TextButton.styleFrom(
-                                                  backgroundColor: Couleur.secondaryGreen
-                                              ), label: Text("Compris",style: TextStyle(
-                                                  color: Colors.white
-                                              ),),icon: Icon(Icons.verified,color: Colors.white,),),
-                                            )
+                            ),
+                                SizedBox(width: 20.w,),GestureDetector(
+                                  onTap: (){
+                                    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>retirer_gains(listsession:widget.listsession)));
+                                  },
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 60.w,
+                                        height: 60.h,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(16.r),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey.withOpacity(0.2),
+                                              blurRadius: 8,
+                                              offset: Offset(0, 4),
+                                            ),
                                           ],
-                                        );
-                                      });
-                                    },
-                                    child: ListTile(
-                                      title: Text((widget.listsession.nom_participant==transac.nom && widget.listsession.prenoms_participant==transac.prenoms)? "Vous":transac.prenoms+" "+transac.nom, style: TextStyle(
-                                          fontSize: 16.sp,
-                                          fontWeight: FontWeight.bold
-                                      ),),
-                                      subtitle: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(transac.type_transaction,style: TextStyle(
-                                                  fontSize: 14.sp
-                                              ),),
-                                              Text(transac.date_transaction,style: TextStyle(
-                                                  fontSize: 14.sp
-                                              ),)
-                                            ],
-                                          ),
-                                          Row(
-                                            children: [
-                                              Column(
-                                                children: [
-                                                  Text(transac.type_transaction!="Retrait" ? "+ ${transac.montant_transaction}":"- ${transac.montant_transaction}",style: TextStyle(
-                                                      color:(transac.type_transaction=="Retrait")?  Colors.red:Colors.green,
-                                                      fontWeight: FontWeight.bold
-                                                  ),),
-                                                  Text(transac.statut_paiement)
-                                                ],
-                                              ),
-                                              SizedBox(
-                                                width: 10.h,
-                                              ),
-                                              Column(
-                                                children: [
-                                                  Icon(transac.type_transaction!="Retrait"? Icons.arrow_outward:Icons.arrow_downward,color:transac.type_transaction!="Retrait"? Colors.green:Colors.red,size: 20.r)
-                                                ],
+                                        ),
+                                        child: Icon(Icons.north_east, color: Couleur.primaryBlue, size: 28.sp),
+                                      ),
+                                      SizedBox(height: 8.h),
+                                      Text(
+                                        "Retirer",
+                                        style: TextStyle(
+                                          fontSize: 12.sp,
+                                          color: Colors.black87,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),SizedBox(width: 20.w,),
+                                GestureDetector(
+                                  onTap: (){
+                                    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>details_tontine(listsession: widget.listsession)));
+                                  },
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 60.w,
+                                        height: 60.h,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(16.r),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey.withOpacity(0.2),
+                                              blurRadius: 8,
+                                              offset: Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Icon(Icons.group, color: Couleur.primaryBlue, size: 28.sp),
+                                      ),
+                                      SizedBox(height: 8.h),
+                                      Text(
+                                        "Tontine",
+                                        style: TextStyle(
+                                          fontSize: 12.sp,
+                                          color: Colors.black87,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),SizedBox(width: 20.w,),
+                                GestureDetector(
+                                  onTap: (){
+                                    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>tourTontine(listsession: widget.listsession)));
+                                  },
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 60.w,
+                                        height: 60.h,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(16.r),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey.withOpacity(0.2),
+                                              blurRadius: 8,
+                                              offset: Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Icon(Icons.calendar_month, color: Couleur.primaryBlue, size: 28.sp),
+                                      ),
+                                      SizedBox(height: 8.h),
+                                      Text(
+                                        "Planning",
+                                        style: TextStyle(
+                                          fontSize: 12.sp,
+                                          color: Colors.black87,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),SizedBox(width: 20.w,),
+                                GestureDetector(
+                                  onTap: (){
+
+                                  },
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 60.w,
+                                        height: 60.h,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(16.r),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey.withOpacity(0.2),
+                                              blurRadius: 8,
+                                              offset: Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Icon(Icons.query_stats_rounded, color: Couleur.primaryBlue, size: 28.sp),
+                                      ),
+                                      SizedBox(height: 8.h),
+                                      Text(
+                                        "Vue globale",
+                                        style: TextStyle(
+                                          fontSize: 12.sp,
+                                          color: Colors.black87,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),SizedBox(width: 20.w,),
+
+                                GestureDetector(
+                                  onTap: (){
+
+                                  },
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 60.w,
+                                        height: 60.h,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(16.r),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey.withOpacity(0.2),
+                                              blurRadius: 8,
+                                              offset: Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Icon(Icons.share, color: Couleur.primaryBlue, size: 28.sp),
+                                      ),
+                                      SizedBox(height: 8.h),
+                                      Text(
+                                        "Inviter",
+                                        style: TextStyle(
+                                          fontSize: 12.sp,
+                                          color: Colors.black87,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                ],
+                            ),
+                          ),SizedBox(
+                            height: 15.h,
+                          ),
+                          Text("Activité récente",style: TextStyle(
+                              fontSize: 25.sp,
+                              fontWeight: FontWeight.bold
+                          ),),
+                          SizedBox(
+                            height: 10.h,
+                          ),
+                          SizedBox(
+                              height:300.h,
+                              width: double.maxFinite,
+                              child: _listeTransac.isEmpty ?
+                              Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    ColorFiltered(colorFilter: ColorFilter.mode(Couleur.primaryBlue, BlendMode.srcATop),
+                                      child: Lottie.asset("assets/animations/lottieflow-ecommerce-14-7-000000-easey.json",width: 150.w,height: 150.h),),
+                                    SizedBox(height: 15.h,),
+                                    Text("Vos transactions apparaîtront ici",
+                                      style: TextStyle(color: Colors.grey[600]),)
+                                  ],
+                                ),
+                              ): ListView.builder(
+                                  itemCount: _listeTransac.length,
+                                  itemBuilder: (context,index){
+                                    final Transactions transac=_listeTransac[index];
+                                    return GestureDetector(
+                                      onTap: (){
+                                        showDialog(context: context, builder: (BuildContext context){
+                                          return AlertDialog(
+                                            title: Center(child: Text("Détails de transaction",style: TextStyle(
+                                                fontSize: 15.sp
+                                            ),)),
+                                            content: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text("Nom :${transac.nom}",style: TextStyle(
+                                                    fontSize: 15.sp
+                                                ),),
+                                                Text("Prénoms :${transac.prenoms}",style: TextStyle(
+                                                    fontSize: 15.sp
+                                                ),),
+                                                Text("Type de transaction :${transac.type_transaction}",style: TextStyle(
+                                                    fontSize: 15.sp
+                                                ),),
+                                                Text("Montant de transaction :${transac.montant_transaction}",style: TextStyle(
+                                                    fontSize: 15.sp
+                                                ),),
+                                                Text("Date de transaction :${transac.date_transaction}",style: TextStyle(
+                                                    fontSize: 15.sp
+                                                ),),
+                                                Text("Mode de paiement :${transac.mode_paiement}",style: TextStyle(
+                                                    fontSize: 15.sp
+                                                ),),
+                                                Text("Statut: ${transac.statut_paiement}",style: TextStyle(
+                                                    fontSize: 15.sp
+                                                ),),
+                                              ],
+                                            ),
+                                            actions: [
+                                              Center(
+                                                child: TextButton.icon(onPressed: (){
+                                                  Navigator.of(context).pop();
+                                                },style: TextButton.styleFrom(
+                                                    backgroundColor: Couleur.secondaryGreen
+                                                ), label: Text("Compris",style: TextStyle(
+                                                    color: Colors.white
+                                                ),),icon: Icon(Icons.verified,color: Colors.white,),),
                                               )
                                             ],
-                                          ),
+                                          );
+                                        });
+                                      },
+                                      child: ListTile(
+                                        title: Text((widget.listsession.nom_participant==transac.nom && widget.listsession.prenoms_participant==transac.prenoms)? "Vous":transac.prenoms+" "+transac.nom, style: TextStyle(
+                                            fontSize: 16.sp,
+                                            fontWeight: FontWeight.bold
+                                        ),),
+                                        subtitle: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(transac.type_transaction,style: TextStyle(
+                                                    fontSize: 14.sp
+                                                ),),
+                                                Text(transac.date_transaction,style: TextStyle(
+                                                    fontSize: 14.sp
+                                                ),)
+                                              ],
+                                            ),
+                                            Row(
+                                              children: [
+                                                Column(
+                                                  children: [
+                                                    Text(transac.type_transaction!="Retrait" ? "+ ${transac.montant_transaction}":"- ${transac.montant_transaction}",style: TextStyle(
+                                                        color:(transac.type_transaction=="Retrait")?  Colors.red:Colors.green,
+                                                        fontWeight: FontWeight.bold
+                                                    ),),
+                                                    Text(transac.statut_paiement)
+                                                  ],
+                                                ),
+                                                SizedBox(
+                                                  width: 10.h,
+                                                ),
+                                                Column(
+                                                  children: [
+                                                    Icon(transac.type_transaction!="Retrait"? Icons.arrow_outward:Icons.arrow_downward,color:transac.type_transaction!="Retrait"? Colors.green:Colors.red,size: 20.r)
+                                                  ],
+                                                )
+                                              ],
+                                            ),
 
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                })
-                        )
-                      ],
+                                    );
+                                  })
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ))
+                  ],
+                                ),
+                              ),
+                ))
         ),
     );
   }

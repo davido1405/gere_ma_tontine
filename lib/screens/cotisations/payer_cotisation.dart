@@ -7,8 +7,10 @@ import 'package:delightful_toast/toast/components/toast_card.dart';
 import 'package:delightful_toast/toast/utils/enums.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widget_previews.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/cotisation.dart';
+import 'package:gerematontine/models/preview.dart';
 import 'package:gerematontine/models/session.dart';
 import 'package:flutter/material.dart';
 import 'package:gerematontine/models/tontines.dart';
@@ -19,7 +21,9 @@ import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../constants/colors.dart';
 import '../../constants/server.dart';
-import 'package:path_provider/path_provider.dart'; // Pour getApplicationDocumentsDirectory()
+import 'package:path_provider/path_provider.dart';
+
+import '../../models/infos_wallet_participant.dart'; // Pour getApplicationDocumentsDirectory()
 
 
 class payer_cotisation extends StatefulWidget {
@@ -39,6 +43,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
     fetchCotisation();
     _selectedOption="Wallet Participant";
     payable=false;
+    infosFinanceParticipant();
   }
 
 
@@ -48,7 +53,6 @@ class _payer_cotisationState extends State<payer_cotisation> {
   bool misejourEncour=false;
   bool enCourtraitement=false;
   String lottieAffiche='';
-  int? solde_wallet_participant;
   String modePaiement="Choisir mode de paiement";
   bool wallet_parti=true;
   bool payable=false;
@@ -56,6 +60,10 @@ class _payer_cotisationState extends State<payer_cotisation> {
   String? montantAffiche;
   int? fraisTransac;
   int? totalTransac;
+
+  PreviewCotisation? previewCotisation;
+
+  InfosWallet? infos_wallet_participant;
 
 
   List<Cotisation>_listCotisation=[];
@@ -82,6 +90,96 @@ class _payer_cotisationState extends State<payer_cotisation> {
       setState(() {
         _listCotisation=coti.map((coti)=>Cotisation.fromJson(coti)).toList();
       });
+    }
+  }
+
+  Future<void>preview()async{
+    String? jwt = await widget.listsession.getSecureJwt();
+    // 1️⃣ Affiche le dialogue de chargement
+    showDialog(
+      context: context,
+      barrierDismissible: false, // empêche de fermer en cliquant dehors
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Center(child: Text("Statut")),
+          content: SizedBox(
+            height: 200.h,
+            child: Center(
+              child: Column(
+                children: [
+                  Lottie.asset("assets/animations/Card swiping.json", width: 150.w, height: 150.h),
+                  const SizedBox(height: 10),
+                  const Text("Chargement de l'aperçu...")
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    try {
+      final url = Uri.parse("${adress}?ressource=cotisations&action=preview_cotisation");
+      final reponse = await http.post(
+        url,
+        headers: {
+          "content-Type": "application/json",
+          "Authorization": "Bearer $jwt"
+        },
+        body: jsonEncode({
+          "code_tontine": widget.listsession.code_tontine,
+          "code_participant": widget.listsession.code_participant,
+          "montant": int.tryParse(montant.text) ?? 0,
+        }),
+      );
+
+      // 2️⃣ Fermer le dialogue de chargement une fois la réponse obtenue
+      if (Navigator.canPop(context)) Navigator.pop(context);
+
+      if (reponse.statusCode == 200) {
+        Map<String, dynamic> data = jsonDecode(reponse.body);
+        bool success = data['success'];
+
+        if(success){
+          if(mounted){
+            setState(() {
+              previewCotisation=PreviewCotisation.fromJson(data['data']);
+            });
+          }
+        }
+      } else {
+        setState(() => enCourtraitement = false);
+        print("Erreur serveur : ${reponse.statusCode}");
+      }
+    } catch (e) {
+      // ✅ Vérifier mounted AVANT d'utiliser context
+      if (!mounted) return;
+
+      // Fermer le dialogue
+      if (Navigator.canPop(context)) {
+        setState(() => enCourtraitement = false);
+        Navigator.pop(context);
+      }
+
+
+      // 3bis️⃣ Affiche un dialogue d’erreur
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text("Erreur"),
+          content: Text("Une erreur est survenue : $e"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),style: TextButton.styleFrom(
+                backgroundColor: Couleur.secondaryGreen
+            ),
+              child: const Text("Compris",style: TextStyle(
+                  color: Colors.white
+              ),),
+            )
+          ],
+        ),
+      );
     }
   }
 
@@ -176,9 +274,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
                         enCourtraitement = false;
                         _selectedOption = "";
                       });
-                      Navigator.of(context)
-                        ..pop()
-                        ..pop();
+                      Navigator.of(context).pop();
                       montant.clear();
                       montantFraisinculs.clear();
                       fetchCotisation();
@@ -227,6 +323,21 @@ class _payer_cotisationState extends State<payer_cotisation> {
           ],
         ),
       );
+    }
+  }
+
+  Future<void>infosFinanceParticipant() async{
+    String? jwt=await widget.listsession.getSecureJwt();
+    final url=Uri.parse("${adress}?ressource=participants&action=infos_wallet_participant");
+    final response = await http.post(url,headers: {'content-Type':'application/json',
+      "Authorization":"Bearer $jwt"},body: convert.jsonEncode({
+      "code_participant":widget.listsession.code_participant
+    }));
+    if(response.statusCode==200){
+      Map <String,dynamic> data =convert.jsonDecode(response.body);
+      setState(() {
+        infos_wallet_participant=InfosWallet.fromJson(data['data']);
+      });
     }
   }
 
@@ -395,12 +506,16 @@ class _payer_cotisationState extends State<payer_cotisation> {
                                     ],),
                                 SizedBox(height: 15.h,),
                                 Row(children: [
-                                  Expanded(child: TextButton.icon(onPressed: (){
-                                    setState(() {
-                                      montantAffiche=montant.text;
-                                    });
+                                  Expanded(child: TextButton.icon(onPressed: () async{
+                                    if(mounted){
+                                      setState(() {
+                                        montantAffiche=montant.text;
+                                      });
+                                      preview();
+                                    }
+
                                     print('Calculer la ventilation');
-                                  }, label: Text("Calculer",style: TextStyle(color: Colors.white),),icon: Icon(Icons.currency_exchange_rounded,color: Colors.white,),style: TextButton.styleFrom(
+                                  }, label: Text("Repartir",style: TextStyle(color: Colors.white),),icon: Icon(Icons.currency_exchange_rounded,color: Colors.white,),style: TextButton.styleFrom(
                                     backgroundColor: Couleur.accentOrange
                                   ),))
                                 ],)
@@ -474,27 +589,11 @@ class _payer_cotisationState extends State<payer_cotisation> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                             Text("Cotisation(s) manquée(s)"),
-                              Text("${cotisationManque ?? 0}",style: TextStyle(
+                              Text("${previewCotisation?.cotisations_manquees ?? 0}",style: TextStyle(
                                   fontSize: 18.sp,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black
                               ),),
-                          ],),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(8.0.w),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                            Text("Total des frais"),
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text("${fraisTransac ?? 0} FCFA"  ,style: TextStyle(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black
-                              ),),
-                            )
                           ],),
                         ),
                         Padding(
@@ -505,17 +604,49 @@ class _payer_cotisationState extends State<payer_cotisation> {
                               Text("Situation tour en cours"),
                               Container(
                                 decoration: BoxDecoration(
-                                  color: payable?Couleur.secondaryGreen:Colors.red,
-                                  borderRadius: BorderRadius.circular(18.r)
+                                    color: previewCotisation?.situtaion_tour.toString()=="Payable"?Couleur.secondaryGreen:Colors.red,
+                                    borderRadius: BorderRadius.circular(18.r)
                                 ),
                                 child: Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 18.0.w,vertical: 5.h),
-                                  child: Text(payable?"Paiement possible":"Paiement impossible",style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold
+                                  child: Text(previewCotisation?.situtaion_tour ?? "En attente",style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold
                                   ),),
                                 ),)
                             ],),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(8.0.w),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Tours en avance"),
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text("${previewCotisation?.tour_avance ?? 0}"  ,style: TextStyle(
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black
+                                ),),
+                              )
+                            ],),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(8.0.w),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                            Text("Total des frais"),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text("${previewCotisation?.total_frais ?? 0} FCFA"  ,style: TextStyle(
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black
+                              ),),
+                            )
+                          ],),
                         ),
                         Divider(height: 10.h,thickness: 1.5.w,indent: 25.w,endIndent: 25.w,),
                         Padding(
@@ -526,7 +657,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
                               Text("Total transaction"),
                               FittedBox(
                                 fit: BoxFit.scaleDown,
-                                child: Text("${totalTransac ?? 0} FCFA"  ,style: TextStyle(
+                                child: Text("${previewCotisation?.total_transaction ?? 0} FCFA"  ,style: TextStyle(
                                     fontSize: 18.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black
@@ -580,7 +711,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
                                             fontSize: 20.sp,
                                             fontWeight: FontWeight.w500
                                         ),),
-                                        Text("Solde: ${solde_wallet_participant ?? 0} FCFA",style: TextStyle(
+                                        Text("Solde: ${infos_wallet_participant?.solde_participant ?? 0} FCFA",style: TextStyle(
                                             fontSize: 18.sp,
                                             fontWeight: FontWeight.w400,
                                             color: Colors.grey
@@ -588,8 +719,8 @@ class _payer_cotisationState extends State<payer_cotisation> {
                                         ],)
                                         ],
                                       )),
-                                  ?wallet_parti?
-                                  Expanded(
+                                  ?wallet_parti
+                                      ? Expanded(
                                       child: Icon(Icons.check_circle_outline_outlined,color: Couleur.primaryBlue,))
                                       :null
                                   ]
@@ -926,7 +1057,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
                   SizedBox(
                   height: 10.h,
                 ),
-                  ElevatedButton.icon(onPressed: (){
+                  ElevatedButton.icon(onPressed: () async{
                     String montantCotiser=montant.text.toString();
                     String modePaiement=_selectedOption.toString();
                     if(montantCotiser.isEmpty || modePaiement.isEmpty){
@@ -943,8 +1074,10 @@ class _payer_cotisationState extends State<payer_cotisation> {
                               ),)],),
                             color: Colors.red.shade700,);
                         },).show(context);
+                    }else{
+                      payerCotisation(montantCotiser,modePaiement);
                     }
-                    print(modePaiement);
+
                   }, label: Text("Confirmer le paiement",style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white
