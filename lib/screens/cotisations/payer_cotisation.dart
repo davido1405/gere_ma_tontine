@@ -360,7 +360,9 @@ class _payer_cotisationState extends State<payer_cotisation> {
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: fetchCotisation,
+          onRefresh: () async{
+            infosFinanceParticipant();
+          },
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 10.0.w),
             child: SingleChildScrollView(

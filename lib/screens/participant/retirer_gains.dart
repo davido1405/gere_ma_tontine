@@ -156,7 +156,6 @@ class _retirer_gainsState extends State<retirer_gains> {
                           enCourtraitement = false;
                           _selectedOption = "";
                           montant.clear();
-
                         });
                         await infosFinanceParticipant();
                         Navigator.of(context).pop();

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../constants/colors.dart';
@@ -33,6 +35,8 @@ class _details_tontineState extends State<details_tontine> with SingleTickerProv
     super.initState();
     chargerMembres();
     _controllerLotti=AnimationController(duration: Duration(seconds: 2), vsync: this);
+    tontineInfo();
+    monTour();
   }
 
   @override
@@ -226,6 +230,61 @@ class _details_tontineState extends State<details_tontine> with SingleTickerProv
     }
   }
 
+  Future<void> tontineInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Charger immédiatement les données du cache (affichage rapide)
+    final cachedTontine = prefs.getString('tontine_info');
+    if (cachedTontine != null) {
+      setState(() {
+        tontine = Tontine.fromJson(jsonDecode(cachedTontine));
+      });
+      print("✅ Tontine chargée depuis le cache");
+    }
+
+    // Ensuite, vérifier s'il y a une mise à jour côté serveur
+    String? jwt = await widget.listsession.getSecureJwt();
+    final url = Uri.parse("${adress}?ressource=tontines&action=details_tontine");
+
+    try {
+      final reponse = await post(
+        url,
+        headers: {
+          "Authorization": "Bearer $jwt",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "code_tontine": widget.listsession.code_tontine
+        }),
+      ).timeout(const Duration(seconds: 5));
+
+      if (reponse.statusCode == 200) {
+        final data = jsonDecode(reponse.body) as Map<String, dynamic>;
+        if (data['success'] == true) {
+          final tontineData = Tontine.fromJson(data['data']);
+
+          // Comparer les états (ou autre champ clé)
+          if (tontine == null || tontine!.etat != tontineData.etat) {
+            setState(() {
+              tontine = tontineData;
+            });
+
+            // Mettre à jour le cache
+            await prefs.setString('tontine_info', jsonEncode(data['data']));
+            await prefs.setString('tontine_last_fetch', DateTime.now().toIso8601String());
+
+            print("🔄 Cache mis à jour (changement d'état détecté)");
+          } else {
+            print("✅ Aucune modification détectée");
+          }
+        }
+      }
+    } catch (e) {
+      print("⚠️ Erreur lors de la vérification des infos tontine: $e");
+    }
+  }
+
+
   late String nomBeneficiare="N/A";
   late String prenomsBeneficiare="N/A";
   late String datePaiement="N/A";
@@ -352,7 +411,10 @@ class _details_tontineState extends State<details_tontine> with SingleTickerProv
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: ()async { await monTour(); },
+          onRefresh: ()async {
+            await monTour();
+            await tontineInfo();
+            },
           child: SingleChildScrollView(
             scrollDirection: Axis.vertical,
             physics: const AlwaysScrollableScrollPhysics(),
@@ -412,8 +474,6 @@ class _details_tontineState extends State<details_tontine> with SingleTickerProv
                                         size: 150.w,
                                       ),
                                     ),
-          
-          
                                   ],
                                 ),
                               ),
@@ -477,10 +537,12 @@ class _details_tontineState extends State<details_tontine> with SingleTickerProv
                                   ),
                                 ),
                               ),
-                              Text("Total membres",style: TextStyle(
-                                  color: Colors.grey[500]
-                              ),),
-                              Text("10/10",style: TextStyle(
+                              Center(
+                                child: Text("Membres inscrits",style: TextStyle(
+                                    color: Colors.grey[500]
+                                ),overflow: TextOverflow.ellipsis,),
+                              ),
+                              Text("${tontine?.participant_inscrit}/ ${tontine?.nombre_participant ?? 0}",style: TextStyle(
                                   fontSize: 18.sp,
                                   fontWeight: FontWeight.w500,
                               ),)
@@ -523,7 +585,7 @@ class _details_tontineState extends State<details_tontine> with SingleTickerProv
                               Text("Tour actuel",style: TextStyle(
                                 color: Colors.grey[500],
                               ),),
-                              Text("3/10",style: TextStyle(
+                              Text("${double.tryParse(tontine?.tour_actuel ?? '0')?.toInt() ?? 0}/${tontine?.nombre_participant ?? 0}",style: TextStyle(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.w500,
                               ),)
@@ -567,7 +629,7 @@ class _details_tontineState extends State<details_tontine> with SingleTickerProv
                               ),),
                               FittedBox(
                                 fit: BoxFit.scaleDown,
-                                  child: Text("100000 FCFA",style: TextStyle(
+                                  child: Text("${double.tryParse(tontine?.cagnotte ?? '0')?.toInt() ?? 0 } FCFA",style: TextStyle(
                                     fontSize: 18.sp,
                                     fontWeight: FontWeight.w500,
                                   ),))
@@ -677,8 +739,8 @@ class _details_tontineState extends State<details_tontine> with SingleTickerProv
                                           SizedBox(
                                             height: 5.h,
                                           ),
-                                          Text("Position #${prenomsBeneficiare?? "N/A"}",style: TextStyle(
-                                              fontSize: 20.sp,
+                                          Text("Position #${numeroTour?? "N/A"}",style: TextStyle(
+                                              fontSize: 25.sp,
                                               fontWeight: FontWeight.bold,
                                               color: Couleur.primaryBlue
                                           ),),
@@ -701,19 +763,43 @@ class _details_tontineState extends State<details_tontine> with SingleTickerProv
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text("Progression",style: TextStyle(
-                                          fontSize: 14.sp,
+                                      Text("Progression", style: TextStyle(
+                                        fontSize: 14.sp,
                                         color: Colors.grey[400],
-                                      ),),Text("3/10",style: TextStyle(
-                                          fontSize: 20.sp,
-                                          color: Colors.black,
-                                        fontWeight: FontWeight.w500
-                                      ),),
+                                      )),
+                                      Text(
+                                        "${double.tryParse(tontine?.tour_actuel ?? '0')?.toInt() ?? 0}/${double.tryParse(numeroTour ?? '0')?.toInt() ?? 0}",
+                                        style: TextStyle(
+                                            fontSize: 20.sp,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w500
+                                        ),
+                                      ),
                                     ],
                                   ),
                                   SizedBox(height: 8.h,),
                                   LinearProgressIndicator(
-                                    value: 3/10,
+                                    value: () {
+                                      // ✅ Tour actuel de la tontine
+                                      double tourActuel = double.tryParse(tontine?.tour_actuel ?? '0') ?? 0.0;
+
+                                      // ✅ Ma position (quand c'est mon tour)
+                                      double maPosition = double.tryParse(numeroTour ?? '0') ?? 0.0;
+
+                                      // ✅ Éviter division par zéro
+                                      if (maPosition == 0) return 0.0;
+
+                                      // ✅ Progression : tour actuel / ma position
+                                      double progression = tourActuel / maPosition;
+
+                                      // Exemple :
+                                      // Tour actuel = 3, Ma position = 5 → 3/5 = 60%
+                                      // Tour actuel = 5, Ma position = 5 → 5/5 = 100% ✅
+
+                                      // ✅ Limiter entre 0 et 1
+                                      if (progression.isNaN || progression.isInfinite) return 0.0;
+                                      return progression.clamp(0.0, 1.0);
+                                    }(),
                                     backgroundColor: Colors.grey[500],
                                     minHeight: 6.h,
                                     borderRadius: BorderRadius.circular(12.r),
