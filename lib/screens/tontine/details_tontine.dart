@@ -780,23 +780,14 @@ class _details_tontineState extends State<details_tontine> with SingleTickerProv
                                   SizedBox(height: 8.h,),
                                   LinearProgressIndicator(
                                     value: () {
-                                      // ✅ Tour actuel de la tontine
                                       double tourActuel = double.tryParse(tontine?.tour_actuel ?? '0') ?? 0.0;
 
-                                      // ✅ Ma position (quand c'est mon tour)
                                       double maPosition = double.tryParse(numeroTour ?? '0') ?? 0.0;
 
-                                      // ✅ Éviter division par zéro
                                       if (maPosition == 0) return 0.0;
 
-                                      // ✅ Progression : tour actuel / ma position
                                       double progression = tourActuel / maPosition;
 
-                                      // Exemple :
-                                      // Tour actuel = 3, Ma position = 5 → 3/5 = 60%
-                                      // Tour actuel = 5, Ma position = 5 → 5/5 = 100% ✅
-
-                                      // ✅ Limiter entre 0 et 1
                                       if (progression.isNaN || progression.isInfinite) return 0.0;
                                       return progression.clamp(0.0, 1.0);
                                     }(),

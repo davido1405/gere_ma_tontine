@@ -14,6 +14,7 @@ import 'package:gerematontine/screens/participant/retirer_gains.dart';
 import 'package:gerematontine/screens/participant/wallet_participant.dart';
 import 'package:gerematontine/screens/tontine/details_tontine.dart';
 import 'package:gerematontine/screens/tontine/tour_tontine.dart';
+import 'package:gerematontine/screens/tontine/vue_globale.dart';
 import 'package:gerematontine/services/fcm_service.dart';
 import 'package:gerematontine/services/notifications_service.dart';
 import 'package:http/http.dart';
@@ -772,7 +773,9 @@ class _acceuilState extends State<acceuil> {
                                 ),SizedBox(width: 20.w,),
                                 GestureDetector(
                                   onTap: (){
-
+                                    if(mounted){
+                                      Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>VueGlobale(listsession:widget.listsession)));
+                                    }
                                   },
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
@@ -804,43 +807,7 @@ class _acceuilState extends State<acceuil> {
                                       ),
                                     ],
                                   ),
-                                ),SizedBox(width: 20.w,),
-
-                                GestureDetector(
-                                  onTap: (){
-
-                                  },
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        width: 60.w,
-                                        height: 60.h,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(16.r),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.grey.withOpacity(0.2),
-                                              blurRadius: 8,
-                                              offset: Offset(0, 4),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Icon(Icons.share, color: Couleur.primaryBlue, size: 28.sp),
-                                      ),
-                                      SizedBox(height: 8.h),
-                                      Text(
-                                        "Inviter",
-                                        style: TextStyle(
-                                          fontSize: 12.sp,
-                                          color: Colors.black87,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                )
                                 ],
                             ),
                           ),SizedBox(
