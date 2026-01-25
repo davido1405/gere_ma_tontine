@@ -45,8 +45,9 @@ class _tourTontineState extends State<tourTontine> {
   late String prenomsBeneficiare = "N/A";
   late int positionBeneficiare = 0;
   late String dateBeneficiare = "N/A";
-  late int toursCompletes=0;
-  late int totalTours=0;
+  late int toursCompletes = 0;
+  late int totalTours = 0;
+  late int tourActuel = 0; // ✅ NOUVEAU
   String moisTourActuel = "En attente";
   String moisMonTour = "En attente";
 
@@ -108,12 +109,13 @@ class _tourTontineState extends State<tourTontine> {
           // ✅ Récupérer les statistiques
           toursCompletes = stats['tours_completes'] ?? 0;
           totalTours = stats['total_tours'] ?? 0;
+          tourActuel = stats['tour_actuel'] ?? 0; // ✅ NOUVEAU
 
-          // Optionnel : calculer les mois
+          // ✅ Calculer les mois basé sur le champ 'etat' du backend
           if (_listOrdre.isNotEmpty) {
-            // Tour actuel (premier avec statut 1)
+            // Tour actuel (etat = 'en_cours')
             var tourEnCours = _listOrdre.firstWhere(
-                  (b) => b.statutBeneficiare == 1,
+                  (b) => b.etatBeneficiare == 'en_cours',
               orElse: () => _listOrdre.first,
             );
             moisTourActuel = _getMoisFromDate(tourEnCours.dateTour);
@@ -163,246 +165,257 @@ class _tourTontineState extends State<tourTontine> {
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.all(16.w),
-            child: Column(
-              children: [
-                // HEADER CARD
-                Container(
-                  padding: EdgeInsets.all(20.w),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF1E88E5), Color(0xFF42A5F5)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.blue.withOpacity(0.3),
-                        blurRadius: 10,
-                        offset: Offset(0, 4),
+        child: RefreshIndicator(
+          onRefresh: ()async{
+            await verifierTour();
+            await listeBeneficiare();
+          },
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                children: [
+                  // HEADER CARD
+                  Container(
+                    padding: EdgeInsets.all(20.w),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Couleur.primaryBlue, Couleur.secondaryGreen],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                    ],
+                      borderRadius: BorderRadius.circular(16.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Couleur.primaryBlue.withOpacity(0.3),
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildHeaderItem(
+                          "Tours\ncomplétés",
+                          "$toursCompletes/$totalTours",
+                        ),
+                        Container(
+                          width: 1,
+                          height: 40.h,
+                          color: Colors.white.withOpacity(0.3),
+                        ),
+                        _buildHeaderItem(
+                          "Tour actuel",
+                          moisTourActuel,
+                        ),
+                        Container(
+                          width: 1,
+                          height: 40.h,
+                          color: Colors.white.withOpacity(0.3),
+                        ),
+                        _buildHeaderItem(
+                          "Mon tour",
+                          moisMonTour,
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Row(
+
+                  SizedBox(height: 20.h),
+
+                  // LÉGENDE
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildHeaderItem(
-                        "Tours\ncomplétés",
-                        "$toursCompletes/$totalTours",
-                      ),
-                      Container(
-                        width: 1,
-                        height: 40.h,
-                        color: Colors.white.withOpacity(0.3),
-                      ),
-                      _buildHeaderItem(
-                        "Tour actuel",
-                        moisTourActuel,
-                      ),
-                      Container(
-                        width: 1,
-                        height: 40.h,
-                        color: Colors.white.withOpacity(0.3),
-                      ),
-                      _buildHeaderItem(
-                        "Mon tour",
-                        moisMonTour,
-                      ),
+                      _buildLegendItem("Complété", Couleur.secondaryGreen),
+                      _buildLegendItem("En cours", Couleur.primaryBlue),
+                      _buildLegendItem("À venir", Colors.grey[300]!),
                     ],
                   ),
-                ),
 
-                SizedBox(height: 20.h),
+                  SizedBox(height: 20.h),
 
-                // LÉGENDE
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildLegendItem("Complété", Colors.green),
-                    _buildLegendItem("En cours", Colors.blue),
-                    _buildLegendItem("À venir", Colors.grey[300]!),
-                  ],
-                ),
-
-                SizedBox(height: 20.h),
-
-                // LISTE DES BÉNÉFICIAIRES
-                _listOrdre.isEmpty
-                    ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Lottie.asset(
-                        "assets/animations/No-Data.json",
-                        width: 150.w,
-                        height: 150.h,
-                      ),
-                      SizedBox(height: 15.h),
-                      Text(
-                        "Les tours seront générés automatiquement",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: Colors.grey[600],
+                  // LISTE DES BÉNÉFICIAIRES
+                  _listOrdre.isEmpty
+                      ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Lottie.asset(
+                          "assets/animations/No-Data.json",
+                          width: 150.w,
+                          height: 150.h,
                         ),
-                      ),
-                    ],
-                  ),
-                )
-                    : ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: _listOrdre.length,
-                  itemBuilder: (context, index) {
-                    final Beneficiare beneficiaire = _listOrdre[index];
-                    bool estEnCours = beneficiaire.statutBeneficiare == 1;
-                    bool estComplete = beneficiaire.statutBeneficiare == 2;
-                    bool estMoi = widget.listsession.code_participant == beneficiaire.codeBeneficiare;
-
-                    return Container(
-                      margin: EdgeInsets.only(bottom: 12.h),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: estEnCours
-                            ? Border.all(color: Colors.blue, width: 2)
-                            : null,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 5,
-                            offset: Offset(0, 2),
+                        SizedBox(height: 15.h),
+                        Text(
+                          "Les tours seront générés automatiquement",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: Colors.grey[600],
                           ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(16.w),
-                        child: Row(
-                          children: [
-                            // ICÔNE STATUT
-                            Container(
-                              width: 50.w,
-                              height: 50.w,
-                              decoration: BoxDecoration(
-                                color: estComplete
-                                    ? Colors.green
-                                    : estEnCours
-                                    ? Colors.blue
-                                    : Colors.grey[200],
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                estComplete
-                                    ? Icons.check
-                                    : estEnCours
-                                    ? Icons.calendar_today
-                                    : Icons.schedule,
-                                color: estComplete || estEnCours
-                                    ? Colors.white
-                                    : Colors.grey[400],
-                                size: 24.sp,
-                              ),
+                        ),
+                      ],
+                    ),
+                  )
+                      : ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: _listOrdre.length,
+                    itemBuilder: (context, index) {
+                      final Beneficiare beneficiaire = _listOrdre[index];
+
+                      // ✅ NOUVELLE LOGIQUE basée sur le champ 'etat' du backend
+                      bool estEnCours = beneficiaire.etatBeneficiare == 'en_cours';
+                      bool estComplete = beneficiaire.etatBeneficiare == 'complete';
+                      bool estAVenir = beneficiaire.etatBeneficiare == 'a_venir';
+                      bool estMoi = widget.listsession.code_participant == beneficiaire.codeBeneficiare;
+
+                      return Container(
+                        margin: EdgeInsets.only(bottom: 12.h),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: estEnCours
+                              ? Border.all(color: Couleur.primaryBlue, width: 2)
+                              : null,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 5,
+                              offset: Offset(0, 2),
                             ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(16.w),
+                          child: Row(
+                            children: [
+                              // ICÔNE STATUT
+                              Container(
+                                width: 50.w,
+                                height: 50.w,
+                                decoration: BoxDecoration(
+                                  color: estComplete
+                                      ? Couleur.secondaryGreen
+                                      : estEnCours
+                                      ? Couleur.primaryBlue
+                                      : Colors.grey[200],
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  estComplete
+                                      ? Icons.check
+                                      : estEnCours
+                                      ? Icons.calendar_today
+                                      : Icons.schedule,
+                                  color: estComplete || estEnCours
+                                      ? Colors.white
+                                      : Colors.grey[400],
+                                  size: 24.sp,
+                                ),
+                              ),
 
-                            SizedBox(width: 16.w),
+                              SizedBox(width: 16.w),
 
-                            // CONTENU
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        estMoi ? "👤" : "👥",
-                                        style: TextStyle(fontSize: 18.sp),
-                                      ),
-                                      SizedBox(width: 8.w),
-                                      Expanded(
-                                        child: Text(
-                                          estMoi
-                                              ? "Vous"
-                                              : "${beneficiaire.prenomsBeneficiare} ${beneficiaire.nomBeneficiare}",
-                                          style: TextStyle(
-                                            fontSize: 16.sp,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black87,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 4.h),
-                                  Text(
-                                    _getMoisFromDate(beneficiaire.dateTour),
-                                    style: TextStyle(
-                                      fontSize: 13.sp,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                  SizedBox(height: 8.h),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "Position #${beneficiaire.positionBeneficiare}",
-                                        style: TextStyle(
-                                          fontSize: 12.sp,
-                                          color: Colors.grey[500],
-                                        ),
-                                      ),
-                                      Text(
-                                        "500 000 FCFA",
-                                        style: TextStyle(
-                                          fontSize: 15.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.blue,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  if (estComplete || estEnCours) ...[
-                                    SizedBox(height: 8.h),
+                              // CONTENU
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
                                     Row(
                                       children: [
-                                        Icon(
-                                          estComplete
-                                              ? Icons.check_circle
-                                              : Icons.access_time,
-                                          color: estComplete
-                                              ? Colors.green
-                                              : Colors.blue,
-                                          size: 14.sp,
-                                        ),
-                                        SizedBox(width: 4.w),
                                         Text(
-                                          estComplete
-                                              ? "Paiement effectué"
-                                              : "En cours - Fin le ${beneficiaire.dateTour.split(' ')[0]}",
-                                          style: TextStyle(
-                                            fontSize: 12.sp,
-                                            color: estComplete
-                                                ? Colors.green
-                                                : Colors.blue,
+                                          estMoi ? "👤" : "👥",
+                                          style: TextStyle(fontSize: 18.sp),
+                                        ),
+                                        SizedBox(width: 8.w),
+                                        Expanded(
+                                          child: Text(
+                                            estMoi
+                                                ? "Vous"
+                                                : "${beneficiaire.prenomsBeneficiare} ${beneficiaire.nomBeneficiare}",
+                                            style: TextStyle(
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black87,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
                                       ],
                                     ),
+                                    SizedBox(height: 4.h),
+                                    Text(
+                                      _getMoisFromDate(beneficiaire.dateTour),
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                    SizedBox(height: 8.h),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "Position #${beneficiaire.positionBeneficiare}",
+                                          style: TextStyle(
+                                            fontSize: 12.sp,
+                                            color: Colors.grey[500],
+                                          ),
+                                        ),
+                                        Text(
+                                          "${beneficiaire.montant ?? 0} FCFA",
+                                          style: TextStyle(
+                                            fontSize: 15.sp,
+                                            fontWeight: FontWeight.bold,
+                                            color: Couleur.primaryBlue,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    if (estComplete || estEnCours) ...[
+                                      SizedBox(height: 8.h),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            estComplete
+                                                ? Icons.check_circle
+                                                : Icons.access_time,
+                                            color: estComplete
+                                                ? Couleur.secondaryGreen
+                                                : Couleur.primaryBlue,
+                                            size: 14.sp,
+                                          ),
+                                          SizedBox(width: 4.w),
+                                          Text(
+                                            estComplete
+                                                ? "Paiement effectué"
+                                                : "En cours - Fin le ${beneficiaire.dateTour.split(' ')[0]}",
+                                            style: TextStyle(
+                                              fontSize: 12.sp,
+                                              color: estComplete
+                                                  ? Couleur.secondaryGreen
+                                                  : Couleur.primaryBlue,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ],
-                                ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
-              ],
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -186,11 +186,11 @@ class _DefinirpinState extends State<Definirpin> {
           if(mounted){
             Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>acceuil(listsession: listsession,)), (route)=>false);
           }
-          }else{
+        }else{
           if(mounted){
-            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>participer(listsession: listsession,)), (route)=>false);
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>acceuil(listsession: listsession,)), (route)=>false);
           }
-          }
+        }
       }else{
         SharedPreferences prefs=await SharedPreferences.getInstance();
         if(mounted){

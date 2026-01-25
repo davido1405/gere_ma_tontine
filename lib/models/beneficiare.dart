@@ -3,10 +3,10 @@ class Beneficiare {
   final String nomBeneficiare;
   final String prenomsBeneficiare;
   final int positionBeneficiare;
-  final int statutBeneficiare;  // 0 = à venir, 1 = en cours, 2 = complété
-  final String etat;  // 'complete', 'en_cours', 'a_venir'
+  final int statutBeneficiare; // ✅ Gardez pour compatibilité
+  final String etatBeneficiare; // ✅ NOUVEAU - 'en_cours', 'complete', 'a_venir'
   final String dateTour;
-  final double montant;
+  final double? montant;
 
   Beneficiare({
     required this.codeBeneficiare,
@@ -14,33 +14,34 @@ class Beneficiare {
     required this.prenomsBeneficiare,
     required this.positionBeneficiare,
     required this.statutBeneficiare,
-    required this.etat,
+    required this.etatBeneficiare, // ✅ NOUVEAU
     required this.dateTour,
-    required this.montant,
+    this.montant,
   });
 
   factory Beneficiare.fromJson(Map<String, dynamic> json) {
     return Beneficiare(
-      codeBeneficiare: json['code_participant']?.toString() ?? '',
-      nomBeneficiare: json['nom_participant']?.toString() ?? '',
-      prenomsBeneficiare: json['prenoms_participant']?.toString() ?? '',
-      positionBeneficiare: json['ordre'] is int
-          ? json['ordre']
-          : int.tryParse(json['ordre']?.toString() ?? '0') ?? 0,
-      statutBeneficiare: json['statut'] is int
-          ? json['statut']
-          : int.tryParse(json['statut']?.toString() ?? '0') ?? 0,
-      etat: json['etat']?.toString() ?? 'a_venir',
-      dateTour: json['date_tour']?.toString() ?? '',
-      montant: _toDouble(json['montant']),
+      codeBeneficiare: json['code_participant'] ?? '',
+      nomBeneficiare: json['nom_participant'] ?? '',
+      prenomsBeneficiare: json['prenoms_participant'] ?? '',
+      positionBeneficiare: json['ordre'] ?? 0,
+      statutBeneficiare: json['statut'] ?? 0,
+      etatBeneficiare: json['etat'] ?? 'a_venir', // ✅ NOUVEAU avec valeur par défaut
+      dateTour: json['date_tour'] ?? '',
+      montant: json['montant']?.toDouble(),
     );
   }
 
-  static double _toDouble(dynamic value) {
-    if (value == null) return 0.0;
-    if (value is double) return value;
-    if (value is int) return value.toDouble();
-    if (value is String) return double.tryParse(value) ?? 0.0;
-    return 0.0;
+  Map<String, dynamic> toJson() {
+    return {
+      'code_participant': codeBeneficiare,
+      'nom_participant': nomBeneficiare,
+      'prenoms_participant': prenomsBeneficiare,
+      'ordre': positionBeneficiare,
+      'statut': statutBeneficiare,
+      'etat': etatBeneficiare, // ✅ NOUVEAU
+      'date_tour': dateTour,
+      'montant': montant,
+    };
   }
 }

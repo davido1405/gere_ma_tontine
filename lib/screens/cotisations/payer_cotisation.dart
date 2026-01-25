@@ -1060,7 +1060,7 @@ class _payer_cotisationState extends State<payer_cotisation> {
                   height: 10.h,
                 ),
                   ElevatedButton.icon(onPressed: () async{
-                    String montantCotiser=montant.text.toString();
+                    String montantCotiser=(previewCotisation?.total_transaction).toString();
                     String modePaiement=_selectedOption.toString();
                     if(montantCotiser.isEmpty || modePaiement.isEmpty){
                       DelightToastBar(

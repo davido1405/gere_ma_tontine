@@ -96,26 +96,14 @@ class _connexion_screenState extends State<connexion_screen> {
     if(response.statusCode==200){
       var data=jsonDecode(response.body) as Map<String,dynamic>;
       bool success=data['success'];
-      if(success==true && data['message']=="Connexion réussie"){
+      if(success==true){
         var parti=data['data'];
         listsession=Session.fromJson(parti);
         print(listsession);
         //Sécuriser le JWT après reception
         await listsession.secureJwt();
-        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>acceuil(listsession: listsession)),(route)=>false);
-      }else if(success==true && data['message']=="Connexion réussie (pas encore de tontine)"){
-        var parti=data['data'];
-        listsession=Session.fromJson(parti);
-        //Sécuriser le JWT après reception
-        await listsession.secureJwt();
-        //Verifier s'il y'a un lien d'invitation
-        final prefs=await SharedPreferences.getInstance();
-        if(prefs.getString('token_invitation')!=null){
-          String? token_invitation=prefs.getString('token_invitation');
-          await verifierLien(token_invitation!);
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>acceuil(listsession: listsession)), (route)=>false);
-        }else{
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>participer(listsession: listsession)),(route)=>false);
+        if(mounted){
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>acceuil(listsession: listsession)),(route)=>false);
         }
         }else{
         showDialog(context: context, builder: (BuildContext contex){

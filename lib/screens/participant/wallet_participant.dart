@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/infos_wallet_participant.dart';
 import 'package:gerematontine/models/session.dart';
+import 'package:gerematontine/screens/auth/verifier_profil_kyc.dart';
 import 'package:gerematontine/screens/participant/retirer_gains.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -259,7 +260,9 @@ class _wallet_participantState extends State<wallet_participant> {
                         valueColor: AlwaysStoppedAnimation<Color>(Couleur.secondaryGreen),
                         borderRadius: BorderRadius.circular(12.r),
                       ),
-                      TextButton.icon(onPressed: (){}, label: Text("Augmenter mes limites",style: TextStyle(
+                      TextButton.icon(onPressed: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>verifier_profil_kyc(listsession: widget.listsession,)));
+                      }, label: Text("Augmenter mes limites",style: TextStyle(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.bold,
                         color: Couleur.primaryBlue
@@ -358,7 +361,7 @@ class _wallet_participantState extends State<wallet_participant> {
                               ColorFiltered(colorFilter: ColorFilter.mode(Couleur.primaryBlue, BlendMode.srcATop),
                                 child: Lottie.asset("assets/animations/lottieflow-ecommerce-14-7-000000-easey.json",width: 150.w,height: 150.h),),
                               SizedBox(height: 15.h,),
-                              Text("Aucune transaction disponible pour le moment")
+                              Text("Toutes vos transactions seront affichées ici")
                             ],
                           ),
                         ): ListView.builder(

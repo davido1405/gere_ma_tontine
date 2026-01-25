@@ -37,6 +37,7 @@ class _details_tontineState extends State<details_tontine> with SingleTickerProv
     _controllerLotti=AnimationController(duration: Duration(seconds: 2), vsync: this);
     tontineInfo();
     monTour();
+    verifierTour();
   }
 
   @override
@@ -195,7 +196,7 @@ class _details_tontineState extends State<details_tontine> with SingleTickerProv
           setState(() {
             nomBeneficiare=tour['nom_participant'];
             prenomsBeneficiare=tour['prenoms_participant'];
-            datePaiement=tour['date_tour'];
+            datePaiement=tour['date_tour'].split(' ')[0];
           });
         }
       }

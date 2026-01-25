@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gerematontine/models/session.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:http/http.dart' as http;
 
 import '../../constants/colors.dart';
@@ -103,20 +104,19 @@ class _VueGlobaleState extends State<VueGlobale> {
 
       switch (type) {
         case 'cotisation_manquee':
-          score += 1;  // Rouge : 1 point
+          score = 1;  // Rouge : 1 point
           break;
         case 'cotisation_rattrapee':
-          score += 3;  // Orange : 3 points
+          score = 3;  // Orange : 3 points
           break;
         case 'cotisation_payee':
-          score += 6;  // Bleu : 6 points
+          score = 6;  // Bleu : 6 points
           break;
-        case 'tour_tontine':
-          score += 9;  // Vert : 9 points
+        case 'distribution':
+          score = 9;  // Vert : 9 points
           break;
       }
     }
-
     return score;
   }
 
@@ -124,7 +124,16 @@ class _VueGlobaleState extends State<VueGlobale> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Tableau des transactions"),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Calendrier des transactions"),
+            Text("Calendrier retraçant toutes vos transactions",style: TextStyle(
+              fontSize: 13.sp,
+              color: Colors.grey[600]
+            ),)
+          ],
+        ),
         actions: [
           IconButton(
             icon: Icon(Icons.refresh),
@@ -141,14 +150,15 @@ class _VueGlobaleState extends State<VueGlobale> {
           children: [
             Icon(Icons.calendar_today, size: 64.sp, color: Colors.grey),
             SizedBox(height: 16.h),
-            Text(
-              "Aucune transaction",
-              style: TextStyle(fontSize: 18.sp, color: Colors.grey),
+            Center(
+              child: Text(
+                "Aucune transaction",
+                style: TextStyle(fontSize: 18.sp, color: Colors.grey),
+              ),
             ),
           ],
         ),
-      )
-          : SingleChildScrollView(
+      ) : SingleChildScrollView(
         child: Column(
           children: [
             // ✅ LÉGENDE COHÉRENTE
@@ -171,23 +181,22 @@ class _VueGlobaleState extends State<VueGlobale> {
                       ),
                     ),
                     SizedBox(height: 12.h),
-                    _buildLegendItem("Manquée", Colors.red, Icons.cancel),
+                    _buildLegendItem("Cotisation manquée", Colors.red, Icons.cancel),
                     SizedBox(height: 8.h),
-                    _buildLegendItem("Rattrapée", Colors.orange, Icons.refresh),
+                    _buildLegendItem("Cotisation rattrapée", Colors.orange, Icons.refresh),
                     SizedBox(height: 8.h),
-                    _buildLegendItem("Payée", Colors.blueAccent, Icons.check_circle),
+                    _buildLegendItem("Cotisation payée", Colors.blueAccent, Icons.check_circle),
                     SizedBox(height: 8.h),
-                    _buildLegendItem("Tour reçu", Colors.green, Icons.emoji_events),
+                    _buildLegendItem("Tour distribué", Colors.green, Icons.emoji_events),
                   ],
                 ),
               ),
             ),
-
             // HEAT MAP
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 10.0.w),
               child: HeatMapCalendar(
-                defaultColor: Colors.white,
+                defaultColor: Colors.grey[400],
                 flexible: true,
                 colorMode: ColorMode.color,
                 datasets: datasets,
@@ -197,6 +206,7 @@ class _VueGlobaleState extends State<VueGlobale> {
                   6: Colors.blueAccent, // Payée
                   9: Colors.green,      // Tour
                 },
+                textColor: Colors.white,
                 onClick: (value) {
                   _showTransactionsForDate(value);
                 },
@@ -294,15 +304,60 @@ class _VueGlobaleState extends State<VueGlobale> {
 
     List<dynamic> transactions = transactionsJour['transactions'] ?? [];
 
+    // ✅ Si aucune transaction, afficher une AlertDialog
+    if (transactions.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+              "Transactions du $dateStr",
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: Text(
+              "Aucune transaction ce jour",
+              style: TextStyle(fontSize: 14.sp),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text("Fermer"),
+              ),
+            ],
+          );
+        },
+      );
+      return; // ✅ Sortir de la fonction après avoir affiché le dialog
+    }
+
+    // ✅ Si des transactions existent, afficher le BottomSheet
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
       builder: (context) {
         return Container(
           padding: EdgeInsets.all(16.w),
           height: MediaQuery.of(context).size.height * 0.6,
           child: Column(
             children: [
+              // ✅ En-tête avec ligne de poignée
+              Container(
+                width: 40.w,
+                height: 4.h,
+                margin: EdgeInsets.only(bottom: 16.h),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
+
+              // ✅ Titre
               Text(
                 "Transactions du $dateStr",
                 style: TextStyle(
@@ -310,42 +365,64 @@ class _VueGlobaleState extends State<VueGlobale> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+
               SizedBox(height: 16.h),
-              if (transactions.isEmpty)
-                Padding(
-                  padding: EdgeInsets.all(16.w),
-                  child: Text("Aucune transaction ce jour"),
-                )
-              else
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: transactions.length,
-                    itemBuilder: (context, index) {
-                      var t = transactions[index];
-                      return Card(
-                        margin: EdgeInsets.only(bottom: 8.h),
-                        child: ListTile(
-                          leading: Icon(
+
+              // ✅ Liste des transactions
+              Expanded(
+                child: ListView.builder(
+                  itemCount: transactions.length,
+                  itemBuilder: (context, index) {
+                    var t = transactions[index];
+                    return Card(
+                      margin: EdgeInsets.only(bottom: 8.h),
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: ListTile(
+                        leading: Container(
+                          padding: EdgeInsets.all(8.w),
+                          decoration: BoxDecoration(
+                            color: _getColorForType(t['type_transaction']).withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
                             _getIconForType(t['type_transaction']),
                             color: _getColorForType(t['type_transaction']),
+                            size: 24.sp,
                           ),
-                          title: Text(
-                            t['statut'] ?? '',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        title: Text(
+                          t['statut'] ?? 'N/A',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15.sp,
                           ),
-                          subtitle: Text(t['code_cotisation'] ?? ''),
-                          trailing: Text(
-                            "${t['montant_transaction']} FCFA",
+                        ),
+                        subtitle: Padding(
+                          padding: EdgeInsets.only(top: 4.h),
+                          child: Text(
+                            t['code_cotisation'] ?? 'N/A',
                             style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14.sp,
+                              fontSize: 12.sp,
+                              color: Colors.grey[600],
                             ),
                           ),
                         ),
-                      );
-                    },
-                  ),
+                        trailing: Text(
+                          "${t['montant_transaction'] ?? 0} FCFA",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14.sp,
+                            color: _getColorForType(t['type_transaction']),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
+              ),
             ],
           ),
         );
@@ -361,7 +438,7 @@ class _VueGlobaleState extends State<VueGlobale> {
         return Icons.cancel;
       case 'cotisation_rattrapee':
         return Icons.refresh;
-      case 'tour_tontine':
+      case 'distribution':
         return Icons.emoji_events;
       default:
         return Icons.info;
@@ -377,7 +454,7 @@ class _VueGlobaleState extends State<VueGlobale> {
         return Colors.orange;
       case 'cotisation_payee':
         return Colors.blueAccent;
-      case 'tour_tontine':
+      case 'distribution':
         return Colors.green;
       default:
         return Colors.grey;

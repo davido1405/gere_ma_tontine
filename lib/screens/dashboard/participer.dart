@@ -172,7 +172,6 @@ class _participerState extends State<participer> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
         title: Center(
           child: Text("Participer", style: TextStyle(
               fontSize: 20.sp,
@@ -345,16 +344,7 @@ class _participerState extends State<participer> {
                               : Text("Participer", style: TextStyle(fontSize: 14.sp, color: Colors.white)),
                           icon: _isLoading ? SizedBox.shrink() : Icon(Icons.rocket_launch, color: Colors.white),
                           style: _buttonStyle),
-                      SizedBox(width: 10.w,),
-                      TextButton.icon(
-                          onPressed: _isLoading ? null : () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (context) => creer_tontine(listsession: widget.listsession)));
-                          },
-                          style: _buttonStyle, // CORRECTION 10: Style factorisé
-                          label: Text("Créer ma tontine", style: TextStyle(fontSize: 14.sp, color: Colors.white)),
-                          icon: Icon(Icons.rocket_launch, color: Colors.white))
-                    ],
+                      ],
                   ),
                 ],
               ))

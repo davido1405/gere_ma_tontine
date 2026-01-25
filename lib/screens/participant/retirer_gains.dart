@@ -10,12 +10,10 @@ import 'package:gerematontine/models/session.dart';
 import 'package:http/http.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pinput/pinput.dart';
-import 'package:screenshot/screenshot.dart';
 
 import '../../constants/colors.dart';
 import '../../constants/server.dart';
 import '../../models/infos_wallet_participant.dart';
-import '../../models/wallet_tontine.dart';
 
 class retirer_gains extends StatefulWidget {
   final Session listsession;
@@ -212,7 +210,7 @@ class _retirer_gainsState extends State<retirer_gains> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Retirer mes gains"),
+        title: Text("Transférer mes gains"),
       ),
       body: SafeArea(child: RefreshIndicator(
         onRefresh: ()async{
@@ -311,7 +309,7 @@ class _retirer_gainsState extends State<retirer_gains> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(padding: EdgeInsets.symmetric(horizontal:10.w,vertical: 5.h),child:
-                      Text("Montant à retirer",style: TextStyle(
+                      Text("Montant à transférer",style: TextStyle(
                           fontSize: 15.sp,
                           color: Colors.grey
                       ),),),
@@ -429,7 +427,7 @@ class _retirer_gainsState extends State<retirer_gains> {
                     ),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 15.0.w),
-                      child: Text("Options de retrait",style: TextStyle(
+                      child: Text("Options de transfert",style: TextStyle(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.w500,
                         color: Colors.grey[500]
@@ -672,7 +670,7 @@ class _retirer_gainsState extends State<retirer_gains> {
                               });
                               retirer();
                             }
-                          }, label: Text(enCourtraitement?"Retrait en cours":"Retirer",style: TextStyle(
+                          }, label: Text(enCourtraitement?"Transfert en cours":"Transférer",style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 15.sp
